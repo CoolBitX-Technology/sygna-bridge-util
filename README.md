@@ -2,7 +2,7 @@
 
 ## Installation
 
-```
+```shell
 npm i sygna-bridge-util
 ```
 
