@@ -3,7 +3,7 @@ const request = require('./request');
 /**
  * Request specific vasp's public key.
  * @param {string} vasp_code 
- * @returns {Promise<string>} uncompressed publickey
+ * @return {Promise<string>} uncompressed publickey
  */
 async function getVASPPublicKey(sygnaBridgeDomain, api_key, vasp_code){
     const url = sygnaBridgeDomain + '/v1/get-vasp';
@@ -19,7 +19,7 @@ async function getVASPPublicKey(sygnaBridgeDomain, api_key, vasp_code){
  * Notify Sygna Bridge that you have confirmed specific transfer from other VASP.
  * @param {string} callback_url 
  * @param {{transfer_id:string, beneficiary_signature:string, result:string}} params 
- * @returns {Promise<boolean>}
+ * @return {Promise<boolean>}
  */
 async function callBackConfirmNotification(callback_url, api_key, params) {
     let url = callback_url + '/v1/confirm-notification';

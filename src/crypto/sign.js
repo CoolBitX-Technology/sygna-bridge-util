@@ -5,7 +5,7 @@ const crypto = require("crypto");
  * Sign utf-8 message with private message
  * @param {string} message
  * @param {string} privateKey
- * @returns {string} signature
+ * @return {string} signature
  */
 exports.sign = (message, privateKey) => {
     const msgHash = crypto.createHash('sha256').update(message, 'utf8').digest();
@@ -18,7 +18,7 @@ exports.sign = (message, privateKey) => {
  * @param {string} message
  * @param {string} signature
  * @param {string} publicKey
- * @returns {boolean}
+ * @return {boolean}
  */
 exports.verify = (message, signature, publicKey) => {
     const msgHash = crypto.createHash('sha256').update(message, 'utf8').digest();
