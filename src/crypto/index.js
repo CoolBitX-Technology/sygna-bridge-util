@@ -5,7 +5,7 @@ const sygnaSign = require('./sign');
  * Encrypt private info object to hex string.
  * @param {object} data priv_info in object format.
  * @param {string} publicKey recipeint public key in hex string.
- * @return {string} ECIES encoded privMsg.
+ * @returns {string} ECIES encoded privMsg.
  */
 exports.sygnaEncodePrivateObj = (data, publicKey) => {
     const msgString = JSON.stringify(data);
@@ -17,7 +17,7 @@ exports.sygnaEncodePrivateObj = (data, publicKey) => {
  * Decode private info from recipent server.
  * @param {string} privMsg 
  * @param {string} privateKey 
- * @return {object}
+ * @returns {object}
  */
 exports.sygnaDecodePrivateObg = (privMsg, privateKey) => {
     const decoded = ecies.ECIESDecode(privMsg, privateKey);
@@ -28,6 +28,7 @@ exports.sygnaDecodePrivateObg = (privMsg, privateKey) => {
  * Sign Objects.
  * @param {object} obj
  * @param {string} privateKey
+ * @returns {string}
  */
 exports.signObject = (obj, privateKey) => {
     const msgStr = JSON.stringify(obj);
@@ -39,6 +40,7 @@ exports.signObject = (obj, privateKey) => {
  * @param {object} obj
  * @param {string} publicKey
  * @param {string} signature
+ * @returns {boolean}
  */
 exports.verifyObject = (obj, publicKey, signature) => {
     const msgStr = JSON.stringify(obj);

@@ -18,7 +18,7 @@ exports.sign = (message, privateKey) => {
  * @param {string} message
  * @param {string} signature
  * @param {string} publicKey
- * @return {boolean}
+ * @returns {boolean}
  */
 exports.verify = (message, signature, publicKey) => {
     const msgHash = crypto.createHash('sha256').update(message, 'utf8').digest();

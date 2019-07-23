@@ -22,7 +22,6 @@ const privateInfo = {
 };
 
 const encoded_info = sygnaBridgeUtil.crypto.sygnaEncodePrivateObj(privateInfo, recipient_pubKey);
-
 const decoded_priv_info = sygnaBridge.crypto.sygnaDecodePrivateObg(encoded_info, recipient_privKey)
 
 ```
@@ -44,7 +43,6 @@ let obj = {
 };
 
 const originator_signature = sygnaBridgeUtil.crypto.signObject(obj, originator_privKey);
-
 const valid = sygnaBridgeUtil.crypto.verifyObject(obj, originator_pubKey, originator_signature);
 
 ```
