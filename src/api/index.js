@@ -2,8 +2,7 @@ const originator = require('./originator');
 const beneficiary = require('./beneficiary');
 
 /**
- * Request specific vasp's public key.
- * Can be called by anyone.
+ * Request specific vasp's public key. Can be called by anyone.
  * @param {string} vasp_code 
  * @return {Promise<string>} uncompressed publickey
  */
