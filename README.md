@@ -63,7 +63,7 @@ const publicKey = await sygnaBridgeUtil.api.getVASPPublicKey("https://sygna/brid
 
 ### For Originator
 
-There are two API calls from **transaction originator** to Sygna Bridge Server Define in the protocol, which are `transfer` and `send-txid`. They can be found under `api.originator`.
+There are two API calls from **transaction originator** to Sygna Bridge Server defined in the protocol, which are `transfer` and `send-txid`. They can be found under `api.originator`.
 
 The full logic of originator would be like the following:
 
@@ -97,4 +97,4 @@ params.beneficiary_signature = beneficiary_signature;
 await sygnaBridgeUtil.api.beneficiary.callBackConfirmNotification("https://sygna/bridge/api", API_KEY, params);
 ```
 
-If you're trying to implement the beneficiary server on your own, we strongly recommand you to take a look at our [Nodejs sample]() to get a big picture of how it should behave in the ecosystem.
+If you're trying to implement the beneficiary server on your own, we strongly recommand you to take a look at our [Nodejs sample](https://github.com/CoolBitX-Technology/) to get a big picture of how it should behave in the ecosystem.
