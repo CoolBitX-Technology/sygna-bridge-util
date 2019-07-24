@@ -23,15 +23,15 @@ async function transfer(sygnaBridgeDomain, api_key, hex_data, transaction, origi
  * Send broadcasted transaction id to Sygna Bridge for purpose of storage.
  * @param {string} sygnaBridgeDomain 
  * @param {string} api_key 
- * @param {string} txid 
  * @param {string} transfer_id the id got from transfer request
- * @param {string} originator_signature Signature of {txid, transfer_id} signed with crypto.signObject
+ * @param {string} txid tx id on blockchain
+ * @param {string} originator_signature Signature of { transfer_id, txid } signed with crypto.signObject
  * @return {Promise}
  */
-async function sendTransactionId(sygnaBridgeDomain, api_key, txid, transfer_id, originator_signature) {
+async function sendTransactionId(sygnaBridgeDomain, api_key, transfer_id, txid, originator_signature) {
     const url = sygnaBridgeDomain + '/v1/send-txid';
     const headers = { "api-key": api_key };
-    const params = { txid, transfer_id, originator_signature };
+    const params = { transfer_id, txid, originator_signature };
     return await request.postSygnaBridge(url, headers, params);
 }
 
