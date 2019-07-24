@@ -68,6 +68,8 @@ There are two API calls from **transaction originator** to Sygna Bridge Server d
 The full logic of originator would be like the following:
 
 ```javascript
+// originator.js
+
 const transaction = { "originator_vasp_code":"10000", "originator_addr":"3MNDLKJQW109J3KASM344", "beneficiary_vasp_code":"10298", "beneficiary_addr":"0x1234567890101010", "transaction_currency":"0x80000000", "amount": 0.973 };
 const privateSenderInfo = { "originator": { "name": "Antoine Griezmann", "date_of_birth":"1991-03-21" } };
 const recipientPublicKey = await sygnaBridgeUtil.api.getVASPPublicKey("https://sygna/bridge/api", "API_KEY", "10298");
@@ -76,10 +78,10 @@ const hex_data = sygnaBridge.crypto.sygnaEncodePrivateObj(privateSenderInfo, rec
 const objectToSign = { hex_data, transaction };
 const originator_signature = sygnaBridgeUtil.crypto.signObject(objectToSign, privateKey);
 
-let transfer_id = await sygnaBridge.api.originator.transfer("https://sygna/bridge/api", "API_KEY", hex_data, transaction, originator_signature, "https://originatorDomain")
+const transfer_id = await sygnaBridge.api.originator.transfer("https://sygna/bridge/api", "API_KEY", hex_data, transaction, originator_signature, "https://originatorDomain")
 
 // Boradcast your transaction to blockchain after got and api reponse at your api server.
-const txid = await whatever.boardcast(rawTxPayload);
+// const txid = await whatever.boardcast(rawTxPayload);
 
 // Inform Sygna Bridge that a specific transfer is successfully broadcasted to the blockchain.
 const result = await sygnaBridge.api.originator.sendTransactionId("https://sygna/bridge/api", "API_KEY", txid, transfer_id, originator_signature);
