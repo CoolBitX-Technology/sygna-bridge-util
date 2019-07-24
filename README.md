@@ -94,7 +94,7 @@ There is only one api for Beneficiary to call, which is `callBackConfirmNotifica
 let params = { transfer_id, result };
 const beneficiary_signature = sygnaBridge.crypto.signObject(params, privateKey);
 params.beneficiary_signature = beneficiary_signature;
-await sygnaBridgeUtil.api.sygnaServer.callBackConfirmNotification("https://sygna/bridge/api", API_KEY, params);
+await sygnaBridgeUtil.api.beneficiary.callBackConfirmNotification("https://sygna/bridge/api", API_KEY, params);
 ```
 
 If you're trying to implement the beneficiary server on your own, we strongly recommand you to take a look at our [Nodejs sample]() to get a big picture of how it should behave in the ecosystem.
