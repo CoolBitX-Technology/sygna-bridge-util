@@ -1,8 +1,8 @@
 # JavaScript Sygna Bridge Util
 
-<a href="https://nodei.co/npm/sygna-bridge-util/"><img src="https://nodei.co/npm/sygna-bridge-util.png"></a>
-
 ## Installation
+
+<a href="https://nodei.co/npm/sygna-bridge-util/"><img src="https://nodei.co/npm/sygna-bridge-util.png"></a>
 
 ```shell
 npm i sygna-bridge-util
