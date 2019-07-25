@@ -1,5 +1,7 @@
 # JavaScript Sygna Bridge Util
 
+This is a Javascript library to help you build servers/servies within Sygna Bridge Ecosystem. For more detail information about Sygna Bridge, please go through the [Official Sygna Bridge API Document](https://coolbitx.gitlab.io/sygna/bridge/api/#sygna-bridge).
+
 ## Installation
 
 <a href="https://nodei.co/npm/sygna-bridge-util/"><img src="https://nodei.co/npm/sygna-bridge-util.png"></a>
@@ -10,9 +12,11 @@ npm i sygna-bridge-util
 
 ## Crypto
 
-Encoding, Decoding, Signing and Verifying in Sygna.
+Dealing with encoding, decoding, signing and verifying in Sygna Bridge.
 
-### ECIES Encode an Deocde private information
+### ECIES Encoding an Decoding
+
+During the communication of VASPs, there are some private information that must be encrypted. We use ECIES(Elliptic Curve Integrated Encryption Scheme) to securely encrypt these private data so that they can only be accessed by the recipient.
 
 ```javascript
 
@@ -29,6 +33,10 @@ const decoded_priv_info = sygnaBridge.crypto.sygnaDecodePrivateObg(encoded_info,
 ```
 
 ### Sign and Verify
+
+In Sygna Bridge, we use secp256k1 ECDSA over sha256 of utf-8 json string to create signature on every API call. Since you need to provide the identical utf-8 string during verficication, the order of key-value pair you put into the object is important.
+
+The following example is the snippet of originator's signing process of `transfer` API call. If you put the key `transaction` before `hex_data` in the object, the verification will fail in the central server.
 
 ```javascript
 
