@@ -1,6 +1,7 @@
 const fetch = require('node-fetch');
 
 async function postSygnaBridge (url, headers, json ) {
+    headers['Content-Type'] = "application/json";
     const response = await fetch(url, {
         method: 'POST',
         body: JSON.stringify(json),
