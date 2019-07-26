@@ -1,15 +1,20 @@
 const originator = require('./originator');
 const beneficiary = require('./beneficiary');
 
+// const crypto = require('../crypto');
+// const { SYGNA_BRIDGE_CENTRAL_PUBKEY } = require('../config');
+
 /**
  * get list of registered VASP associated with publicKey.
  * @param {string} sygnaBridgeDomain 
  * @param {string} api_key 
  * @return {Promise<Array<{ vasp_name:string, vasp_code:string, vasp_pubkey:string }>>}
  */
-async function getVASPList(){
+async function getVASPList(sygnaBridgeDomain, api_key){
     const url = sygnaBridgeDomain + '/v1/get-vasp';
     const headers = { "api-key": api_key };
+    // const { vasps, signature } = await request.getSygnaBridge(url, headers);
+    // const valid = crypto.verifyObject(vasps, SYGNA_BRIDGE_CENTRAL_PUBKEY, signature);
     const vasps = await request.getSygnaBridge(url, headers);
     return vasps;
 }
