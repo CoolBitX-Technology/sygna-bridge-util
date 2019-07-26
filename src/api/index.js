@@ -1,5 +1,6 @@
 const originator = require('./originator');
 const beneficiary = require('./beneficiary');
+const request = require('./request');
 
 // const crypto = require('../crypto');
 // const { SYGNA_BRIDGE_CENTRAL_PUBKEY } = require('../config');
