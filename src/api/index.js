@@ -17,7 +17,6 @@ class API {
      */
     async getVASPPublicKey(vasp_code, validate=true){
         const vasps = await this.getVASPList(validate);
-        console.log(vasps);
         const target = vasps.filter(vasp=>vasp.vasp_code === vasp_code).map(vasp=>vasp.vasp_pubkey);
         if (target.length < 1) throw new Error("Invalid vasp_code");
         return target[0];
