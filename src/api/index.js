@@ -3,8 +3,7 @@ const fetch = require('node-fetch');
 const { SYGNA_BRIDGE_CENTRAL_PUBKEY } = require('../config');
 
 class API {
-    constructor(API_KEY, username, password, sygnaBridgeDomain){
-        this.API_KEY = API_KEY;
+    constructor(username, password, sygnaBridgeDomain){
         this.username = username;
         this.password = password;
         this.domain = sygnaBridgeDomain;
@@ -18,6 +17,7 @@ class API {
      */
     async getVASPPublicKey(vasp_code, validate=true){
         const vasps = await this.getVASPList(validate);
+        console.log(vasps);
         const target = vasps.filter(vasp=>vasp.vasp_code === vasp_code).map(vasp=>vasp.vasp_pubkey);
         if (target.length < 1) throw new Error("Invalid vasp_code");
         return target[0];
@@ -83,7 +83,6 @@ class API {
     async postSB (url, json ) {
         const headers = {
             "Content-Type":"application/json",
-            "api-key":this.API_KEY,
             "Authorization": 'Basic ' + Buffer.from(this.username + ":" + this.password).toString('base64')
         };
         const response = await fetch(url, { method: 'POST', body: JSON.stringify(json), headers: headers });
@@ -91,7 +90,7 @@ class API {
     }
     
     async getSB (url ) {
-        const headers = { "api-key": this.API_KEY, "Authorization": 'Basic ' + Buffer.from(this.username + ":" + this.password).toString('base64')};
+        const headers = { "Authorization": 'Basic ' + Buffer.from(this.username + ":" + this.password).toString('base64')};
         const response = await fetch(url, { headers:headers });
         return await response.json();
     }
