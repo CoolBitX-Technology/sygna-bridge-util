@@ -13,10 +13,11 @@ class API {
     /**
      * A Wrapper function of getVASPList to return specific VASP's publickey.
      * @param {string} vasp_code 
+     * @param {boolean?} validate whether to validate returned vasp list data.
      * @return {Promise<string>} uncompressed publickey
      */
-    async getVASPPublicKey(vasp_code){
-        const vasps = await this.getVASPList(sygnaBridgeDomain, api_key);
+    async getVASPPublicKey(vasp_code, validate=true){
+        const vasps = await this.getVASPList(validate);
         const target = vasps.filter(vasp=>vasp.vasp_code === vasp_code).map(vasp=>vasp.vasp_pubkey);
         if (target.length < 1) throw new Error("Invalid vasp_code");
         return target[0];
@@ -24,12 +25,15 @@ class API {
 
     /**
      * get list of registered VASP associated with publicKey.
+     * @param {boolean?} validate whether to validate returned vasp list data.
      * @return {Promise<Array<{ vasp_name:string, vasp_code:string, vasp_pubkey:string }>>}
      */
-    async getVASPList(){
+    async getVASPList(validate=true){
         const url = this.domain + '/v1/get-vasp';
         const { vasp_data, signature } = await this.getSB(url);
-        const valid = crypto.verifyObject(vasp_data, SYGNA_BRIDGE_CENTRAL_PUBKEY, signature);
+        if (!validate) return vasp_data;
+        
+        const valid = crypto.verifyObject({vasp_data}, SYGNA_BRIDGE_CENTRAL_PUBKEY, signature);
         if (valid) return vasp_data;
         throw Error("get VASP info error: invalid signature.");
     }
