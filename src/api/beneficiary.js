@@ -10,10 +10,7 @@ const request = require('./request');
  * @return {Promise}
  */
 async function callBackConfirmNotification(sygnaBridgeDomain, api_key, transfer_id, result, beneficiary_signature) {
-    const url = sygnaBridgeDomain + '/v1/confirm-notification';
-    const headers = { "api-key": api_key };
-    const params = { transfer_id, result, beneficiary_signature };
-    return await request.postSygnaBridge(url, headers, params);
+    
 }
 
 module.exports = {
