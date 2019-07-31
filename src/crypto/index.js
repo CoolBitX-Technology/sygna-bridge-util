@@ -1,5 +1,6 @@
 const ecies = require('./ecies');
 const sygnaSign = require('./sign');
+const { SYGNA_BRIDGE_CENTRAL_PUBKEY } = require('../config');
 
 /**
  * Encrypt private info object to hex string.
@@ -32,6 +33,16 @@ exports.sygnaDecodePrivateObg = (privMsg, privateKey) => {
  * @return {{private_info: string, transaction:{}, data_dt:string, signature:string}}
  */
 exports.signTransferData = (private_info, transaction, data_dt, privateKey) => {
+    if (typeof private_info != "string") throw new Error(`private_info should be string, got ${typeof private_info}`);
+    if (typeof data_dt != "string") throw new Error(`data_dt should be string, got ${typeof data_dt}`);
+    if (typeof privateKey != "string") throw new Error(`privateKey should be string, got ${typeof privateKey}`);
+    if (typeof transaction.originator_vasp_code != "string") throw new Error(`transaction.originator_vasp_code should be string, got ${typeof transaction.originator_vasp_code}`);
+    if (typeof transaction.originator_addr != "string") throw new Error(`transaction.originator_addr should be string, got ${typeof transaction.originator_addr}`);
+    if (typeof transaction.beneficiary_vasp_code != "string") throw new Error(`transaction.beneficiary_vasp_code should be string, got ${typeof transaction.beneficiary_vasp_code}`);
+    if (typeof transaction.beneficiary_addr != "string") throw new Error(`transaction.beneficiary_addr should be string, got ${typeof transaction.beneficiary_addr}`);
+    if (typeof transaction.transaction_currency != "string") throw new Error(`transaction.transaction_currency should be string, got ${typeof transaction.transaction_currency}`);
+    if (typeof transaction.amount != "number") throw new Error(`transaction.amount should be number, got ${typeof transaction.amount}`);
+    
     let data = {
         private_info,
         transaction,
@@ -46,6 +57,8 @@ exports.signTransferData = (private_info, transaction, data_dt, privateKey) => {
  * @return {{callback_url_string, signature: string}}
  */
 exports.signCallBack = (callback_url, privateKey) => {
+    if (typeof callback_url != "string") throw new Error(`callback_url should be string, got ${typeof callback_url}`);
+    if (typeof privateKey != "string") throw new Error(`privateKey should be string, got ${typeof privateKey}`);
     let data = {
         callback_url,
     };
@@ -59,10 +72,26 @@ exports.signCallBack = (callback_url, privateKey) => {
  * @return {{transfer_id:string, result: string, signature: string}}
  */
 exports.signResult = (transfer_id, result, privateKey) => {
+    if (typeof transfer_id != "string") throw new Error(`transfer_id should be string, got ${typeof transfer_id}`);
+    if (typeof result != "string") throw new Error(`result should be string, got ${typeof result}`);
+    if (typeof privateKey != "string") throw new Error(`privateKey should be string, got ${typeof privateKey}`);
     let data = {
         transfer_id,
         result
     };
+    return this.signObject(data, privateKey);
+};
+
+/**
+ * @param {string} transfer_id
+ * @param {string} txid
+ * @return {{transfer_id:string, txid:string, signature:string}}
+ */
+exports.signSendTxId = (transfer_id, txid) => {
+    if (typeof transfer_id != "string") throw new Error(`transfer_id should be string, got ${typeof transfer_id}`);
+    if (typeof txid != "string") throw new Error(`txid should be string, got ${typeof txid}`);
+    if (typeof privateKey != "string") throw new Error(`privateKey should be string, got ${typeof privateKey}`);
+    let data = { transfer_id, txid };
     return this.signObject(data, privateKey);
 };
 
@@ -81,11 +110,12 @@ exports.signObject = (obj, privateKey) => {
 };
 
 /**
+ * verify obj with provided pubkey or default sygna bridge publickey
  * @param {object} obj
- * @param {string} publicKey
+ * @param {string?} publicKey default to sygna bridge's publickey
  * @return {boolean}
  */
-exports.verifyObject = (obj, publicKey) => {
+exports.verifyObject = (obj, publicKey=SYGNA_BRIDGE_CENTRAL_PUBKEY) => {
     const { signature } = obj;
     obj.signature = "";
     const msgStr = JSON.stringify(obj);
