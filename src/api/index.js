@@ -1,5 +1,6 @@
 const crypto = require('../crypto');
 const fetch = require('node-fetch');
+const check = require('./check');
 const { SYGNA_BRIDGE_CENTRAL_PUBKEY } = require('../config');
 
 class API {
@@ -56,9 +57,11 @@ class API {
     * @return {Promise<{transfer_id: string}>} transfer-id 
     */
    async transfer(transferData, callback) {
-       const url = this.domain + '/v1/transfer';
-       const params = { transfer_data: transferData, callback};
-       return await this.postSB(url, params);
+      check.checkObjSigned(transferData);
+      check.checkObjSigned(callback);
+      const url = this.domain + '/v1/transfer';
+      const params = { data: transferData, callback};
+      return await this.postSB(url, params);
    }
 
    /**
@@ -67,6 +70,9 @@ class API {
     * @return {Promise}
     */
     async sendTransactionId(sendTxIdObj) {
+      check.checkObjSigned(sendTxIdObj);
+      if (typeof sendTxIdObj.transfer_id != "string") throw new Error(`Obj.transfer_id should be string, got ${typeof sendTxIdObj.transfer_id}`);
+      if (typeof sendTxIdObj.txid != "string") throw new Error(`Obj.txid should be string, got ${typeof sendTxIdObj.txid}`);
         const url = this.domain + '/v1/send-txid';
         return await this.postSB(url, sendTxIdObj);
     }

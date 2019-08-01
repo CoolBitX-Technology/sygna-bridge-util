@@ -85,9 +85,10 @@ exports.signResult = (transfer_id, result, privateKey) => {
 /**
  * @param {string} transfer_id
  * @param {string} txid
+ * @param {string} privateKey
  * @return {{transfer_id:string, txid:string, signature:string}}
  */
-exports.signSendTxId = (transfer_id, txid) => {
+exports.signSendTxId = (transfer_id, txid, privateKey) => {
     if (typeof transfer_id != "string") throw new Error(`transfer_id should be string, got ${typeof transfer_id}`);
     if (typeof txid != "string") throw new Error(`txid should be string, got ${typeof txid}`);
     if (typeof privateKey != "string") throw new Error(`privateKey should be string, got ${typeof privateKey}`);
@@ -116,8 +117,9 @@ exports.signObject = (obj, privateKey) => {
  * @return {boolean}
  */
 exports.verifyObject = (obj, publicKey=SYGNA_BRIDGE_CENTRAL_PUBKEY) => {
-    const { signature } = obj;
-    obj.signature = "";
-    const msgStr = JSON.stringify(obj);
+    const clone = Object.assign({}, obj);
+    const { signature } = clone;
+    clone.signature = "";
+    const msgStr = JSON.stringify(clone);
     return sygnaSign.verify(msgStr, signature, publicKey);
 };
