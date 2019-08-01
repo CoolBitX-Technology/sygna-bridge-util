@@ -71,6 +71,8 @@ valid = sygnaBridgeUtil.crypto.verifyObject(signed_obj, originator_pubKey);
 
 ```
 
+We provide different methods like `signTransferData`, `signCallback()` to sign different objects(or parameters) we specified in our [api doc](https://coolbitx.gitlab.io/sygna/bridge/api/#custom-objects). You can also find more examples in the following section.
+
 ## API
 
 API calls to communicate with Sygna Bridge server.
@@ -104,33 +106,41 @@ The full logic of originator would be like the following:
 ```javascript
 // originator.js
 
-const transaction = { "originator_vasp_code":"10000", "originator_addr":"3MNDLKJQW109J3KASM344", "beneficiary_vasp_code":"10298", "beneficiary_addr":"0x1234567890101010", "transaction_currency":"0x80000000", "amount": 0.973 };
-const privateSenderInfo = { "originator": { "name": "Antoine Griezmann", "date_of_birth":"1991-03-21" } };
-const recipientPublicKey = await sygnaBridgeUtil.api.getVASPPublicKey("https://sygna/bridge/api", "API_KEY", "10298");
+const privateSenderInfo = { "originator": { "name": "Antoine Griezmann", "date_of_birth":"1991-03-21" }, "beneficiary":{"name":"Leo Messi"} };
+const recipientPublicKey = await sbAPI.getVASPPublicKey("10298");
+const private_info = sygnaBridge.crypto.sygnaEncodePrivateObj(privateSenderInfo, recipientPublicKey);
 
-const hex_data = sygnaBridge.crypto.sygnaEncodePrivateObj(privateSenderInfo, recipientPublicKey);
-const objectToSign = { hex_data, transaction };
-const originator_signature = sygnaBridgeUtil.crypto.signObject(objectToSign, privateKey);
+const transaction = { "originator_vasp_code":"10000", "originator_addr":"3KvJ1uHPShhEAWyqsBEzhfXyeh1TXKAd7D", "beneficiary_vasp_code":"10298", "beneficiary_addr":"3CHgkx946yyueucCMiJhyH2Vg5kBBvfSGH", "transaction_currency":"0x80000000", "amount": 0.973 };
+const data_dt = "2019-07-29T07:29:80Z"
 
-const transfer_id = await sygnaBridge.api.originator.transfer("https://sygna/bridge/api", "API_KEY", hex_data, transaction, originator_signature, "https://originatorDomain")
+const transferObj = sygnaBridgeUtil.crypto.signTransferData(private_info, transaction, data_dt, sender_privKey)
+
+const callback_url = "https://81f7d956.ngrok.io/api/v1/transfer-response";
+const callbackObj = sygnaBridgeUtil.crypto.signCallBack(callback_url, sender_privKey);
+
+const { transfer_id } = await sbAPI.transfer(tansferObj, callbackObj)
 
 // Boradcast your transaction to blockchain after got and api reponse at your api server.
-// const txid = await whatever.boardcast(rawTxPayload);
+const txid = "1a0c9bef489a136f7e05671f7f7fada2b9d96ac9f44598e1bcaa4779ac564dcd";
 
 // Inform Sygna Bridge that a specific transfer is successfully broadcasted to the blockchain.
-const result = await sygnaBridge.api.originator.sendTransactionId("https://sygna/bridge/api", "API_KEY", txid, transfer_id, originator_signature);
+
+let sendTxIdObj = sygnaBridgeUtil.crypto.signSendTxId(transfer_id, txid, sender_privKey);
+let result = await sygnaAPI.sendTransactionId(sendTxIdObj);
 
 ```
 
 ### For Beneficiary
 
-There is only one api for Beneficiary to call, which is `callBackConfirmNotification`. After the beneficiary server confirm thet legitemacy of a transfer, they will sign `{ transfer_id, result }`, and send the result with signature to Sygna Bridge Central Server.
+There is only one api for Beneficiary to call, which is `callBackConfirmNotification`. After the beneficiary server confirm thet legitemacy of a transfer, they will sign `{ transfer_id, result }` using `signResult()` function, and send the result with signature to Sygna Bridge Central Server.
 
 ```javascript
-let params = { transfer_id, result };
-const beneficiary_signature = sygnaBridge.crypto.signObject(params, privateKey);
-params.beneficiary_signature = beneficiary_signature;
-await sygnaBridgeUtil.api.beneficiary.callBackConfirmNotification("https://sygna/bridge/api", API_KEY, params);
+
+const callback_url = "https://sygna/bridge/api/v1/transfer-notification/"
+const result = "ACCEPT"; // or "REJECT"
+const callbackObj = sygnaBridgeUtil.crypto.signResult(transfer_id, result, beneficiary_privKey);
+const finalresult = await sygnaAPI.callBackConfirmNotification(callback_url, callbackObj);
+
 ```
 
 If you're trying to implement the beneficiary server on your own, we strongly recommand you to take a look at our [Nodejs sample](https://github.com/CoolBitX-Technology/) to get a big picture of how it should behave in the ecosystem.
