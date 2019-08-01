@@ -20,40 +20,54 @@ During the communication of VASPs, there are some private information that must 
 
 ```javascript
 
-const privateInfo = {
+const sensitive_data = {
     "originator": {
         "name": "Antoine Griezmann", //required and must be in English
         "date_of_birth":"1991-03-21"
+    },
+    "beneficiary":{
+        "name": "Leo Messi"
     }
 };
 
-const encoded_info = sygnaBridgeUtil.crypto.sygnaEncodePrivateObj(privateInfo, recipient_pubKey);
-const decoded_priv_info = sygnaBridge.crypto.sygnaDecodePrivateObg(encoded_info, recipient_privKey)
+const private_info = sygnaBridgeUtil.crypto.sygnaEncodePrivateObj(sensitive_data, recipient_pubKey);
+const decoded_priv_info = sygnaBridge.crypto.sygnaDecodePrivateObg(private_info, recipient_privKey)
 
 ```
 
 ### Sign and Verify
 
-In Sygna Bridge, we use secp256k1 ECDSA over sha256 of utf-8 json string to create signature on every API call. Since you need to provide the identical utf-8 string during verficication, the order of key-value pair you put into the object is important.
+In Sygna Bridge, we use secp256k1 ECDSA over sha256 of utf-8 json string to create signature on every API call. Since you need to provide the identical utf-8 string during verfication, the order of key-value pair you put into the object is important.
 
-The following example is the snippet of originator's signing process of `transfer` API call. If you put the key `transaction` before `hex_data` in the object, the verification will fail in the central server.
+The following example is the snippet of originator's signing process of `transfer` API call. If you put the key `transaction` before `private_info` in the object, the verification will fail in the central server.
 
 ```javascript
+let transaction = {
+    originator_vasp_code:"10000",
+    originator_addr:"3MNDLKJQW109J3KASM344",
+    beneficiary_vasp_code:"10001",
+    beneficiary_addr:"0x1234567890101010",
+    transaction_currency:"0x80000000",
+    amount: 0.973
+}
+
+let data_dt = "2019-07-29T06:28:00Z"
+
+// using signObject to get a valid signed object (with signature attached)
 
 let obj = {
-    "hex_data": encoded_info,
-    "transaction":{
-        "originator_vasp_code":"10000",
-        "originator_addr":"3MNDLKJQW109J3KASM344",
-        "beneficiary_vasp_code":"10001",
-        "beneficiary_addr":"0x1234567890101010",
-        "transaction_currency":"0x80000000",
-        "amount": 0.973
-    }
+    private_info,
+    transaction,
+    data_dt
 };
 
-const originator_signature = sygnaBridgeUtil.crypto.signObject(obj, originator_privKey);
-const valid = sygnaBridgeUtil.crypto.verifyObject(obj, originator_pubKey, originator_signature);
+sygnaBridgeUtil.crypto.signObject(obj, originator_privKey);
+
+const valid = sygnaBridgeUtil.crypto.verifyObject(obj, originator_pubKey);
+
+// or you can use the method that's built for `transfer` request:
+let signed_obj = sygnaBridgeUtil.crypto.signTransferData(private_info, transaction, data_dt, originator_privKey)
+valid = sygnaBridgeUtil.crypto.verifyObject(signed_obj, originator_pubKey);
 
 ```
 
@@ -61,14 +75,24 @@ const valid = sygnaBridgeUtil.crypto.verifyObject(obj, originator_pubKey, origin
 
 API calls to communicate with Sygna Bridge server.
 
+We use **baisc auth** with all the API calls. To simplify the process, we provide a API class to deal with authentication and post/ get request format.
+
+```javascript
+const sbServer = "https://sygna-bridge.io/api"
+const sbAPI = new sygnaBridgeUtil.API("username", "pwd", sbServer)
+```
+
+After you create the `API` instance, you can use it to make any API call to communicate with Sygna Bridge central server.
+
 ### Get VASP Information
 
 ```javascript
 // Get List of VASPs associated with public keys.
-const vasps = await sygnaBridgeUtil.api.getVASPList("https://sygna/bridge/api", "API_KEY");
+const verify = true // set verify to true to verify the signature attached with api response automatically.
+const vasps = await sbAPI.getVASPList(verify);
 
 // Or call use getVASPPublicKey() to directly get public key for a specific VASP.
-const publicKey = await sygnaBridgeUtil.api.getVASPPublicKey("https://sygna/bridge/api", "API_KEY", "10298");
+const publicKey = await sbAPI.getVASPPublicKey("10298", verify);
 ```
 
 ### For Originator
