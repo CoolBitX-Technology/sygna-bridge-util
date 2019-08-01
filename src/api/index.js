@@ -29,56 +29,53 @@ class API {
      */
     async getVASPList(validate=true){
         const url = this.domain + '/v1/get-vasp';
-        const { vasp_data, signature } = await this.getSB(url);
-        if (!validate) return vasp_data;
+        const result = await this.getSB(url);
+        if (!validate) return result.vasp_data;
         
-        const valid = crypto.verifyObject({vasp_data}, SYGNA_BRIDGE_CENTRAL_PUBKEY, signature);
-        if (valid) return vasp_data;
+        const valid = crypto.verifyObject(result, SYGNA_BRIDGE_CENTRAL_PUBKEY);
+        if (valid) return result.vasp_data;
         throw Error("get VASP info error: invalid signature.");
     }
 
     /**
      * Notify Sygna Bridge that you have confirmed specific transfer from other VASP.
      * Should be called by Beneficiary Server
-     * @param {string} transfer_id
-     * @param {string} beneficiary_signature
+     * @param {string} callback_url
+     * @param {{transfer_id:string, result:string, signature:string}} confirmNotificationObj
      * @param {string} result
      * @return {Promise}
      */
-    async callBackConfirmNotification(transfer_id, result, beneficiary_signature){
-        const url = this.domain + '/v1/confirm-notification';
-        const params = { transfer_id, result, beneficiary_signature };
-        return await this.postSB(url, params);
+    async callBackConfirmNotification(callback_url, confirmNotificationObj){
+        return await this.postSB(callback_url, confirmNotificationObj);
     }
 
    /** 
     * Should be called by Originator.
-    * @param {string} hex_data Private sender info encoded by crypto.sygnaEncodePrivateObj
-    * @param {{originator_vasp_code: string, originator_addr:string, beneficiary_vasp_code:string, beneficiary_addr:string, transaction_currency:string, amount:number}} transaction
-    * @param {string} data_dt
-    * @param {string} originator_signature Signature of {hex_data, transaction} signed with crypto.signObject
-    * @param {string} callback_url The url 
+    * @param {{private_info:string, transaction:{}, data_dat:string, signature:string}} transferData Private sender info encoded by crypto.sygnaEncodePrivateObj
+    * @param {{callback_url: string, signature:string}} callback callback Obj 
     * @return {Promise<{transfer_id: string}>} transfer-id 
     */
-   async transfer(hex_data, transaction, data_dt, originator_signature, callback_url) {
+   async transfer(transferData, callback) {
        const url = this.domain + '/v1/transfer';
-       const params = { hex_data, transaction, data_dt, originator_signature, callback_url };
+       const params = { transfer_data: transferData, callback};
        return await this.postSB(url, params);
    }
 
    /**
     * Send broadcasted transaction id to Sygna Bridge for purpose of storage.
-    * @param {string} transfer_id the id got from transfer request
-    * @param {string} txid tx id on blockchain
-    * @param {string} originator_signature Signature of { transfer_id, txid } signed with crypto.signObject
+    * @param {{transfer_id: string, txid:string, signature:string}} sendTxIdObj
     * @return {Promise}
     */
-    async sendTransactionId(transfer_id, txid, originator_signature) {
+    async sendTransactionId(sendTxIdObj) {
         const url = this.domain + '/v1/send-txid';
-        const params = { transfer_id, txid, originator_signature };
-        return await this.postSB(url, params);
+        return await this.postSB(url, sendTxIdObj);
     }
 
+    /**
+     * HTTP Post request to Sygna Bridge
+     * @param {string} url 
+     * @param {object} json 
+     */
     async postSB (url, json ) {
         const headers = {
             "Content-Type":"application/json",
@@ -88,6 +85,10 @@ class API {
         return await response.json();
     }
     
+    /**
+     * HTTP GET request to Sygna Bridge
+     * @param {string} url 
+     */
     async getSB (url ) {
         const headers = { "Authorization": 'Basic ' + Buffer.from(this.username + ":" + this.password).toString('base64')};
         const response = await fetch(url, { headers:headers });
