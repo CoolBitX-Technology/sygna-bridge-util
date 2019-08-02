@@ -50,6 +50,16 @@ class API {
         return await this.postSB(callback_url, confirmNotificationObj);
     }
 
+    /**
+     * get transactio detail of particular transfer request
+     * @param {string} transfer_id 
+     */
+    async getTransferStatus(transfer_id){
+      const url = this.domain + '/v1/transfer-status?transfer_id=' + transfer_id;
+      const result = await this.getSB(url);
+      return result;
+    }
+
    /** 
     * Should be called by Originator.
     * @param {{private_info:string, transaction:{}, data_dat:string, signature:string}} transferData Private sender info encoded by crypto.sygnaEncodePrivateObj
