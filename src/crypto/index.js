@@ -32,7 +32,7 @@ exports.sygnaDecodePrivateObg = (privMsg, privateKey) => {
  * @param {string} privateKey
  * @return {{private_info: string, transaction:{}, data_dt:string, signature:string}}
  */
-exports.signTransferData = (private_info, transaction, data_dt, privateKey) => {
+exports.signPermissionRequest = (private_info, transaction, data_dt, privateKey) => {
     if (typeof private_info != "string") throw new Error(`private_info should be string, got ${typeof private_info}`);
     if (typeof data_dt != "string") throw new Error(`data_dt should be string, got ${typeof data_dt}`);
     if (typeof privateKey != "string") throw new Error(`privateKey should be string, got ${typeof privateKey}`);
@@ -71,7 +71,7 @@ exports.signCallBack = (callback_url, privateKey) => {
  * @param {string} privateKey
  * @return {{transfer_id:string, result: string, signature: string}}
  */
-exports.signResult = (transfer_id, result, privateKey) => {
+exports.signPermission = (transfer_id, result, privateKey) => {
     if (typeof transfer_id != "string") throw new Error(`transfer_id should be string, got ${typeof transfer_id}`);
     if (typeof result != "string") throw new Error(`result should be string, got ${typeof result}`);
     if (typeof privateKey != "string") throw new Error(`privateKey should be string, got ${typeof privateKey}`);
@@ -88,7 +88,7 @@ exports.signResult = (transfer_id, result, privateKey) => {
  * @param {string} privateKey
  * @return {{transfer_id:string, txid:string, signature:string}}
  */
-exports.signSendTxId = (transfer_id, txid, privateKey) => {
+exports.signTxId = (transfer_id, txid, privateKey) => {
     if (typeof transfer_id != "string") throw new Error(`transfer_id should be string, got ${typeof transfer_id}`);
     if (typeof txid != "string") throw new Error(`txid should be string, got ${typeof txid}`);
     if (typeof privateKey != "string") throw new Error(`privateKey should be string, got ${typeof privateKey}`);

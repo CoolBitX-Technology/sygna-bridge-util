@@ -39,14 +39,14 @@ const decoded_priv_info = sygnaBridge.crypto.sygnaDecodePrivateObg(private_info,
 
 In Sygna Bridge, we use secp256k1 ECDSA over sha256 of utf-8 json string to create signature on every API call. Since you need to provide the identical utf-8 string during verfication, the order of key-value pair you put into the object is important.
 
-The following example is the snippet of originator's signing process of `transfer` API call. If you put the key `transaction` before `private_info` in the object, the verification will fail in the central server.
+The following example is the snippet of originator's signing process of `premissionRequest` API call. If you put the key `transaction` before `private_info` in the object, the verification will fail in the central server.
 
 ```javascript
 let transaction = {
     originator_vasp_code:"10000",
-    originator_addr:"3MNDLKJQW109J3KASM344",
+    originator_addr:"3KvJ1uHPShhEAWyqsBEzhfXyeh1TXKAd7D",
     beneficiary_vasp_code:"10001",
-    beneficiary_addr:"0x1234567890101010",
+    beneficiary_addr:"3F4ReDwiMLu8LrAiXwwD2DhH8U9xMrUzUf",
     transaction_currency:"0x80000000",
     amount: 0.973
 }
@@ -66,12 +66,13 @@ sygnaBridgeUtil.crypto.signObject(obj, originator_privKey);
 const valid = sygnaBridgeUtil.crypto.verifyObject(obj, originator_pubKey);
 
 // or you can use the method that's built for `transfer` request:
-let signed_obj = sygnaBridgeUtil.crypto.signTransferData(private_info, transaction, data_dt, originator_privKey)
+let signed_obj = sygnaBridgeUtil.crypto.signPermissionRequest(private_info, transaction, data_dt, originator_privKey)
+
 valid = sygnaBridgeUtil.crypto.verifyObject(signed_obj, originator_pubKey);
 
 ```
 
-We provide different methods like `signTransferData`, `signCallback()` to sign different objects(or parameters) we specified in our [api doc](https://coolbitx.gitlab.io/sygna/bridge/api/#custom-objects). You can also find more examples in the following section.
+We provide different methods like `signPermissionRequest`, `signCallback()` to sign different objects(or parameters) we specified in our [api doc](https://coolbitx.gitlab.io/sygna/bridge/api/#custom-objects). You can also find more examples in the following section.
 
 ## API
 
@@ -80,7 +81,7 @@ API calls to communicate with Sygna Bridge server.
 We use **baisc auth** with all the API calls. To simplify the process, we provide a API class to deal with authentication and post/ get request format.
 
 ```javascript
-const sbServer = "https://sygna-bridge.io/api"
+const sbServer = "https://sygna.io/sb/api"
 const sbAPI = new sygnaBridgeUtil.API("username", "pwd", sbServer)
 ```
 
@@ -99,7 +100,7 @@ const publicKey = await sbAPI.getVASPPublicKey("10298", verify);
 
 ### For Originator
 
-There are two API calls from **transaction originator** to Sygna Bridge Server defined in the protocol, which are `transfer` and `send-txid`. They can be found under `api.originator`.
+There are two API calls from **transaction originator** to Sygna Bridge Server defined in the protocol, which are `postPermissionRequest` and `postTransactionId`. 
 
 The full logic of originator would be like the following:
 
@@ -113,33 +114,33 @@ const private_info = sygnaBridge.crypto.sygnaEncodePrivateObj(privateSenderInfo,
 const transaction = { "originator_vasp_code":"10000", "originator_addr":"3KvJ1uHPShhEAWyqsBEzhfXyeh1TXKAd7D", "beneficiary_vasp_code":"10298", "beneficiary_addr":"3CHgkx946yyueucCMiJhyH2Vg5kBBvfSGH", "transaction_currency":"0x80000000", "amount": 0.973 };
 const data_dt = "2019-07-29T07:29:80Z"
 
-const transferObj = sygnaBridgeUtil.crypto.signTransferData(private_info, transaction, data_dt, sender_privKey)
+const transferObj = sygnaBridgeUtil.crypto.signPermissionRequest(private_info, transaction, data_dt, sender_privKey)
 
 const callback_url = "https://81f7d956.ngrok.io/api/v1/transfer-response";
 const callbackObj = sygnaBridgeUtil.crypto.signCallBack(callback_url, sender_privKey);
 
-const { transfer_id } = await sbAPI.transfer(tansferObj, callbackObj)
+const { transfer_id } = await sbAPI.postPermissionRequest(tansferObj, callbackObj)
 
 // Boradcast your transaction to blockchain after got and api reponse at your api server.
 const txid = "1a0c9bef489a136f7e05671f7f7fada2b9d96ac9f44598e1bcaa4779ac564dcd";
 
 // Inform Sygna Bridge that a specific transfer is successfully broadcasted to the blockchain.
 
-let sendTxIdObj = sygnaBridgeUtil.crypto.signSendTxId(transfer_id, txid, sender_privKey);
+let sendTxIdObj = sygnaBridgeUtil.crypto.signTxId(transfer_id, txid, sender_privKey);
 let result = await sygnaAPI.sendTransactionId(sendTxIdObj);
 
 ```
 
 ### For Beneficiary
 
-There is only one api for Beneficiary to call, which is `callBackConfirmNotification`. After the beneficiary server confirm thet legitemacy of a transfer, they will sign `{ transfer_id, result }` using `signResult()` function, and send the result with signature to Sygna Bridge Central Server.
+There is only one api for Beneficiary to call, which is `postPermission`. After the beneficiary server confirm thet legitemacy of a transfer request, they will sign `{ transfer_id, result }` using `signPermission()` function, and send the result with signature to Sygna Bridge Central Server.
 
 ```javascript
 
 const callback_url = "https://sygna/bridge/api/v1/transfer-notification/"
 const result = "ACCEPT"; // or "REJECT"
-const callbackObj = sygnaBridgeUtil.crypto.signResult(transfer_id, result, beneficiary_privKey);
-const finalresult = await sygnaAPI.callBackConfirmNotification(callback_url, callbackObj);
+const callbackObj = sygnaBridgeUtil.crypto.signPermission(transfer_id, result, beneficiary_privKey);
+const finalresult = await sygnaAPI.postPermission(callback_url, callbackObj);
 
 ```
 
