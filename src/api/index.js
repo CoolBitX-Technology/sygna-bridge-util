@@ -29,7 +29,7 @@ class API {
      * @return {Promise<Array<{ vasp_name:string, vasp_code:string, vasp_pubkey:string }>>}
      */
     async getVASPList(validate=true){
-        const url = this.domain + '/v1/get-vasp';
+        const url = this.domain + '/v1/bridge/vasp';
         const result = await this.getSB(url);
         if (!validate) return result.vasp_data;
         
@@ -39,38 +39,38 @@ class API {
     }
 
     /**
-     * Notify Sygna Bridge that you have confirmed specific transfer from other VASP.
+     * Notify Sygna Bridge that you have confirmed specific permission Request from other VASP.
      * Should be called by Beneficiary Server
      * @param {string} callback_url
      * @param {{transfer_id:string, result:string, signature:string}} confirmNotificationObj
      * @param {string} result
      * @return {Promise}
      */
-    async callBackConfirmNotification(callback_url, confirmNotificationObj){
+    async postPermission(callback_url, confirmNotificationObj){
         return await this.postSB(callback_url, confirmNotificationObj);
     }
 
     /**
-     * get transactio detail of particular transfer request
+     * get detail of particular transaction premission request 
      * @param {string} transfer_id 
      */
-    async getTransferStatus(transfer_id){
-      const url = this.domain + '/v1/transfer-status?transfer_id=' + transfer_id;
+    async getStatus(transfer_id){
+      const url = this.domain + '/v1/bridge/transaction/status?transfer_id=' + transfer_id;
       const result = await this.getSB(url);
       return result;
     }
 
    /** 
     * Should be called by Originator.
-    * @param {{private_info:string, transaction:{}, data_dat:string, signature:string}} transferData Private sender info encoded by crypto.sygnaEncodePrivateObj
+    * @param {{private_info:string, transaction:{}, data_dat:string, signature:string}} requestData Private sender info encoded by crypto.sygnaEncodePrivateObj
     * @param {{callback_url: string, signature:string}} callback callback Obj 
     * @return {Promise<{transfer_id: string}>} transfer-id 
     */
-   async transfer(transferData, callback) {
-      check.checkObjSigned(transferData);
+   async postPermissionRequest(requestData, callback) {
+      check.checkObjSigned(requestData);
       check.checkObjSigned(callback);
-      const url = this.domain + '/v1/transfer';
-      const params = { data: transferData, callback};
+      const url = this.domain + '/v1/bridge/transaction/permission-request';
+      const params = { data: requestData, callback};
       return await this.postSB(url, params);
    }
 
@@ -79,11 +79,11 @@ class API {
     * @param {{transfer_id: string, txid:string, signature:string}} sendTxIdObj
     * @return {Promise}
     */
-    async sendTransactionId(sendTxIdObj) {
+    async postTransactionId(sendTxIdObj) {
       check.checkObjSigned(sendTxIdObj);
       if (typeof sendTxIdObj.transfer_id != "string") throw new Error(`Obj.transfer_id should be string, got ${typeof sendTxIdObj.transfer_id}`);
       if (typeof sendTxIdObj.txid != "string") throw new Error(`Obj.txid should be string, got ${typeof sendTxIdObj.txid}`);
-        const url = this.domain + '/v1/send-txid';
+        const url = this.domain + '/v1/bridge/transaction/txid';
         return await this.postSB(url, sendTxIdObj);
     }
 
