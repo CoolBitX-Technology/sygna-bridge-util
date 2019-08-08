@@ -127,7 +127,7 @@ const txid = "1a0c9bef489a136f7e05671f7f7fada2b9d96ac9f44598e1bcaa4779ac564dcd";
 // Inform Sygna Bridge that a specific transfer is successfully broadcasted to the blockchain.
 
 let sendTxIdObj = sygnaBridgeUtil.crypto.signTxId(transfer_id, txid, sender_privKey);
-let result = await sygnaAPI.sendTransactionId(sendTxIdObj);
+let result = await sygnaAPI.postTransactionId(sendTxIdObj);
 
 ```
 
