@@ -116,7 +116,7 @@ const data_dt = "2019-07-29T07:29:80Z"
 
 const transferObj = sygnaBridgeUtil.crypto.signPermissionRequest(private_info, transaction, data_dt, sender_privKey)
 
-const callback_url = "https://81f7d956.ngrok.io/api/v1/transfer-response";
+const callback_url = "https://81f7d956.ngrok.io/api/v1/originator/transaction/premission";
 const callbackObj = sygnaBridgeUtil.crypto.signCallBack(callback_url, sender_privKey);
 
 const { transfer_id } = await sbAPI.postPermissionRequest(tansferObj, callbackObj)
