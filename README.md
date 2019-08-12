@@ -81,8 +81,8 @@ API calls to communicate with Sygna Bridge server.
 We use **baisc auth** with all the API calls. To simplify the process, we provide a API class to deal with authentication and post/ get request format.
 
 ```javascript
-const sbServer = "https://sygna.io/sb/api"
-const sbAPI = new sygnaBridgeUtil.API("username", "pwd", sbServer)
+const sbServer = "https://apis.sygna.io/sb/"
+const sbAPI = new sygnaBridgeUtil.API("api-key", sbServer)
 ```
 
 After you create the `API` instance, you can use it to make any API call to communicate with Sygna Bridge central server.
@@ -133,14 +133,13 @@ let result = await sygnaAPI.postTransactionId(sendTxIdObj);
 
 ### For Beneficiary
 
-There is only one api for Beneficiary to call, which is `postPermission`. After the beneficiary server confirm thet legitemacy of a transfer request, they will sign `{ transfer_id, result }` using `signPermission()` function, and send the result with signature to Sygna Bridge Central Server.
+There is only one api for Beneficiary VASP to call, which is `postPermission`. After the beneficiary server confirm thet legitemacy of a transfer request, they will sign `{ transfer_id, result }` using `signPermission()` function, and send the result with signature to Sygna Bridge Central Server.
 
 ```javascript
 
-const callback_url = "https://sygna/bridge/api/v1/transfer-notification/"
 const result = "ACCEPT"; // or "REJECT"
-const callbackObj = sygnaBridgeUtil.crypto.signPermission(transfer_id, result, beneficiary_privKey);
-const finalresult = await sygnaAPI.postPermission(callback_url, callbackObj);
+const permissionObj = sygnaBridgeUtil.crypto.signPermission(transfer_id, result, beneficiary_privKey);
+const finalresult = await sygnaAPI.postPermission(permissionObj);
 
 ```
 

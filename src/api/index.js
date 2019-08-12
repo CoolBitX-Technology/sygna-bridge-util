@@ -4,9 +4,8 @@ const check = require('./check');
 const { SYGNA_BRIDGE_CENTRAL_PUBKEY } = require('../config');
 
 class API {
-    constructor(username, password, sygnaBridgeDomain){
-        this.username = username;
-        this.password = password;
+    constructor(api_key, sygnaBridgeDomain){
+        this.api_key = api_key;
         this.domain = sygnaBridgeDomain;
     }
 
@@ -29,8 +28,9 @@ class API {
      * @return {Promise<Array<{ vasp_name:string, vasp_code:string, vasp_pubkey:string }>>}
      */
     async getVASPList(validate=true){
-        const url = this.domain + '/v1/bridge/vasp';
+        const url = this.domain + 'api/v1/bridge/vasp';
         const result = await this.getSB(url);
+        if (!result.vasp_data) {throw new Error(`Request VASPs failed: ${result.message}`)}
         if (!validate) return result.vasp_data;
         
         const valid = crypto.verifyObject(result, SYGNA_BRIDGE_CENTRAL_PUBKEY);
@@ -41,13 +41,14 @@ class API {
     /**
      * Notify Sygna Bridge that you have confirmed specific permission Request from other VASP.
      * Should be called by Beneficiary Server
-     * @param {string} callback_url
-     * @param {{transfer_id:string, result:string, signature:string}} confirmNotificationObj
+     * @param {{transfer_id:string, result:string, signature:string}} permissionObj
      * @param {string} result
      * @return {Promise}
      */
-    async postPermission(callback_url, confirmNotificationObj){
-        return await this.postSB(callback_url, confirmNotificationObj);
+    async postPermission(permissionObj){
+        check.checkObjSigned(permissionObj);
+        const url = this.domain + 'api/v1/bridge/transaction/permission';
+        return await this.postSB(url, permissionObj);
     }
 
     /**
@@ -55,7 +56,7 @@ class API {
      * @param {string} transfer_id 
      */
     async getStatus(transfer_id){
-      const url = this.domain + '/v1/bridge/transaction/status?transfer_id=' + transfer_id;
+      const url = this.domain + 'api/v1/bridge/transaction/status?transfer_id=' + transfer_id;
       const result = await this.getSB(url);
       return result;
     }
@@ -69,7 +70,7 @@ class API {
    async postPermissionRequest(requestData, callback) {
       check.checkObjSigned(requestData);
       check.checkObjSigned(callback);
-      const url = this.domain + '/v1/bridge/transaction/permission-request';
+      const url = this.domain + 'api/v1/bridge/transaction/permission-request';
       const params = { data: requestData, callback};
       return await this.postSB(url, params);
    }
@@ -83,7 +84,7 @@ class API {
       check.checkObjSigned(sendTxIdObj);
       if (typeof sendTxIdObj.transfer_id != "string") throw new Error(`Obj.transfer_id should be string, got ${typeof sendTxIdObj.transfer_id}`);
       if (typeof sendTxIdObj.txid != "string") throw new Error(`Obj.txid should be string, got ${typeof sendTxIdObj.txid}`);
-        const url = this.domain + '/v1/bridge/transaction/txid';
+        const url = this.domain + 'api/v1/bridge/transaction/txid';
         return await this.postSB(url, sendTxIdObj);
     }
 
@@ -95,7 +96,7 @@ class API {
     async postSB (url, json ) {
         const headers = {
             "Content-Type":"application/json",
-            "Authorization": 'Basic ' + Buffer.from(this.username + ":" + this.password).toString('base64')
+            "api_key": this.api_key
         };
         const response = await fetch(url, { method: 'POST', body: JSON.stringify(json), headers: headers });
         return await response.json();
@@ -106,7 +107,7 @@ class API {
      * @param {string} url 
      */
     async getSB (url ) {
-        const headers = { "Authorization": 'Basic ' + Buffer.from(this.username + ":" + this.password).toString('base64')};
+        const headers = { "api_key": this.api_key };
         const response = await fetch(url, { headers:headers });
         return await response.json();
     }
