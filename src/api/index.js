@@ -41,8 +41,7 @@ class API {
     /**
      * Notify Sygna Bridge that you have confirmed specific permission Request from other VASP.
      * Should be called by Beneficiary Server
-     * @param {{transfer_id:string, result:string, signature:string}} permissionObj
-     * @param {string} result
+     * @param {{transfer_id:string, permission_status:string, signature:string}} permissionObj
      * @return {Promise}
      */
     async postPermission(permissionObj){

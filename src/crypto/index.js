@@ -67,17 +67,17 @@ exports.signCallBack = (callback_url, privateKey) => {
 
 /**
  * @param {string} transfer_id
- * @param {string} result REJECT or ACCEPT
+ * @param {string} permission_status REJECT or ACCEPT
  * @param {string} privateKey
- * @return {{transfer_id:string, result: string, signature: string}}
+ * @return {{transfer_id:string, permission_status: string, signature: string}}
  */
-exports.signPermission = (transfer_id, result, privateKey) => {
+exports.signPermission = (transfer_id, permission_status, privateKey) => {
     if (typeof transfer_id != "string") throw new Error(`transfer_id should be string, got ${typeof transfer_id}`);
-    if (typeof result != "string") throw new Error(`result should be string, got ${typeof result}`);
+    if (typeof permission_status != "string") throw new Error(`permission_status should be string, got ${typeof permission_status}`);
     if (typeof privateKey != "string") throw new Error(`privateKey should be string, got ${typeof privateKey}`);
     let data = {
         transfer_id,
-        result
+        permission_status
     };
     return this.signObject(data, privateKey);
 };

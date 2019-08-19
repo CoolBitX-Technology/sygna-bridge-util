@@ -133,12 +133,12 @@ let result = await sygnaAPI.postTransactionId(sendTxIdObj);
 
 ### For Beneficiary
 
-There is only one api for Beneficiary VASP to call, which is `postPermission`. After the beneficiary server confirm thet legitemacy of a transfer request, they will sign `{ transfer_id, result }` using `signPermission()` function, and send the result with signature to Sygna Bridge Central Server.
+There is only one api for Beneficiary VASP to call, which is `postPermission`. After the beneficiary server confirm thet legitemacy of a transfer request, they will sign `{ transfer_id, permission_status }` using `signPermission()` function, and send the result with signature to Sygna Bridge Central Server.
 
 ```javascript
 
-const result = "ACCEPT"; // or "REJECT"
-const permissionObj = sygnaBridgeUtil.crypto.signPermission(transfer_id, result, beneficiary_privKey);
+const permission_status = "ACCEPT"; // or "REJECT"
+const permissionObj = sygnaBridgeUtil.crypto.signPermission(transfer_id, permission_status, beneficiary_privKey);
 const finalresult = await sygnaAPI.postPermission(permissionObj);
 
 ```
