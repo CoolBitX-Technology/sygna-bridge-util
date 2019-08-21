@@ -31,7 +31,7 @@ const sensitive_data = {
 };
 
 const private_info = sygnaBridgeUtil.crypto.sygnaEncodePrivateObj(sensitive_data, recipient_pubKey);
-const decoded_priv_info = sygnaBridge.crypto.sygnaDecodePrivateObg(private_info, recipient_privKey)
+const decoded_priv_info = sygnaBridge.crypto.sygnaDecodePrivateObj(private_info, recipient_privKey)
 
 ```
 

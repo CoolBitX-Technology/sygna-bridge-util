@@ -1,6 +1,6 @@
 {
   "name": "sygna-bridge-util",
-  "version": "1.4.1",
+  "version": "1.4.2",
   "description": "JavaScript library to interact with Sygna Bridge Server.",
   "main": "index.js",
   "scripts": {

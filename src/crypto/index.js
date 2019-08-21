@@ -20,7 +20,7 @@ exports.sygnaEncodePrivateObj = (data, publicKey) => {
  * @param {string} privateKey 
  * @return {object}
  */
-exports.sygnaDecodePrivateObg = (privMsg, privateKey) => {
+exports.sygnaDecodePrivateObj = (privMsg, privateKey) => {
     const decoded = ecies.ECIESDecode(privMsg, privateKey);
     return JSON.parse(decoded);
 };
