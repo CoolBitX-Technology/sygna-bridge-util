@@ -44,9 +44,9 @@ The following example is the snippet of originator's signing process of `premiss
 ```javascript
 let transaction = {
     originator_vasp_code:"10000",
-    originator_addr:"3KvJ1uHPShhEAWyqsBEzhfXyeh1TXKAd7D",
+    originator_addrs:["3KvJ1uHPShhEAWyqsBEzhfXyeh1TXKAd7D"],
     beneficiary_vasp_code:"10001",
-    beneficiary_addr:"3F4ReDwiMLu8LrAiXwwD2DhH8U9xMrUzUf",
+    beneficiary_addrs:["3F4ReDwiMLu8LrAiXwwD2DhH8U9xMrUzUf"],
     transaction_currency:"0x80000000",
     amount: 0.973
 }
@@ -111,7 +111,14 @@ const privateSenderInfo = { "originator": { "name": "Antoine Griezmann", "date_o
 const recipientPublicKey = await sbAPI.getVASPPublicKey("10298");
 const private_info = sygnaBridge.crypto.sygnaEncodePrivateObj(privateSenderInfo, recipientPublicKey);
 
-const transaction = { "originator_vasp_code":"10000", "originator_addr":"3KvJ1uHPShhEAWyqsBEzhfXyeh1TXKAd7D", "beneficiary_vasp_code":"10298", "beneficiary_addr":"3CHgkx946yyueucCMiJhyH2Vg5kBBvfSGH", "transaction_currency":"0x80000000", "amount": 0.973 };
+const transaction = {
+    "originator_vasp_code":"10000",
+    "originator_addrs": ["3KvJ1uHPShhEAWyqsBEzhfXyeh1TXKAd7D"],
+    "beneficiary_vasp_code":"10298",
+    "beneficiary_addrs": ["3CHgkx946yyueucCMiJhyH2Vg5kBBvfSGH"],
+    "transaction_currency":"0x80000000",
+    "amount": 0.973
+};
 const data_dt = "2019-07-29T07:29:80Z"
 
 const transferObj = sygnaBridgeUtil.crypto.signPermissionRequest(private_info, transaction, data_dt, sender_privKey)
