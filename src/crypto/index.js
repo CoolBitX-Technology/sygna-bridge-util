@@ -36,10 +36,10 @@ exports.signPermissionRequest = (private_info, transaction, data_dt, privateKey)
     if (typeof private_info != "string") throw new Error(`private_info should be string, got ${typeof private_info}`);
     if (typeof data_dt != "string") throw new Error(`data_dt should be string, got ${typeof data_dt}`);
     if (typeof privateKey != "string") throw new Error(`privateKey should be string, got ${typeof privateKey}`);
+    if (!Array.isArray(transaction.beneficiary_addrs)) throw new Error(`transaction.beneficiary_addrs should be array, got ${typeof transaction.beneficiary_addrs}`);
+    if (!Array.isArray(transaction.originator_addrs)) throw new Error(`transaction.originator_addrs should be array, got ${typeof transaction.originator_addrs}`);
     if (typeof transaction.originator_vasp_code != "string") throw new Error(`transaction.originator_vasp_code should be string, got ${typeof transaction.originator_vasp_code}`);
-    if (typeof transaction.originator_addr != "string") throw new Error(`transaction.originator_addr should be string, got ${typeof transaction.originator_addr}`);
     if (typeof transaction.beneficiary_vasp_code != "string") throw new Error(`transaction.beneficiary_vasp_code should be string, got ${typeof transaction.beneficiary_vasp_code}`);
-    if (typeof transaction.beneficiary_addr != "string") throw new Error(`transaction.beneficiary_addr should be string, got ${typeof transaction.beneficiary_addr}`);
     if (typeof transaction.transaction_currency != "string") throw new Error(`transaction.transaction_currency should be string, got ${typeof transaction.transaction_currency}`);
     if (typeof transaction.amount != "number") throw new Error(`transaction.amount should be number, got ${typeof transaction.amount}`);
     
