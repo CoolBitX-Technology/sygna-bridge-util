@@ -83,8 +83,8 @@ class API {
     */
     async postTransactionId(sendTxIdObj) {
       check.checkObjSigned(sendTxIdObj);
-      if (typeof sendTxIdObj.transfer_id != "string") throw new Error(`Obj.transfer_id should be string, got ${typeof sendTxIdObj.transfer_id}`);
-      if (typeof sendTxIdObj.txid != "string") throw new Error(`Obj.txid should be string, got ${typeof sendTxIdObj.txid}`);
+      if (typeof sendTxIdObj.transfer_id !== "string") throw new Error(`Obj.transfer_id should be string, got ${typeof sendTxIdObj.transfer_id}`);
+      if (typeof sendTxIdObj.txid !== "string") throw new Error(`Obj.txid should be string, got ${typeof sendTxIdObj.txid}`);
         const url = this.domain + 'api/v1/bridge/transaction/txid';
         return await this.postSB(url, sendTxIdObj);
     }
