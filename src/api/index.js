@@ -43,11 +43,12 @@ class API {
     /**
      * Notify Sygna Bridge that you have confirmed specific permission Request from other VASP.
      * Should be called by Beneficiary Server
-     * @param {{transfer_id:string, permission_status:string, signature:string}} permissionObj
+     * @param {{transfer_id:string, permission_status:string, signature:string,expire_date?:number}} permissionObj
      * @return {Promise}
      */
     async postPermission(permissionObj){
         check.checkObjSigned(permissionObj);
+        check.checkExpireDateValid(permissionObj.expire_date);
         const url = this.domain + 'api/v1/bridge/transaction/permission';
         return await this.postSB(url, permissionObj);
     }
@@ -64,12 +65,13 @@ class API {
 
    /** 
     * Should be called by Originator.
-    * @param {{private_info:string, transaction:{}, data_dat:string, signature:string}} requestData Private sender info encoded by crypto.sygnaEncodePrivateObj
+    * @param {{private_info:string, transaction:{}, data_dat:string, signature:string,expire_date?:number}} requestData Private sender info encoded by crypto.sygnaEncodePrivateObj
     * @param {{callback_url: string, signature:string}} callback callback Obj 
     * @return {Promise<{transfer_id: string}>} transfer-id 
     */
    async postPermissionRequest(requestData, callback) {
       check.checkObjSigned(requestData);
+      check.checkExpireDateValid(requestData.expire_date);
       check.checkObjSigned(callback);
       const url = this.domain + 'api/v1/bridge/transaction/permission-request';
       const params = { data: requestData, callback};
