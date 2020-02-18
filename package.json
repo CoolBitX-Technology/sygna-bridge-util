@@ -4,7 +4,7 @@
   "description": "JavaScript library to interact with Sygna Bridge Server.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest"
   },
   "repository": {
     "type": "git",
@@ -15,5 +15,8 @@
   "dependencies": {
     "node-fetch": "^2.6.0",
     "secp256k1": "^3.7.1"
+  },
+  "devDependencies": {
+    "jest": "^25.1.0"
   }
 }
