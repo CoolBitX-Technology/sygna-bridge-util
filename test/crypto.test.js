@@ -394,9 +394,9 @@ describe('test crypto', () => {
       expect(signature).toEqual(
         {
           private_info: data.private_info,
-          data_dt: data.data_dt,
           transaction: data.transaction,
-          signature: "6d69f53ecd7d6bf76b5f348caddfc292d47ff0032a49fb3e0e98efa6f09f45796da0e94ad12ade758e6a68c10f88799f9958c449f5f2c72ffd5dca7ef3f4e5cf"
+          data_dt: data.data_dt,
+          signature: "932797f0fbe29d726a2ad7ea0b097ba46bbcbc632342f9344257652811f149a9121a5bc21880e653ad8b1ff1d55c9ffbe6c24a8107978a720884c3cf8db3437f"
         }
       )
 
@@ -405,10 +405,10 @@ describe('test crypto', () => {
       expect(signature1).toEqual(
         {
           private_info: data.private_info,
-          data_dt: data.data_dt,
           transaction: data.transaction,
+          data_dt: data.data_dt,
           expire_date: data.expire_date,
-          signature: "e2cbb11f6b757ff556a0a116fd884a50e8f16ee659d9ee882a14990058630584083ed55fbb4072bb9571cce48c1b863f9a753e7dd20824e2efb053fad869e421"
+          signature: "4f548a64281660761d9b90dd679b2e7994ae661bafa50b65acefdf2774d7350f1de477ae23b7bb740a5be3c1427c7d1cee830464bf0f5bce37d69394cdaa045a"
         }
       )
     });
