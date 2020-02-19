@@ -326,7 +326,7 @@ describe('test crypto', () => {
       }
     });
 
-    it('should checkExpireDateValid is called once if signPermissionRequest is called', () => {
+    it('should checkExpireDateValid is called with correct parameters if signPermissionRequest is called', () => {
       signPermissionRequest(
         {
           private_info: "private_info",
