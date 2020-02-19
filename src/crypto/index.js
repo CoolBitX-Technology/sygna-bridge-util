@@ -50,7 +50,10 @@ exports.signPermissionRequest = (data) => {
     if (typeof transaction.transaction_currency !== "string") throw new Error(`transaction.transaction_currency should be string, got ${typeof transaction.transaction_currency}`);
     if (typeof transaction.amount !== "number") throw new Error(`transaction.amount should be number, got ${typeof transaction.amount}`);
     checkExpireDateValid(expire_date);
-    return this.signObject(data, private_key);
+
+    const objectToSign = { ...data };
+    delete objectToSign.private_key;
+    return this.signObject(objectToSign, private_key);
 };
 
 /**
@@ -82,7 +85,10 @@ exports.signPermission = (data) => {
     if (typeof permission_status !== "string") throw new Error(`permission_status should be string, got ${typeof permission_status}`);
     if (typeof private_key !== "string") throw new Error(`private_key should be string, got ${typeof private_key}`);
     checkExpireDateValid(expire_date);
-    return this.signObject(data, private_key);
+
+    const objectToSign = { ...data };
+    delete objectToSign.private_key;
+    return this.signObject(objectToSign, private_key);
 };
 
 /**
