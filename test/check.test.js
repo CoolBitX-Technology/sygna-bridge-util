@@ -2,6 +2,7 @@ const {
   checkObjSigned,
   checkExpireDateValid
 } = require('../src/api/check');
+const { EXPIRE_DATE_MIN_OFFSET } = require('../src/config')
 
 describe('test check', () => {
   describe('test checkObjSigned', () => {
@@ -68,15 +69,15 @@ describe('test check', () => {
     it('should throw error if expire_date is too short', () => {
       expect(() => {
         checkExpireDateValid(1582011631);//GMT: Tuesday, February 18, 2020 7:40:31 AM
-      }).toThrow(new Error(`expire_date should be at least 60 seconds away from the current time.`));
+      }).toThrow(new Error(`expire_date should be at least ${EXPIRE_DATE_MIN_OFFSET} seconds away from the current time.`));
 
       expect(() => {
         checkExpireDateValid(1582011631000);//GMT: Tuesday, February 18, 2020 7:40:31 AM
-      }).toThrow(new Error(`expire_date should be at least 60 seconds away from the current time.`));
+      }).toThrow(new Error(`expire_date should be at least ${EXPIRE_DATE_MIN_OFFSET} seconds away from the current time.`));
 
       expect(() => {
         checkExpireDateValid(4106604075);//GMT: Thursday, February 18, 2100 3:21:15 AM
-      }).toThrow(new Error(`expire_date should be at least 60 seconds away from the current time.`));
+      }).toThrow(new Error(`expire_date should be at least ${EXPIRE_DATE_MIN_OFFSET} seconds away from the current time.`));
 
 
       expect(function () {
