@@ -17,7 +17,7 @@ function checkExpireDateValid(expire_date) {
     const date = new Date(expire_date)
     const today = new Date()
     if (date.getTime() - today.getTime() < EXPIRE_DATE_MIN_OFFSET) {
-        throw new Error(`expire_date should be at least ${EXPIRE_DATE_MIN_OFFSET} seconds away from the current time.`);
+        throw new Error(`expire_date should be at least ${EXPIRE_DATE_MIN_OFFSET/1000} seconds away from the current time.`);
     }
 }
 
