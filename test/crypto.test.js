@@ -59,17 +59,17 @@ describe('test crypto', () => {
       }
     });
 
-    it('should throw error if private_key is not string', () => {
+    it('should throw error if privateKey is not string', () => {
       try {
         signPermissionRequest(
           {
             private_info: "private_info",
             data_dt: "123",
-            private_key: 123
-          }
+          },
+          123
         );
       } catch (error) {
-        expect(error).toEqual(new Error(`private_key should be string, got number`))
+        expect(error).toEqual(new Error(`privateKey should be string, got number`))
       }
 
       try {
@@ -78,7 +78,7 @@ describe('test crypto', () => {
           data_dt: "123",
         });
       } catch (error) {
-        expect(error).toEqual(new Error(`private_key should be string, got undefined`))
+        expect(error).toEqual(new Error(`privateKey should be string, got undefined`))
       }
     });
 
@@ -88,20 +88,22 @@ describe('test crypto', () => {
           {
             private_info: "private_info",
             data_dt: "123",
-            private_key: "123",
             transaction: 123
-          }
+          },
+          "123",
         );
       } catch (error) {
         expect(error).toEqual(new Error(`transaction should be object, got number`))
       }
 
       try {
-        signPermissionRequest({
-          private_info: "private_info",
-          data_dt: "123",
-          private_key: "{ a: 1 }"
-        });
+        signPermissionRequest(
+          {
+            private_info: "private_info",
+            data_dt: "123"
+          },
+          "{ a: 1 }"
+        );
       } catch (error) {
         expect(error).toEqual(new Error(`transaction should be object, got undefined`))
       }
@@ -113,11 +115,11 @@ describe('test crypto', () => {
           {
             private_info: "private_info",
             data_dt: "123",
-            private_key: "123",
             transaction: {
               beneficiary_addrs: 123
             }
-          }
+          },
+          "123"
         );
       } catch (error) {
         expect(error).toEqual(new Error(`transaction.beneficiary_addrs should be array, got number`))
@@ -128,11 +130,11 @@ describe('test crypto', () => {
           {
             private_info: "private_info",
             data_dt: "123",
-            private_key: "123",
             transaction: {
               a: 123
             }
-          }
+          },
+          "123"
         );
       } catch (error) {
         expect(error).toEqual(new Error(`transaction.beneficiary_addrs should be array, got undefined`))
@@ -145,12 +147,12 @@ describe('test crypto', () => {
           {
             private_info: "private_info",
             data_dt: "123",
-            private_key: "123",
             transaction: {
               beneficiary_addrs: [123],
               originator_addrs: 123
             }
-          }
+          },
+          "123"
         );
       } catch (error) {
         expect(error).toEqual(new Error(`transaction.originator_addrs should be array, got number`))
@@ -161,11 +163,11 @@ describe('test crypto', () => {
           {
             private_info: "private_info",
             data_dt: "123",
-            private_key: "123",
             transaction: {
               beneficiary_addrs: [123]
             }
-          }
+          },
+          "123"
         );
       } catch (error) {
         expect(error).toEqual(new Error(`transaction.originator_addrs should be array, got undefined`))
@@ -178,13 +180,13 @@ describe('test crypto', () => {
           {
             private_info: "private_info",
             data_dt: "123",
-            private_key: "123",
             transaction: {
               beneficiary_addrs: [123],
               originator_addrs: [123],
               originator_vasp_code: 123
             }
-          }
+          },
+          "123"
         );
       } catch (error) {
         expect(error).toEqual(new Error(`transaction.originator_vasp_code should be string, got number`))
@@ -195,12 +197,12 @@ describe('test crypto', () => {
           {
             private_info: "private_info",
             data_dt: "123",
-            private_key: "123",
             transaction: {
               beneficiary_addrs: [123],
               originator_addrs: [123]
             }
-          }
+          },
+          "123"
         );
       } catch (error) {
         expect(error).toEqual(new Error(`transaction.originator_vasp_code should be string, got undefined`))
@@ -213,14 +215,14 @@ describe('test crypto', () => {
           {
             private_info: "private_info",
             data_dt: "123",
-            private_key: "123",
             transaction: {
               beneficiary_addrs: [123],
               originator_addrs: [123],
               originator_vasp_code: "123",
               beneficiary_vasp_code: 123
             }
-          }
+          },
+          "123"
         );
       } catch (error) {
         expect(error).toEqual(new Error(`transaction.beneficiary_vasp_code should be string, got number`))
@@ -231,13 +233,13 @@ describe('test crypto', () => {
           {
             private_info: "private_info",
             data_dt: "123",
-            private_key: "123",
             transaction: {
               beneficiary_addrs: [123],
               originator_addrs: [123],
               originator_vasp_code: "123"
             }
-          }
+          },
+          "123"
         );
       } catch (error) {
         expect(error).toEqual(new Error(`transaction.beneficiary_vasp_code should be string, got undefined`))
@@ -250,7 +252,6 @@ describe('test crypto', () => {
           {
             private_info: "private_info",
             data_dt: "123",
-            private_key: "123",
             transaction: {
               beneficiary_addrs: [123],
               originator_addrs: [123],
@@ -258,7 +259,8 @@ describe('test crypto', () => {
               beneficiary_vasp_code: "123",
               transaction_currency: 123
             }
-          }
+          },
+          "123"
         );
       } catch (error) {
         expect(error).toEqual(new Error(`transaction.transaction_currency should be string, got number`))
@@ -269,14 +271,14 @@ describe('test crypto', () => {
           {
             private_info: "private_info",
             data_dt: "123",
-            private_key: "123",
             transaction: {
               beneficiary_addrs: [123],
               originator_addrs: [123],
               originator_vasp_code: "123",
               beneficiary_vasp_code: "123"
             }
-          }
+          },
+          "123"
         );
       } catch (error) {
         expect(error).toEqual(new Error(`transaction.transaction_currency should be string, got undefined`))
@@ -290,7 +292,6 @@ describe('test crypto', () => {
           {
             private_info: "private_info",
             data_dt: "123",
-            private_key: "123",
             transaction: {
               beneficiary_addrs: [123],
               originator_addrs: [123],
@@ -299,7 +300,8 @@ describe('test crypto', () => {
               transaction_currency: "123",
               amount: "123"
             }
-          }
+          },
+          "123"
         );
       } catch (error) {
         expect(error).toEqual(new Error(`transaction.amount should be number, got string`))
@@ -310,7 +312,6 @@ describe('test crypto', () => {
           {
             private_info: "private_info",
             data_dt: "123",
-            private_key: "123",
             transaction: {
               beneficiary_addrs: [123],
               originator_addrs: [123],
@@ -318,7 +319,8 @@ describe('test crypto', () => {
               beneficiary_vasp_code: "123",
               transaction_currency: "123"
             }
-          }
+          },
+          "123"
         );
       } catch (error) {
         expect(error).toEqual(new Error(`transaction.amount should be number, got undefined`))
@@ -326,10 +328,10 @@ describe('test crypto', () => {
     });
 
     it('should checkExpireDateValid and signObject be called with correct parameters if signPermissionRequest was called', () => {
+      const privateKey = "123";
       const data = {
         private_info: "private_info",
         data_dt: "123",
-        private_key: "123",
         transaction: {
           beneficiary_addrs: [123],
           originator_addrs: [123],
@@ -339,7 +341,7 @@ describe('test crypto', () => {
           amount: 123
         }
       };
-      signPermissionRequest(data);
+      signPermissionRequest(data, privateKey);
       expect(checkExpireDateValid).toBeCalledWith(undefined);
       expect(checkExpireDateValid.mock.calls.length).toBe(1);
       expect(crypto.signObject.mock.calls.length).toBe(1);
@@ -350,10 +352,10 @@ describe('test crypto', () => {
           transaction: data.transaction
         }
       );
-      expect(crypto.signObject.mock.calls[0][1]).toEqual(data.private_key);
+      expect(crypto.signObject.mock.calls[0][1]).toEqual(privateKey);
 
       data.expire_date = 123;
-      signPermissionRequest(data);
+      signPermissionRequest(data, privateKey);
       expect(checkExpireDateValid).toBeCalledWith(123);
       expect(checkExpireDateValid.mock.calls.length).toBe(2);
       expect(crypto.signObject.mock.calls.length).toBe(2);
@@ -365,7 +367,7 @@ describe('test crypto', () => {
           expire_date: data.expire_date
         }
       );
-      expect(crypto.signObject.mock.calls[1][1]).toEqual(data.private_key);
+      expect(crypto.signObject.mock.calls[1][1]).toEqual(privateKey);
     });
   });
 
@@ -376,11 +378,10 @@ describe('test crypto', () => {
     });
 
     it('should object which is return by signPermissionRequest be correct', () => {
-      const private_key = "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b";
+      const privateKey = "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b";
       const data = {
         private_info: "private_info",
         data_dt: "123",
-        private_key,
         transaction: {
           beneficiary_addrs: [123],
           originator_addrs: [123],
@@ -390,7 +391,7 @@ describe('test crypto', () => {
           amount: 123
         }
       }
-      const signature = signPermissionRequest(data);
+      const signature = signPermissionRequest(data, privateKey);
       expect(signature).toEqual(
         {
           private_info: data.private_info,
@@ -401,7 +402,7 @@ describe('test crypto', () => {
       )
 
       data.expire_date = 123;
-      const signature1 = signPermissionRequest(data);
+      const signature1 = signPermissionRequest(data, privateKey);
       expect(signature1).toEqual(
         {
           private_info: data.private_info,
@@ -463,17 +464,17 @@ describe('test crypto', () => {
       }
     });
 
-    it('should throw error if private_key is not string', () => {
+    it('should throw error if privateKey is not string', () => {
       try {
         signPermission(
           {
             transfer_id: "123",
             permission_status: "ACCEPT",
-            private_key: 123
-          }
+          },
+          123
         );
       } catch (error) {
-        expect(error).toEqual(new Error(`private_key should be string, got number`))
+        expect(error).toEqual(new Error(`privateKey should be string, got number`))
       }
 
       try {
@@ -482,17 +483,17 @@ describe('test crypto', () => {
           permission_status: "ACCEPT"
         });
       } catch (error) {
-        expect(error).toEqual(new Error(`private_key should be string, got undefined`))
+        expect(error).toEqual(new Error(`privateKey should be string, got undefined`))
       }
     });
 
     it('should checkExpireDateValid and signObject be called once if signPermission was called', () => {
+      const privateKey = "123";
       const data = {
         transfer_id: "123",
         permission_status: "ACCEPT",
-        private_key: "123"
       };
-      signPermission(data);
+      signPermission(data, privateKey);
       expect(checkExpireDateValid).toBeCalledWith(undefined);
       expect(checkExpireDateValid.mock.calls.length).toBe(1);
       expect(crypto.signObject.mock.calls.length).toBe(1);
@@ -502,10 +503,10 @@ describe('test crypto', () => {
           permission_status: data.permission_status
         }
       );
-      expect(crypto.signObject.mock.calls[0][1]).toEqual(data.private_key);
+      expect(crypto.signObject.mock.calls[0][1]).toEqual(privateKey);
 
       data.expire_date = 123;
-      signPermission(data);
+      signPermission(data, privateKey);
       expect(checkExpireDateValid).toBeCalledWith(123);
       expect(checkExpireDateValid.mock.calls.length).toBe(2);
       expect(crypto.signObject.mock.calls.length).toBe(2);
@@ -516,7 +517,7 @@ describe('test crypto', () => {
           expire_date: data.expire_date
         }
       );
-      expect(crypto.signObject.mock.calls[1][1]).toEqual(data.private_key);
+      expect(crypto.signObject.mock.calls[1][1]).toEqual(privateKey);
     });
   });
 
@@ -527,14 +528,13 @@ describe('test crypto', () => {
     });
 
     it('should object which is return by signPermission be correct', () => {
-      const private_key = "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b";
+      const privateKey = "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b";
       const data = {
         transfer_id: "123",
-        permission_status: "ACCEPT",
-        private_key
+        permission_status: "ACCEPT"
       };
 
-      const signature = signPermission(data);
+      const signature = signPermission(data, privateKey);
       expect(signature).toEqual(
         {
           transfer_id: data.transfer_id,
@@ -545,7 +545,7 @@ describe('test crypto', () => {
 
 
       data.expire_date = 123;
-      const signature1 = signPermission(data);
+      const signature1 = signPermission(data, privateKey);
       expect(signature1).toEqual(
         {
           transfer_id: data.transfer_id,

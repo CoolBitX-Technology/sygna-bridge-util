@@ -27,21 +27,21 @@ exports.sygnaDecodePrivateObj = (privMsg, privateKey) => {
 };
 
 /**
- * @param {{private_info: string, transaction:object, data_dt:string, private_key:string, expire_date?:number}} data
+ * @param {{private_info: string, transaction:object, data_dt:string, expire_date?:number}} data
+ * @param {string} privateKey
  * @return {{private_info: string, transaction:{}, data_dt:string, signature:string, expire_date?:number}}
  */
-exports.signPermissionRequest = (data) => {
+exports.signPermissionRequest = (data, privateKey) => {
     const {
         private_info,
         transaction,
         data_dt,
-        private_key,
         expire_date
     } = data;
 
     if (typeof private_info !== "string") throw new Error(`private_info should be string, got ${typeof private_info}`);
     if (typeof data_dt !== "string") throw new Error(`data_dt should be string, got ${typeof data_dt}`);
-    if (typeof private_key !== "string") throw new Error(`private_key should be string, got ${typeof private_key}`);
+    if (typeof privateKey !== "string") throw new Error(`privateKey should be string, got ${typeof privateKey}`);
     if (typeof transaction !== "object") throw new Error(`transaction should be object, got ${typeof transaction}`);
     if (!Array.isArray(transaction.beneficiary_addrs)) throw new Error(`transaction.beneficiary_addrs should be array, got ${typeof transaction.beneficiary_addrs}`);
     if (!Array.isArray(transaction.originator_addrs)) throw new Error(`transaction.originator_addrs should be array, got ${typeof transaction.originator_addrs}`);
@@ -50,16 +50,15 @@ exports.signPermissionRequest = (data) => {
     if (typeof transaction.transaction_currency !== "string") throw new Error(`transaction.transaction_currency should be string, got ${typeof transaction.transaction_currency}`);
     if (typeof transaction.amount !== "number") throw new Error(`transaction.amount should be number, got ${typeof transaction.amount}`);
     checkExpireDateValid(expire_date);
-
-    const objectToSign = {
-        private_info: data.private_info,
-        transaction: data.transaction,
-        data_dt: data.data_dt
+    const dataToSign = {
+        private_info,
+        transaction,
+        data_dt
     };
     if (expire_date) {
-        objectToSign.expire_date = data.expire_date;
+        dataToSign.expire_date = expire_date;
     }
-    return this.signObject(objectToSign, private_key);
+    return this.signObject(dataToSign, privateKey);
 };
 
 /**
@@ -77,29 +76,29 @@ exports.signCallBack = (callback_url, privateKey) => {
 };
 
 /**
- * @param {{transfer_id:string, permission_status:REJECT | ACCEPT, private_key:string, expire_date?:number}} data
+ * @param {{transfer_id:string, permission_status:REJECT | ACCEPT, expire_date?:number}} data
+ * @param {string} privateKey
  * @return {{transfer_id:string, permission_status: REJECT | ACCEPT, signature: string, expire_date?:number}}
  */
-exports.signPermission = (data) => {
+exports.signPermission = (data, privateKey) => {
     const {
         transfer_id,
         permission_status,
-        private_key,
         expire_date
     } = data;
     if (typeof transfer_id !== "string") throw new Error(`transfer_id should be string, got ${typeof transfer_id}`);
     if (typeof permission_status !== "string") throw new Error(`permission_status should be string, got ${typeof permission_status}`);
-    if (typeof private_key !== "string") throw new Error(`private_key should be string, got ${typeof private_key}`);
+    if (typeof privateKey !== "string") throw new Error(`privateKey should be string, got ${typeof privateKey}`);
     checkExpireDateValid(expire_date);
+    const dataToSign = {
+        transfer_id,
+        permission_status
 
-    const objectToSign = {
-        transfer_id: data.transfer_id,
-        permission_status: data.permission_status
     };
     if (expire_date) {
-        objectToSign.expire_date = data.expire_date;
+        dataToSign.expire_date = expire_date;
     }
-    return this.signObject(objectToSign, private_key);
+    return this.signObject(dataToSign, privateKey);
 };
 
 /**
