@@ -1,7 +1,14 @@
-const { checkExpireDateValid } = require('../src/api/check');
+const {
+  checkExpireDateValid,
+  checkPermissionStatus,
+  checkRejectDataValid
+} = require('../src/api/check');
+const { ACCEPTED, REJECTED } = require('../src/config')
 
 jest.mock('../src/api/check', () => ({
-  checkExpireDateValid: jest.fn()
+  checkExpireDateValid: jest.fn(),
+  checkPermissionStatus: jest.fn(),
+  checkRejectDataValid: jest.fn()
 }));
 
 describe('test crypto', () => {
@@ -327,7 +334,7 @@ describe('test crypto', () => {
       }
     });
 
-    it('should checkExpireDateValid and signObject be called with correct parameters if signPermissionRequest was called', () => {
+    it('should checkExpireDateValid be called with correct parameters if signPermissionRequest was called', () => {
       const privateKey = "123";
       const data = {
         private_info: "private_info",
@@ -344,6 +351,37 @@ describe('test crypto', () => {
       signPermissionRequest(data, privateKey);
       expect(checkExpireDateValid).toBeCalledWith(undefined);
       expect(checkExpireDateValid.mock.calls.length).toBe(1);
+
+      data.expire_date = 123;
+      signPermissionRequest(data, privateKey);
+      expect(checkExpireDateValid).toBeCalledWith(123);
+      expect(checkExpireDateValid.mock.calls.length).toBe(2);
+
+      try {
+        checkExpireDateValid.mockImplementationOnce(() => {
+          throw new Error('error from checkExpireDateValid');
+        });
+        signPermissionRequest(data, privateKey);
+      } catch (error) {
+        expect(error).toEqual(new Error(`error from checkExpireDateValid`))
+      }
+    });
+
+    it('should signObject be called with correct parameters if signPermissionRequest was called', () => {
+      const privateKey = "123";
+      const data = {
+        private_info: "private_info",
+        data_dt: "123",
+        transaction: {
+          beneficiary_addrs: [123],
+          originator_addrs: [123],
+          originator_vasp_code: "123",
+          beneficiary_vasp_code: "123",
+          transaction_currency: "123",
+          amount: 123
+        }
+      };
+      signPermissionRequest(data, privateKey);
       expect(crypto.signObject.mock.calls.length).toBe(1);
       expect(crypto.signObject.mock.calls[0][0]).toEqual(
         {
@@ -356,8 +394,6 @@ describe('test crypto', () => {
 
       data.expire_date = 123;
       signPermissionRequest(data, privateKey);
-      expect(checkExpireDateValid).toBeCalledWith(123);
-      expect(checkExpireDateValid.mock.calls.length).toBe(2);
       expect(crypto.signObject.mock.calls.length).toBe(2);
       expect(crypto.signObject.mock.calls[1][0]).toEqual(
         {
@@ -421,8 +457,10 @@ describe('test crypto', () => {
 
     const { signPermission } = crypto;
     beforeEach(() => {
-      checkExpireDateValid.mockClear();
-      crypto.signObject.mockClear();
+      checkExpireDateValid.mockReset();
+      checkPermissionStatus.mockReset();
+      checkRejectDataValid.mockReset();
+      crypto.signObject.mockReset();
     });
 
     it('should throw error if transfer_id is not string', () => {
@@ -469,7 +507,7 @@ describe('test crypto', () => {
         signPermission(
           {
             transfer_id: "123",
-            permission_status: "ACCEPT",
+            permission_status: ACCEPTED,
           },
           123
         );
@@ -480,22 +518,105 @@ describe('test crypto', () => {
       try {
         signPermission({
           transfer_id: "123",
-          permission_status: "ACCEPT"
+          permission_status: ACCEPTED
         });
       } catch (error) {
         expect(error).toEqual(new Error(`privateKey should be string, got undefined`))
       }
     });
 
-    it('should checkExpireDateValid and signObject be called once if signPermission was called', () => {
+    it('should checkPermissionStatus be called with correct parameters if signPermission was called', () => {
       const privateKey = "123";
       const data = {
         transfer_id: "123",
-        permission_status: "ACCEPT",
+        permission_status: ACCEPTED,
       };
+
+      signPermission(data, privateKey);
+      expect(checkPermissionStatus).toBeCalledWith(ACCEPTED);
+      expect(checkPermissionStatus.mock.calls.length).toBe(1);
+
+      data.permission_status = REJECTED;
+      signPermission(data, privateKey);
+      expect(checkPermissionStatus).toBeCalledWith(REJECTED);
+      expect(checkPermissionStatus.mock.calls.length).toBe(2);
+
+      try {
+        checkPermissionStatus.mockImplementationOnce(() => {
+          throw new Error('error from checkPermissionStatus');
+        });
+        signPermission(data, privateKey);
+      } catch (error) {
+        expect(error).toEqual(new Error(`error from checkPermissionStatus`))
+      }
+    });
+
+    it('should checkRejectDataValid be called with correct parameters if signPermission was called', () => {
+      const privateKey = "123";
+      const data = {
+        transfer_id: "123",
+        permission_status: REJECTED,
+        reject_code: "456",
+        reject_message: "789"
+      };
+
+      signPermission(data, privateKey);
+      expect(checkRejectDataValid.mock.calls.length).toBe(1);
+      expect(checkRejectDataValid.mock.calls[0][0]).toBe(data.permission_status);
+      expect(checkRejectDataValid.mock.calls[0][1]).toBe(data.reject_code);
+      expect(checkRejectDataValid.mock.calls[0][2]).toBe(data.reject_message);
+
+      data.reject_code = "555";
+      data.reject_message = "666";
+      signPermission(data, privateKey);
+      expect(checkRejectDataValid.mock.calls.length).toBe(2);
+      expect(checkRejectDataValid.mock.calls[1][0]).toBe(data.permission_status);
+      expect(checkRejectDataValid.mock.calls[1][1]).toBe(data.reject_code);
+      expect(checkRejectDataValid.mock.calls[1][2]).toBe(data.reject_message);
+
+      try {
+        checkRejectDataValid.mockImplementationOnce(() => {
+          throw new Error('error from checkRejectDataValid');
+        });
+        signPermission(data, privateKey);
+      } catch (error) {
+        expect(error).toEqual(new Error(`error from checkRejectDataValid`))
+      }
+    });
+
+    it('should checkExpireDateValid be called with correct parameters if signPermission was called', () => {
+      const privateKey = "123";
+      const data = {
+        transfer_id: "123",
+        permission_status: ACCEPTED,
+      };
+
       signPermission(data, privateKey);
       expect(checkExpireDateValid).toBeCalledWith(undefined);
       expect(checkExpireDateValid.mock.calls.length).toBe(1);
+
+      data.expire_date = 123;
+      signPermission(data, privateKey);
+      expect(checkExpireDateValid).toBeCalledWith(123);
+      expect(checkExpireDateValid.mock.calls.length).toBe(2);
+
+      try {
+        checkExpireDateValid.mockImplementationOnce(() => {
+          throw new Error('error from checkExpireDateValid');
+        });
+        signPermission(data, privateKey);
+      } catch (error) {
+        expect(error).toEqual(new Error(`error from checkExpireDateValid`))
+      }
+    });
+
+    it('should signObject be called with correct parameters if signPermission was called', () => {
+      const privateKey = "123";
+      const data = {
+        transfer_id: "123",
+        permission_status: ACCEPTED,
+      };
+      signPermission(data, privateKey);
       expect(crypto.signObject.mock.calls.length).toBe(1);
       expect(crypto.signObject.mock.calls[0][0]).toEqual(
         {
@@ -507,8 +628,6 @@ describe('test crypto', () => {
 
       data.expire_date = 123;
       signPermission(data, privateKey);
-      expect(checkExpireDateValid).toBeCalledWith(123);
-      expect(checkExpireDateValid.mock.calls.length).toBe(2);
       expect(crypto.signObject.mock.calls.length).toBe(2);
       expect(crypto.signObject.mock.calls[1][0]).toEqual(
         {
@@ -531,7 +650,9 @@ describe('test crypto', () => {
       const privateKey = "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b";
       const data = {
         transfer_id: "123",
-        permission_status: "ACCEPT"
+        permission_status: ACCEPTED,
+        reject_code: "456",
+        reject_message: "transfer_id is not valid"
       };
 
       const signature = signPermission(data, privateKey);
@@ -539,10 +660,9 @@ describe('test crypto', () => {
         {
           transfer_id: data.transfer_id,
           permission_status: data.permission_status,
-          signature: "a0f0e3a8c474494efa30cbbae7a104eb78ef3471dcae97d82df128b0d9c706813cae7a06c3b00cfddf95ef5bb2521c2410257f02e5d2af81087d17c39e4b5393"
+          signature: "cc8643e0e18695f015d19b0ceb5859e281fc9043f18655a58670fb12108be7b044e308d523b41d20230197b659e583b80d61a0c112c14c80be7be8b89efa4e5d"
         }
       )
-
 
       data.expire_date = 123;
       const signature1 = signPermission(data, privateKey);
@@ -551,9 +671,23 @@ describe('test crypto', () => {
           transfer_id: data.transfer_id,
           permission_status: data.permission_status,
           expire_date: data.expire_date,
-          signature: "e4c0282be79e424b96c7433b6c823bbbc99f4439b64e714d22e115696be6b69d79c93664718aa0a3596a042b076e469e803a07c30457bb3103d9f13b55352aaa"
+          signature: "6b0af70a6ea3cb3d363e16852ae5124b58f2c4cdf398af9dc8043952ed4407e215f3a5caee84cd768236b0edd841cee77f5da1cb932080eec0767aa7c86cd461"
         }
       )
+
+      data.permission_status = REJECTED;
+      const signature2 = signPermission(data, privateKey);
+      expect(signature2).toEqual(
+        {
+          transfer_id: data.transfer_id,
+          permission_status: data.permission_status,
+          expire_date: data.expire_date,
+          reject_code: data.reject_code,
+          reject_message: data.reject_message,
+          signature: "d2160e0c8ba4931dac49a937581965c26a4ca34abf25b645f706b522f7187be04b03c0c3da732b0c692b6c911f94194e8ab918ae789de8677bd78f34fae37df5"
+        }
+      )
+
     });
   });
 });

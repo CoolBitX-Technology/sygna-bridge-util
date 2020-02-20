@@ -1,7 +1,7 @@
 const ecies = require('./ecies');
 const sygnaSign = require('./sign');
-const { SYGNA_BRIDGE_CENTRAL_PUBKEY } = require('../config');
-const { checkExpireDateValid } = require('../api/check')
+const { SYGNA_BRIDGE_CENTRAL_PUBKEY, REJECTED } = require('../config');
+const { checkExpireDateValid, checkPermissionStatus, checkRejectDataValid } = require('../api/check')
 
 /**
  * Encrypt private info object to hex string.
@@ -76,20 +76,24 @@ exports.signCallBack = (callback_url, privateKey) => {
 };
 
 /**
- * @param {{transfer_id:string, permission_status:REJECT | ACCEPT, expire_date?:number}} data
+ * @param {{transfer_id:string, permission_status:REJECTED | ACCEPTED, expire_date?:number, reject_code?:string, reject_message?:string}} data
  * @param {string} privateKey
- * @return {{transfer_id:string, permission_status: REJECT | ACCEPT, signature: string, expire_date?:number}}
+ * @return {{transfer_id:string, permission_status:REJECTED| ACCEPTED, signature: string, expire_date?:number, reject_code?:string, reject_message?:string}}}
  */
 exports.signPermission = (data, privateKey) => {
     const {
         transfer_id,
         permission_status,
-        expire_date
+        expire_date,
+        reject_code,
+        reject_message
     } = data;
     if (typeof transfer_id !== "string") throw new Error(`transfer_id should be string, got ${typeof transfer_id}`);
     if (typeof permission_status !== "string") throw new Error(`permission_status should be string, got ${typeof permission_status}`);
+    checkPermissionStatus(permission_status);
     if (typeof privateKey !== "string") throw new Error(`privateKey should be string, got ${typeof privateKey}`);
     checkExpireDateValid(expire_date);
+    checkRejectDataValid(permission_status, reject_code, reject_message);
     const dataToSign = {
         transfer_id,
         permission_status
@@ -97,6 +101,10 @@ exports.signPermission = (data, privateKey) => {
     };
     if (expire_date) {
         dataToSign.expire_date = expire_date;
+    }
+    if (permission_status === REJECTED) {
+        dataToSign.reject_code = reject_code;
+        dataToSign.reject_message = reject_message;
     }
     return this.signObject(dataToSign, privateKey);
 };

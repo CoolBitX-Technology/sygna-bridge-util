@@ -43,11 +43,13 @@ class API {
     /**
      * Notify Sygna Bridge that you have confirmed specific permission Request from other VASP.
      * Should be called by Beneficiary Server
-     * @param {{transfer_id:string, permission_status:string, expire_date?:number, signature:string}} permissionObj
+     * @param {{transfer_id:string, permission_status:string, expire_date?:number, reject_code?:string, reject_message?:string, signature:string}} permissionObj
      * @return {Promise}
      */
     async postPermission(permissionObj) {
         check.checkObjSigned(permissionObj);
+        check.checkPermissionStatus(permissionObj.permission_status);
+        check.checkRejectDataValid(permissionObj.permission_status, permissionObj.reject_code, permissionObj.reject_message);
         check.checkExpireDateValid(permissionObj.expire_date);
         const url = this.domain + 'api/v1/bridge/transaction/permission';
         return await this.postSB(url, permissionObj);
