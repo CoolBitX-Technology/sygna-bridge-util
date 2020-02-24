@@ -16,7 +16,7 @@
     },
     "expire_date": {
       "type": "number",
-      "exclusiveMinimum": 0
+      "minimum": 0
     },
     "reject_code": {
       "type": "string",
@@ -39,18 +39,11 @@
         "compliance_check_fail",
         "other"
       ]
-    },
-    "signature": {
-      "type": "string",
-      "minLength": 128,
-      "maxLength": 128,
-      "pattern": "^[0123456789A-Fa-f]+$"
     }
   },
   "required": [
     "transfer_id",
-    "permission_status",
-    "signature"
+    "permission_status"
   ],
   "additionalProperties": false
 }

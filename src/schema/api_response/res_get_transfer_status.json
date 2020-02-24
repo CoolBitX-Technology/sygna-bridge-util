@@ -1,0 +1,172 @@
+{
+  "type": "object",
+  "properties": {
+    "transferData": {
+      "type": "object",
+      "properties": {
+        "transfer_id": {
+          "type": "string",
+          "minLength": 64,
+          "maxLength": 64
+        },
+        "private_info": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "transaction": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "properties": {
+            "originator_vasp_code": {
+              "type": "string",
+              "minLength": 1
+            },
+            "originator_addrs": {
+              "type": "array",
+              "minItems": 1,
+              "items": [
+                {
+                  "type": "string",
+                  "minLength": 1
+                }
+              ]
+            },
+            "originator_addrs_extra": {
+              "type": "object",
+              "minProperties": 1
+            },
+            "beneficiary_vasp_code": {
+              "type": "string",
+              "minLength": 1
+            },
+            "beneficiary_addrs": {
+              "type": "array",
+              "minItems": 1,
+              "items": [
+                {
+                  "type": "string",
+                  "minLength": 1
+                }
+              ]
+            },
+            "beneficiary_addrs_extra": {
+              "type": "object",
+              "minProperties": 1
+            },
+            "transaction_currency": {
+              "type": "string",
+              "minLength": 1
+            },
+            "amount": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "originator_vasp_code",
+            "originator_addrs",
+            "beneficiary_vasp_code",
+            "beneficiary_addrs",
+            "transaction_currency",
+            "amount"
+          ],
+          "additionalProperties": false
+        },
+        "data_dt": {
+          "format": "date-time"
+        },
+        "permission_request_data_signature": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 128,
+          "maxLength": 128,
+          "pattern": "^[0123456789A-Fa-f]+$"
+        },
+        "permission_status": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "string",
+              "minLength": 1,
+              "enum": [
+                "ACCEPTED",
+                "REJECTED"
+              ]
+            }
+          ]
+        },
+        "permission_signature": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 128,
+          "maxLength": 128,
+          "pattern": "^[0123456789A-Fa-f]+$"
+        },
+        "txid": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "txid_signature": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 128,
+          "maxLength": 128,
+          "pattern": "^[0123456789A-Fa-f]+$"
+        },
+        "created_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "transfer_to_originator_time": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        }
+      },
+      "required": [
+        "transfer_id",
+        "private_info",
+        "transaction",
+        "permission_request_data_signature",
+        "permission_status",
+        "permission_signature",
+        "txid",
+        "txid_signature",
+        "created_at",
+        "transfer_to_originator_time"
+      ],
+      "additionalProperties": false
+    },
+    "signature": {
+      "type": "string",
+      "minLength": 128,
+      "maxLength": 128,
+      "pattern": "^[0123456789A-Fa-f]+$"
+    }
+  },
+  "required": [
+    "transferData",
+    "signature"
+  ],
+  "additionalProperties": false
+}

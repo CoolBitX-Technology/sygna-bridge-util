@@ -1,0 +1,14 @@
+{
+  "type": "object",
+  "properties": {
+    "transfer_id": {
+      "type": "string",
+      "minLength": 64,
+      "maxLength": 64
+    }
+  },
+  "required": [
+    "transfer_id"
+  ],
+  "additionalProperties": false
+}

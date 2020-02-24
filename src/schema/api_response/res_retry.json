@@ -1,0 +1,13 @@
+{
+  "type": "object",
+  "properties": {
+    "retryItems": {
+      "type": "number",
+      "minimum": 0
+    }
+  },
+  "required": [
+    "retryItems"
+  ],
+  "additionalProperties": false
+}

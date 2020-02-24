@@ -14,9 +14,15 @@
         "REJECTED"
       ]
     },
+    "signature": {
+      "type": "string",
+      "minLength": 128,
+      "maxLength": 128,
+      "pattern": "^[0123456789A-Fa-f]+$"
+    },
     "expire_date": {
       "type": "number",
-      "exclusiveMinimum": 0
+      "minimum": 0
     },
     "reject_code": {
       "type": "string",
@@ -43,7 +49,8 @@
   },
   "required": [
     "transfer_id",
-    "permission_status"
+    "permission_status",
+    "signature"
   ],
   "additionalProperties": false
 }

@@ -68,20 +68,13 @@
     },
     "expire_date": {
       "type": "number",
-      "exclusiveMinimum": 0
-    },
-    "signature": {
-      "type": "string",
-      "minLength": 128,
-      "maxLength": 128,
-      "pattern": "^[0123456789A-Fa-f]+$"
+      "minimum": 0
     }
   },
   "required": [
     "private_info",
     "transaction",
-    "data_dt",
-    "signature"
+    "data_dt"
   ],
   "additionalProperties": false
 }
