@@ -1,6 +1,10 @@
 const crypto = require('./src/crypto');
 const API = require('./src/api').API;
+const config = require('./src/config');
+const { validateSchema } = require('./src/utils');
 module.exports = {
     API,
-    crypto
+    crypto,
+    config,
+    validateSchema
 };
