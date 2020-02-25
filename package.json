@@ -1,6 +1,6 @@
 {
-  "name": "sygna-bridge-util",
-  "version": "1.5.2",
+  "name": "@sygna/bridge-util",
+  "version": "0.0.1-beta.1",
   "description": "JavaScript library to interact with Sygna Bridge Server.",
   "main": "index.js",
   "scripts": {
@@ -8,9 +8,9 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://gitlab.com/coolbitx/sygna/bridge/sygna-bridge-util"
+    "url": "https://github.com/CoolBitX-Technology/sygna-bridge-util"
   },
-  "author": "anton@coolbitx.com",
+  "author": "kunming@coolbitx.com",
   "license": "MIT",
   "dependencies": {
     "ajv": "^6.11.0",
