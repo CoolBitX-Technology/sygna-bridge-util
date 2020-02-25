@@ -1,7 +1,6 @@
 const ecies = require('./ecies');
 const sygnaSign = require('./sign');
 const { SYGNA_BRIDGE_CENTRAL_PUBKEY, REJECTED } = require('../config');
-const { checkExpireDateValid, checkPermissionStatus, checkRejectDataValid } = require('../api/check')
 const {
     validateTxIdSchema,
     validateCallbackSchema,

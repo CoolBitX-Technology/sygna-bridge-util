@@ -1,7 +1,12 @@
 const crypto = require('../crypto');
 const fetch = require('node-fetch');
-const check = require('./check');
 const { SYGNA_BRIDGE_CENTRAL_PUBKEY } = require('../config');
+const {
+    validateGetTransferStatusSchema,
+    validatePostPermissionSchema,
+    validatePostPermissionRequestSchema,
+    validatePostTxIdSchema
+} = require('../utils/validateSchema');
 
 class API {
     constructor(api_key, sygnaBridgeDomain) {
@@ -43,16 +48,16 @@ class API {
     /**
      * Notify Sygna Bridge that you have confirmed specific permission Request from other VASP.
      * Should be called by Beneficiary Server
-     * @param {{transfer_id:string, permission_status:string, expire_date?:number, reject_code?:string, reject_message?:string, signature:string}} permissionObj
+     * @param {{transfer_id:string, permission_status:string, expire_date?:number, reject_code?:string, reject_message?:string, signature:string}} data
      * @return {Promise}
      */
-    async postPermission(permissionObj) {
-        check.checkObjSigned(permissionObj);
-        check.checkPermissionStatus(permissionObj.permission_status);
-        check.checkRejectDataValid(permissionObj.permission_status, permissionObj.reject_code, permissionObj.reject_message);
-        check.checkExpireDateValid(permissionObj.expire_date);
+    async postPermission(data) {
+        const valid = validatePostPermissionSchema(data);
+        if (!valid[0]) {
+            throw valid[1];
+        }
         const url = this.domain + 'api/v1/bridge/transaction/permission';
-        return await this.postSB(url, permissionObj);
+        return await this.postSB(url, data);
     }
 
     /**
@@ -60,6 +65,10 @@ class API {
      * @param {string} transfer_id 
      */
     async getStatus(transfer_id) {
+        const valid = validateGetTransferStatusSchema({ transfer_id });
+        if (!valid[0]) {
+            throw valid[1];
+        }
         const url = this.domain + 'api/v1/bridge/transaction/status?transfer_id=' + transfer_id;
         const result = await this.getSB(url);
         return result;
@@ -67,16 +76,17 @@ class API {
 
     /** 
      * Should be called by Originator.
-     * @param {{private_info:string, transaction:{}, data_dat:string, expire_date?:number, signature:string}} requestData Private sender info encoded by crypto.sygnaEncodePrivateObj
-     * @param {{callback_url: string, signature:string}} callback callback Obj 
+     * @param {{ data : {private_info:string, transaction:{}, data_dat:string, expire_date?:number, signature:string}, callback : {callback_url: string, signature:string} }} data
+     * data : Private sender info encoded by crypto.sygnaEncodePrivateObj
      * @return {Promise<{transfer_id: string}>} transfer-id 
      */
-    async postPermissionRequest(requestData, callback) {
-        check.checkObjSigned(requestData);
-        check.checkExpireDateValid(requestData.expire_date);
-        check.checkObjSigned(callback);
+    async postPermissionRequest(data) {
+        const valid = validatePostPermissionRequestSchema(data);
+        if (!valid[0]) {
+            throw valid[1];
+        }
         const url = this.domain + 'api/v1/bridge/transaction/permission-request';
-        const params = { data: requestData, callback };
+        const params = { data: data.data, callback: data.callback };
         return await this.postSB(url, params);
     }
 
@@ -86,9 +96,10 @@ class API {
      * @return {Promise}
      */
     async postTransactionId(sendTxIdObj) {
-        check.checkObjSigned(sendTxIdObj);
-        if (typeof sendTxIdObj.transfer_id !== "string") throw new Error(`Obj.transfer_id should be string, got ${typeof sendTxIdObj.transfer_id}`);
-        if (typeof sendTxIdObj.txid !== "string") throw new Error(`Obj.txid should be string, got ${typeof sendTxIdObj.txid}`);
+        const valid = validatePostTxIdSchema(sendTxIdObj);
+        if (!valid[0]) {
+            throw valid[1];
+        }
         const url = this.domain + 'api/v1/bridge/transaction/txid';
         return await this.postSB(url, sendTxIdObj);
     }
