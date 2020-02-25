@@ -369,6 +369,5 @@ describe('test validate permission_request_schema', () => {
     data.expire_date = expire_date;
     const valid2 = validatePermissionRequestSchema(data, permission_request_schema);
     expect(valid2[0]).toBe(true);
-
   });
 });

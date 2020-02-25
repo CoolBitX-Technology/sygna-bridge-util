@@ -1,9 +1,11 @@
 const Ajv = require('ajv');
-const permission_schema = require('../schema/data/permission.json');
+const { validateExpireDate } = require('./validateExpireDate')
+const { genPermissionSchema } = require('../schema/data/permission');
 const permission_request_schema = require('../schema/data/permission_request.json');
 const callback_schema = require('../schema/data/callback.json');
+const txid_schema = require('../schema/data/txid.json');
 
-const post_permission_schema = require('../schema/api_input/post_permission.json');
+const { genPostPermissionSchema } = require('../schema/api_input/post_permission');
 const post_permission_request_schema = require('../schema/api_input/post_permission_request.json');
 const post_retry_schema = require('../schema/api_input/post_retry.json');
 const post_txid_schema = require('../schema/api_input/post_txid.json');
@@ -29,20 +31,40 @@ exports.validateCallbackSchema = (paramObj) => {
   return this.validateSchema(paramObj, callback_schema);
 }
 
+exports.validateTxIdSchema = (paramObj) => {
+  return this.validateSchema(paramObj, txid_schema);
+}
+
 exports.validatePermissionSchema = (paramObj) => {
-  return this.validateSchema(paramObj, permission_schema);
+  const valid = this.validateSchema(paramObj, genPermissionSchema(paramObj));
+  if (!valid[0]) {
+    return valid;
+  }
+  return validateExpireDate(paramObj.expire_date);
 }
 
 exports.validatePermissionRequestSchema = (paramObj) => {
-  return this.validateSchema(paramObj, permission_request_schema);
+  const valid = this.validateSchema(paramObj, permission_request_schema);
+  if (!valid[0]) {
+    return valid;
+  }
+  return validateExpireDate(paramObj.expire_date);
 }
 
 exports.validatePostPermissionSchema = (paramObj) => {
-  return this.validateSchema(paramObj, post_permission_schema);
+  const valid = this.validateSchema(paramObj, genPostPermissionSchema(paramObj));
+  if (!valid[0]) {
+    return valid;
+  }
+  return validateExpireDate(paramObj.expire_date);
 }
 
 exports.validatePostPermissionRequestSchema = (paramObj) => {
-  return this.validateSchema(paramObj, post_permission_request_schema);
+  const valid = this.validateSchema(paramObj, post_permission_request_schema);
+  if (!valid[0]) {
+    return valid;
+  }
+  return validateExpireDate(paramObj.expire_date);
 }
 
 exports.validatePostRetrySchema = (paramObj) => {

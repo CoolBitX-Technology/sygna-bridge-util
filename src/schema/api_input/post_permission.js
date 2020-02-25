@@ -1,4 +1,6 @@
-{
+const { REJECTED } = require('../../config');
+
+const schema = {
   "type": "object",
   "properties": {
     "transfer_id": {
@@ -13,6 +15,12 @@
         "ACCEPTED",
         "REJECTED"
       ]
+    },
+    "signature": {
+      "type": "string",
+      "minLength": 128,
+      "maxLength": 128,
+      "pattern": "^[0123456789A-Fa-f]+$"
     },
     "expire_date": {
       "type": "number",
@@ -43,7 +51,21 @@
   },
   "required": [
     "transfer_id",
-    "permission_status"
+    "permission_status",
+    "signature"
   ],
   "additionalProperties": false
+}
+
+exports.post_permission_schema = schema;
+exports.genPostPermissionSchema = (paramObj) => {
+  if (!paramObj || paramObj.permission_status !== REJECTED) {
+    return schema;
+  }
+  const clonedObjArray = [...schema.required];
+  clonedObjArray.push('reject_code', 'reject_message');
+  return {
+    ...schema,
+    required: clonedObjArray
+  };
 }

@@ -4,17 +4,10 @@
     "callback_url": {
       "type": "string",
       "format": "uri"
-    },
-    "signature": {
-      "type": "string",
-      "minLength": 128,
-      "maxLength": 128,
-      "pattern": "^[0123456789A-Fa-f]+$"
     }
   },
   "required": [
-    "callback_url",
-    "signature"
+    "callback_url"
   ],
   "additionalProperties": false
 }

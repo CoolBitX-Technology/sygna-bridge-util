@@ -2,6 +2,15 @@ const ecies = require('./ecies');
 const sygnaSign = require('./sign');
 const { SYGNA_BRIDGE_CENTRAL_PUBKEY, REJECTED } = require('../config');
 const { checkExpireDateValid, checkPermissionStatus, checkRejectDataValid } = require('../api/check')
+const {
+    validateTxIdSchema,
+    validateCallbackSchema,
+    validatePermissionSchema,
+    validatePermissionRequestSchema
+} = require('../utils/validateSchema');
+const {
+    validatePrivateKey
+} = require('../utils/validatePrivateKey')
 
 /**
  * Encrypt private info object to hex string.
@@ -32,6 +41,12 @@ exports.sygnaDecodePrivateObj = (privMsg, privateKey) => {
  * @return {{private_info: string, transaction:{}, data_dt:string, signature:string, expire_date?:number}}
  */
 exports.signPermissionRequest = (data, privateKey) => {
+    const valid = validatePermissionRequestSchema(data);
+    if (!valid[0]) {
+        throw valid[1];
+    }
+    validatePrivateKey(privateKey);
+
     const {
         private_info,
         transaction,
@@ -39,17 +54,6 @@ exports.signPermissionRequest = (data, privateKey) => {
         expire_date
     } = data;
 
-    if (typeof private_info !== "string") throw new Error(`private_info should be string, got ${typeof private_info}`);
-    if (typeof data_dt !== "string") throw new Error(`data_dt should be string, got ${typeof data_dt}`);
-    if (typeof privateKey !== "string") throw new Error(`privateKey should be string, got ${typeof privateKey}`);
-    if (typeof transaction !== "object") throw new Error(`transaction should be object, got ${typeof transaction}`);
-    if (!Array.isArray(transaction.beneficiary_addrs)) throw new Error(`transaction.beneficiary_addrs should be array, got ${typeof transaction.beneficiary_addrs}`);
-    if (!Array.isArray(transaction.originator_addrs)) throw new Error(`transaction.originator_addrs should be array, got ${typeof transaction.originator_addrs}`);
-    if (typeof transaction.originator_vasp_code !== "string") throw new Error(`transaction.originator_vasp_code should be string, got ${typeof transaction.originator_vasp_code}`);
-    if (typeof transaction.beneficiary_vasp_code !== "string") throw new Error(`transaction.beneficiary_vasp_code should be string, got ${typeof transaction.beneficiary_vasp_code}`);
-    if (typeof transaction.transaction_currency !== "string") throw new Error(`transaction.transaction_currency should be string, got ${typeof transaction.transaction_currency}`);
-    if (typeof transaction.amount !== "number") throw new Error(`transaction.amount should be number, got ${typeof transaction.amount}`);
-    checkExpireDateValid(expire_date);
     const dataToSign = {
         private_info,
         transaction,
@@ -62,17 +66,21 @@ exports.signPermissionRequest = (data, privateKey) => {
 };
 
 /**
- * @param {string} callback_url
+ * @param {{callback_url:string}} data
  * @param {string} privateKey
- * @return {{callback_url_string, signature: string}}
+ * @return {{callback_url, signature: string}}
  */
-exports.signCallBack = (callback_url, privateKey) => {
-    if (typeof callback_url !== "string") throw new Error(`callback_url should be string, got ${typeof callback_url}`);
-    if (typeof privateKey !== "string") throw new Error(`privateKey should be string, got ${typeof privateKey}`);
-    let data = {
-        callback_url,
+exports.signCallBack = (data, privateKey) => {
+    const valid = validateCallbackSchema(data);
+    if (!valid[0]) {
+        throw valid[1];
+    }
+    validatePrivateKey(privateKey);
+
+    const dataToSign = {
+        callback_url: data.callback_url,
     };
-    return this.signObject(data, privateKey);
+    return this.signObject(dataToSign, privateKey);
 };
 
 /**
@@ -81,6 +89,12 @@ exports.signCallBack = (callback_url, privateKey) => {
  * @return {{transfer_id:string, permission_status:REJECTED| ACCEPTED, signature: string, expire_date?:number, reject_code?:string, reject_message?:string}}}
  */
 exports.signPermission = (data, privateKey) => {
+    const valid = validatePermissionSchema(data);
+    if (!valid[0]) {
+        throw valid[1];
+    }
+    validatePrivateKey(privateKey);
+
     const {
         transfer_id,
         permission_status,
@@ -88,12 +102,7 @@ exports.signPermission = (data, privateKey) => {
         reject_code,
         reject_message
     } = data;
-    if (typeof transfer_id !== "string") throw new Error(`transfer_id should be string, got ${typeof transfer_id}`);
-    if (typeof permission_status !== "string") throw new Error(`permission_status should be string, got ${typeof permission_status}`);
-    checkPermissionStatus(permission_status);
-    if (typeof privateKey !== "string") throw new Error(`privateKey should be string, got ${typeof privateKey}`);
-    checkExpireDateValid(expire_date);
-    checkRejectDataValid(permission_status, reject_code, reject_message);
+
     const dataToSign = {
         transfer_id,
         permission_status
@@ -110,17 +119,19 @@ exports.signPermission = (data, privateKey) => {
 };
 
 /**
- * @param {string} transfer_id
- * @param {string} txid
+ * @param {{transfer_id:string, txid:string}} data
  * @param {string} privateKey
  * @return {{transfer_id:string, txid:string, signature:string}}
  */
-exports.signTxId = (transfer_id, txid, privateKey) => {
-    if (typeof transfer_id !== "string") throw new Error(`transfer_id should be string, got ${typeof transfer_id}`);
-    if (typeof txid !== "string") throw new Error(`txid should be string, got ${typeof txid}`);
-    if (typeof privateKey !== "string") throw new Error(`privateKey should be string, got ${typeof privateKey}`);
-    let data = { transfer_id, txid };
-    return this.signObject(data, privateKey);
+exports.signTxId = (data, privateKey) => {
+    const valid = validateTxIdSchema(data);
+    if (!valid[0]) {
+        throw valid[1];
+    }
+    validatePrivateKey(privateKey);
+
+    const dataToSign = { transfer_id: data.transfer_id, txid: data.txid };
+    return this.signObject(dataToSign, privateKey);
 };
 
 /**

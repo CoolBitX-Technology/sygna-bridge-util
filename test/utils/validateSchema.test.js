@@ -1,24 +1,49 @@
 const Ajv = require('ajv');
+const {
+  validateExpireDate,
+} = require('../../src/utils/validateExpireDate');
+const { genPermissionSchema } = require('../../src/schema/data/permission');
+const { genPostPermissionSchema } = require('../../src/schema/api_input/post_permission');
+
+const fakeValidatedExpireDateResult = 'validated expire_date';
+jest.mock('../../src/utils/validateExpireDate', () => ({
+  validateExpireDate: jest.fn().mockReturnValue('validated expire_date')
+}));
+
+jest.mock('../../src/schema/data/permission', () => ({
+  genPermissionSchema: jest.fn().mockImplementation((paramObj) => 'permission_schema')
+}));
+
+jest.mock('../../src/schema/api_input/post_permission', () => ({
+  genPostPermissionSchema: jest.fn().mockImplementation((paramObj) => 'post_permission_schema')
+}));
 
 describe('test validateSchema', () => {
   const fakeValidatedResult = 'validated';
   const fakeData = {
     "callback_url": "http://google.com",
-    "signature": "abc"
+    "signature": "abc",
+    "permission_status": "abc"
+  };
+  const fakeDataWithExpireDate = {
+    ...fakeData,
+    expire_date: 123
   };
 
   let validateSchemaModulbe;
   jest.isolateModules(() => {
-    validateSchemaModulbe = require('../src/utils/validateSchema');
+    validateSchemaModulbe = require('../../src/utils/validateSchema');
   });
   const validateSchema = validateSchemaModulbe.validateSchema = jest.fn().mockReturnValue(fakeValidatedResult);
 
   beforeEach(() => {
     validateSchema.mockClear();
+    validateExpireDate.mockClear();
+    genPermissionSchema.mockClear();
   });
 
   describe('test validateSchema', () => {
-    const validateSchemaModulbe = require('../src/utils/validateSchema');
+    const validateSchemaModulbe = require('../../src/utils/validateSchema');
     const { validateSchema } = validateSchemaModulbe;
     const restoreValidate = Ajv.prototype.validate;
     const restoreErrors = Ajv.prototype.errors;
@@ -92,7 +117,7 @@ describe('test validateSchema', () => {
   });
 
   describe('test validateCallbackSchema', () => {
-    const schema = require('../src/schema/data/callback.json');
+    const schema = require('../../src/schema/data/callback.json');
     const { validateCallbackSchema } = validateSchemaModulbe;
     it('should validateSchema be called with correct parameters if validateCallbackSchema is called', () => {
       const valid = validateCallbackSchema(fakeData);
@@ -103,11 +128,11 @@ describe('test validateSchema', () => {
     });
   });
 
-  describe('test validatePermissionSchema', () => {
-    const schema = require('../src/schema/data/permission.json');
-    const { validatePermissionSchema } = validateSchemaModulbe;
-    it('should validateSchema be called with correct parameters if validatePermissionSchema is called', () => {
-      const valid = validatePermissionSchema(fakeData);
+  describe('test validateTxIdSchema', () => {
+    const schema = require('../../src/schema/data/txid.json');
+    const { validateTxIdSchema } = validateSchemaModulbe;
+    it('should validateSchema be called with correct parameters if validateTxIdSchema is called', () => {
+      const valid = validateTxIdSchema(fakeData);
       expect(validateSchema.mock.calls.length).toEqual(1);
       expect(validateSchema.mock.calls[0][0]).toEqual(fakeData);
       expect(validateSchema.mock.calls[0][1]).toEqual(schema);
@@ -115,44 +140,104 @@ describe('test validateSchema', () => {
     });
   });
 
+  describe('test validatePermissionSchema', () => {
+    const { validatePermissionSchema } = validateSchemaModulbe;
+    it('should validateSchema,validateExpireDate and genPermissionSchema be called with correct parameters if validatePermissionSchema is called', () => {
+      const valid = validatePermissionSchema(fakeData);
+      expect(genPermissionSchema.mock.calls.length).toEqual(1);
+      expect(genPermissionSchema.mock.calls[0][0]).toEqual(fakeData);
+      expect(validateSchema.mock.calls.length).toEqual(1);
+      expect(validateSchema.mock.calls[0][0]).toEqual(fakeData);
+      expect(validateSchema.mock.calls[0][1]).toEqual('permission_schema');
+      expect(validateExpireDate.mock.calls.length).toEqual(1);
+      expect(validateExpireDate.mock.calls[0][0]).toEqual(undefined);
+      expect(valid).toEqual(fakeValidatedExpireDateResult);
+
+      const valid1 = validatePermissionSchema(fakeDataWithExpireDate);
+      expect(genPermissionSchema.mock.calls.length).toEqual(2);
+      expect(genPermissionSchema.mock.calls[1][0]).toEqual(fakeDataWithExpireDate);
+      expect(validateSchema.mock.calls.length).toEqual(2);
+      expect(validateSchema.mock.calls[1][0]).toEqual(fakeDataWithExpireDate);
+      expect(validateSchema.mock.calls[1][1]).toEqual('permission_schema');
+      expect(validateExpireDate.mock.calls.length).toEqual(2);
+      expect(validateExpireDate.mock.calls[1][0]).toEqual(fakeDataWithExpireDate.expire_date);
+      expect(valid1).toEqual(fakeValidatedExpireDateResult);
+    });
+
+  });
+
   describe('test validatePermissionRequestSchema', () => {
-    const schema = require('../src/schema/data/permission_request.json');
+    const schema = require('../../src/schema/data/permission_request.json');
     const { validatePermissionRequestSchema } = validateSchemaModulbe;
-    it('should validateSchema be called with correct parameters if validatePermissionRequestSchema is called', () => {
+    it('should validateSchema and validateExpireDate be called with correct parameters if validatePermissionRequestSchema is called', () => {
       const valid = validatePermissionRequestSchema(fakeData);
       expect(validateSchema.mock.calls.length).toEqual(1);
       expect(validateSchema.mock.calls[0][0]).toEqual(fakeData);
       expect(validateSchema.mock.calls[0][1]).toEqual(schema);
-      expect(valid).toEqual(fakeValidatedResult);
+      expect(validateExpireDate.mock.calls.length).toEqual(1);
+      expect(validateExpireDate.mock.calls[0][0]).toEqual(undefined);
+      expect(valid).toEqual(fakeValidatedExpireDateResult);
+
+      const valid1 = validatePermissionRequestSchema(fakeDataWithExpireDate);
+      expect(validateSchema.mock.calls.length).toEqual(2);
+      expect(validateSchema.mock.calls[1][0]).toEqual(fakeDataWithExpireDate);
+      expect(validateSchema.mock.calls[1][1]).toEqual(schema);
+      expect(validateExpireDate.mock.calls.length).toEqual(2);
+      expect(validateExpireDate.mock.calls[1][0]).toEqual(fakeDataWithExpireDate.expire_date);
+      expect(valid1).toEqual(fakeValidatedExpireDateResult);
     });
   });
 
   describe('test validatePostPermissionSchema', () => {
-    const schema = require('../src/schema/api_input/post_permission.json');
+    const { genPostPermissionSchema } = require('../../src/schema/api_input/post_permission');
     const { validatePostPermissionSchema } = validateSchemaModulbe;
-    it('should validateSchema be called with correct parameters if validatePostPermissionSchema is called', () => {
+    it('should validateSchema,validateExpireDate and genPostPermissionSchema be called with correct parameters if validatePostPermissionSchema is called', () => {
       const valid = validatePostPermissionSchema(fakeData);
+      expect(genPostPermissionSchema.mock.calls.length).toEqual(1);
+      expect(genPostPermissionSchema.mock.calls[0][0]).toEqual(fakeData);
       expect(validateSchema.mock.calls.length).toEqual(1);
       expect(validateSchema.mock.calls[0][0]).toEqual(fakeData);
-      expect(validateSchema.mock.calls[0][1]).toEqual(schema);
-      expect(valid).toEqual(fakeValidatedResult);
+      expect(validateSchema.mock.calls[0][1]).toEqual('post_permission_schema');
+      expect(validateExpireDate.mock.calls.length).toEqual(1);
+      expect(validateExpireDate.mock.calls[0][0]).toEqual(undefined);
+      expect(valid).toEqual(fakeValidatedExpireDateResult);
+
+      const valid1 = validatePostPermissionSchema(fakeDataWithExpireDate);
+      expect(genPostPermissionSchema.mock.calls.length).toEqual(2);
+      expect(genPostPermissionSchema.mock.calls[1][0]).toEqual(fakeDataWithExpireDate);
+      expect(validateSchema.mock.calls.length).toEqual(2);
+      expect(validateSchema.mock.calls[1][0]).toEqual(fakeDataWithExpireDate);
+      expect(validateSchema.mock.calls[1][1]).toEqual('post_permission_schema');
+      expect(validateExpireDate.mock.calls.length).toEqual(2);
+      expect(validateExpireDate.mock.calls[1][0]).toEqual(fakeDataWithExpireDate.expire_date);
+      expect(valid1).toEqual(fakeValidatedExpireDateResult);
     });
   });
 
   describe('test validatePostPermissionRequestSchema', () => {
-    const schema = require('../src/schema/api_input/post_permission_request.json');
+    const schema = require('../../src/schema/api_input/post_permission_request.json');
     const { validatePostPermissionRequestSchema } = validateSchemaModulbe;
-    it('should validateSchema be called with correct parameters if validatePostPermissionRequestSchema is called', () => {
+    it('should validateSchema and validateExpireDate be called with correct parameters if validatePostPermissionRequestSchema is called', () => {
       const valid = validatePostPermissionRequestSchema(fakeData);
       expect(validateSchema.mock.calls.length).toEqual(1);
       expect(validateSchema.mock.calls[0][0]).toEqual(fakeData);
       expect(validateSchema.mock.calls[0][1]).toEqual(schema);
-      expect(valid).toEqual(fakeValidatedResult);
+      expect(validateExpireDate.mock.calls.length).toEqual(1);
+      expect(validateExpireDate.mock.calls[0][0]).toEqual(undefined);
+      expect(valid).toEqual(fakeValidatedExpireDateResult);
+
+      const valid1 = validatePostPermissionRequestSchema(fakeDataWithExpireDate);
+      expect(validateSchema.mock.calls.length).toEqual(2);
+      expect(validateSchema.mock.calls[1][0]).toEqual(fakeDataWithExpireDate);
+      expect(validateSchema.mock.calls[1][1]).toEqual(schema);
+      expect(validateExpireDate.mock.calls.length).toEqual(2);
+      expect(validateExpireDate.mock.calls[1][0]).toEqual(fakeDataWithExpireDate.expire_date);
+      expect(valid1).toEqual(fakeValidatedExpireDateResult);
     });
   });
 
   describe('test validatePostRetrySchema', () => {
-    const schema = require('../src/schema/api_input/post_retry.json');
+    const schema = require('../../src/schema/api_input/post_retry.json');
     const { validatePostRetrySchema } = validateSchemaModulbe;
     it('should validateSchema be called with correct parameters if validatePostRetrySchema is called', () => {
       const valid = validatePostRetrySchema(fakeData);
@@ -164,7 +249,7 @@ describe('test validateSchema', () => {
   });
 
   describe('test validatePostTxIdSchema', () => {
-    const schema = require('../src/schema/api_input/post_txid.json');
+    const schema = require('../../src/schema/api_input/post_txid.json');
     const { validatePostTxIdSchema } = validateSchemaModulbe;
     it('should validateSchema be called with correct parameters if validatePostTxIdSchema is called', () => {
       const valid = validatePostTxIdSchema(fakeData);
@@ -176,7 +261,7 @@ describe('test validateSchema', () => {
   });
 
   describe('test validateGetTransferStatusSchema', () => {
-    const schema = require('../src/schema/api_input/get_transfer_status.json');
+    const schema = require('../../src/schema/api_input/get_transfer_status.json');
     const { validateGetTransferStatusSchema } = validateSchemaModulbe;
     it('should validateSchema be called with correct parameters if validateGetTransferStatusSchema is called', () => {
       const valid = validateGetTransferStatusSchema(fakeData);
@@ -188,7 +273,7 @@ describe('test validateSchema', () => {
   });
 
   describe('test validateResGetTransferStatusSchema', () => {
-    const schema = require('../src/schema/api_response/res_get_transfer_status.json');
+    const schema = require('../../src/schema/api_response/res_get_transfer_status.json');
     const { validateResGetTransferStatusSchema } = validateSchemaModulbe;
     it('should validateSchema be called with correct parameters if validateResGetTransferStatusSchema is called', () => {
       const valid = validateResGetTransferStatusSchema(fakeData);
@@ -200,7 +285,7 @@ describe('test validateSchema', () => {
   });
 
   describe('test validateResGetVaspSchema', () => {
-    const schema = require('../src/schema/api_response/res_get_vasp.json');
+    const schema = require('../../src/schema/api_response/res_get_vasp.json');
     const { validateResGetVaspSchema } = validateSchemaModulbe;
     it('should validateSchema be called with correct parameters if validateResGetVaspSchema is called', () => {
       const valid = validateResGetVaspSchema(fakeData);
@@ -212,7 +297,7 @@ describe('test validateSchema', () => {
   });
 
   describe('test validateResOkSchema', () => {
-    const schema = require('../src/schema/api_response/res_ok.json');
+    const schema = require('../../src/schema/api_response/res_ok.json');
     const { validateResOkSchema } = validateSchemaModulbe;
     it('should validateSchema be called with correct parameters if validateResOkSchema is called', () => {
       const valid = validateResOkSchema(fakeData);
@@ -224,7 +309,7 @@ describe('test validateSchema', () => {
   });
 
   describe('test validateResPostPermissionRequestSchema', () => {
-    const schema = require('../src/schema/api_response/res_post_permission_request.json');
+    const schema = require('../../src/schema/api_response/res_post_permission_request.json');
     const { validateResPostPermissionRequestSchema } = validateSchemaModulbe;
     it('should validateSchema be called with correct parameters if validateResPostPermissionRequestSchema is called', () => {
       const valid = validateResPostPermissionRequestSchema(fakeData);
@@ -236,7 +321,7 @@ describe('test validateSchema', () => {
   });
 
   describe('test validateResRetrySchema', () => {
-    const schema = require('../src/schema/api_response/res_retry.json');
+    const schema = require('../../src/schema/api_response/res_retry.json');
     const { validateResRetrySchema } = validateSchemaModulbe;
     it('should validateSchema be called with correct parameters if validateResRetrySchema is called', () => {
       const valid = validateResRetrySchema(fakeData);
