@@ -141,6 +141,32 @@
             "null"
           ],
           "minLength": 1
+        },
+        "expire_date": {
+          "type": "number",
+          "minimum": 0
+        },
+        "reject_code": {
+          "type": "string",
+          "minLength": 1,
+          "enum": [
+            "BVRC001",
+            "BVRC002",
+            "BVRC003",
+            "BVRC004",
+            "BVRC999"
+          ]
+        },
+        "reject_message": {
+          "type": "string",
+          "minLength": 1,
+          "enum": [
+            "unsupported_currency",
+            "service_downtime",
+            "exceed_trading_volume",
+            "compliance_check_fail",
+            "other"
+          ]
         }
       },
       "required": [
