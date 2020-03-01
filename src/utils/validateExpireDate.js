@@ -18,10 +18,8 @@ function validateExpireDate(expire_date) {
     ];
   }
 
-  const date = new Date(expire_date);
   const today = new Date();
-
-  const valid = ((date.getTime() - today.getTime()) >= EXPIRE_DATE_MIN_OFFSET);
+  const valid = ((expire_date - today.getTime()) >= EXPIRE_DATE_MIN_OFFSET);
   if (!valid) {
     return [
       false, [
