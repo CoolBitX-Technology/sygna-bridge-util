@@ -1,11 +1,12 @@
-const { ACCEPTED, REJECTED } = require('../src/config')
+const { ACCEPTED, REJECTED, SYGNA_BRIDGE_CENTRAL_PUBKEY } = require('../src/config');
+const crypto = require('../src/crypto');
+const fetch = require('node-fetch');
 const {
   validatePostPermissionRequestSchema,
   validatePostPermissionSchema,
   validateGetTransferStatusSchema,
   validatePostTxIdSchema
 } = require('../src/utils/validateSchema');
-
 
 jest.mock('../src/utils/validateSchema', () => ({
   validatePostPermissionRequestSchema: jest.fn().mockReturnValue([true]),
@@ -14,20 +15,249 @@ jest.mock('../src/utils/validateSchema', () => ({
   validatePostTxIdSchema: jest.fn().mockReturnValue([true])
 }));
 
+jest.mock('node-fetch');
+fetch.mockImplementation(() => {
+  return {
+    json: async () => 'fetch success'
+  }
+});
+
+jest.mock('../src/crypto', () => ({
+  verifyObject: jest.fn().mockReturnValue(true)
+}));
 
 describe('test api', () => {
   const apiModule = require('../src/api');
   const domain = "http://google.com/";
   const api_key = "1234567890";
+
+  beforeEach(() => {
+    fetch.mockClear();
+    crypto.verifyObject.mockReset();
+    crypto.verifyObject.mockReturnValue(true);
+  });
+
+  describe('test getSB', () => {
+    const instance = new apiModule.API(api_key, domain);
+
+    it('should fetch be called with correct parameters if getSB is called', async () => {
+      const headers = { api_key };
+      const url = "http://google.com/"
+      const response = await instance.getSB(url);
+      expect(fetch.mock.calls[0][0]).toBe(url);
+      expect(fetch.mock.calls[0][1]).toEqual({ headers });
+      expect(fetch.mock.calls.length).toBe(1);
+      expect(response).toBe('fetch success');
+    });
+
+  });
+
+  describe('test postSB', () => {
+    const instance = new apiModule.API(api_key, domain);
+
+    it('should fetch be called with correct parameters if postSB is called', async () => {
+      const headers = {
+        "Content-Type": "application/json",
+        api_key
+      };
+      //await fetch(url, { method: 'POST', body: JSON.stringify(json), headers: headers });
+      const url = "http://google.com/"
+      const body = {
+        "key": "value"
+      }
+      const response = await instance.postSB(url, body);
+      expect(fetch.mock.calls[0][0]).toBe(url);
+      expect(fetch.mock.calls[0][1]).toEqual(
+        {
+          method: 'POST',
+          body: JSON.stringify(body),
+          headers: headers
+        }
+      );
+      expect(fetch.mock.calls.length).toBe(1);
+      expect(response).toBe('fetch success');
+    });
+
+  });
+
+  describe('test getVASPList', () => {
+    const instance = new apiModule.API(api_key, domain);
+    instance.getSB = jest.fn();
+
+    const fakeResponse = {
+      vasp_data: [
+        {
+          'vasp_code': 'AAAAAAAA798',
+          'vasp_name': 'AAAA',
+          'is_sb_need_static': false,
+          'vasp_pubkey': '123456'
+        },
+        {
+          'vasp_code': 'ABCDKRZZ111',
+          'vasp_name': 'ASDFGHJKL111111',
+          'is_sb_need_static': true,
+          'vasp_pubkey': '22222222222222222222222'
+        }
+      ]
+    };
+
+    beforeEach(() => {
+      instance.getSB.mockReset();
+      instance.getSB.mockImplementation(() => {
+        return Promise.resolve(fakeResponse);
+      })
+    });
+
+    it('should getSB be called with correct parameters if getVASPList is called', async () => {
+      const response = await instance.getVASPList(false);
+      expect(instance.getSB.mock.calls[0][0]).toBe(`${domain}api/v1/bridge/vasp`);
+      expect(instance.getSB.mock.calls.length).toBe(1);
+      expect(response).toEqual(fakeResponse.vasp_data);
+    });
+
+    it('should throw exception if api response is not valid', async () => {
+      instance.getSB.mockImplementation(() => {
+        return Promise.resolve({
+          message: 'test exception'
+        })
+      })
+      try {
+        const response = await instance.getVASPList(false);
+        fail('not throw error');
+      } catch (error) {
+        expect(error.message).toBe('Request VASPs failed: test exception');
+      }
+    });
+
+    it('should verifyObject be called with correct parameters if validate is true', async () => {
+      const response = await instance.getVASPList(true);
+      expect(crypto.verifyObject.mock.calls[0][0]).toEqual(fakeResponse);
+      expect(crypto.verifyObject.mock.calls[0][1]).toBe(SYGNA_BRIDGE_CENTRAL_PUBKEY);
+      expect(crypto.verifyObject.mock.calls.length).toBe(1);
+      expect(response).toEqual(fakeResponse.vasp_data);
+    });
+
+    it('should throw exception if verifyObject failed', async () => {
+      crypto.verifyObject.mockReturnValue(false);
+      try {
+        const response = await instance.getVASPList(true);
+        fail('not throw error');
+      } catch (error) {
+        expect(error.message).toBe('get VASP info error: invalid signature.');
+      }
+    });
+
+    it('should return response if verifyObject success', async () => {
+      try {
+        const response = await instance.getVASPList(true);
+        expect(crypto.verifyObject.mock.calls[0][0]).toEqual(fakeResponse);
+        expect(crypto.verifyObject.mock.calls[0][1]).toBe(SYGNA_BRIDGE_CENTRAL_PUBKEY);
+        expect(crypto.verifyObject.mock.calls.length).toBe(1);
+        expect(response).toEqual(fakeResponse.vasp_data);
+      } catch (error) {
+        fail('unexpected error');
+      }
+    });
+
+  });
+
+  describe('test getVASPPublicKey', () => {
+    const vasp_code = 'ABCDKRZZ111';
+    const fakeVaspList = [
+      {
+        'vasp_code': 'AAAAAAAA798',
+        'vasp_name': 'AAAA',
+        'is_sb_need_static': false,
+        'vasp_pubkey': '123456'
+      },
+      {
+        'vasp_code': 'ABCDKRZZ111',
+        'vasp_name': 'ASDFGHJKL111111',
+        'is_sb_need_static': true,
+        'vasp_pubkey': '22222222222222222222222'
+      }
+    ]
+    const instance = new apiModule.API(api_key, domain);
+    instance.getVASPList = jest.fn();
+
+    beforeEach(() => {
+      instance.getVASPList.mockReset();
+      instance.getVASPList.mockImplementation(() => {
+        return Promise.resolve(fakeVaspList)
+      })
+    });
+
+    it('should getVASPList be called with correct parameters if getVASPPublicKey is called', async () => {
+      await instance.getVASPPublicKey(vasp_code);
+      expect(instance.getVASPList.mock.calls[0][0]).toBe(true);
+      expect(instance.getVASPList.mock.calls.length).toBe(1);
+
+      await instance.getVASPPublicKey(vasp_code, false);
+      expect(instance.getVASPList.mock.calls[1][0]).toBe(false);
+      expect(instance.getVASPList.mock.calls.length).toBe(2);
+
+      await instance.getVASPPublicKey(vasp_code, true);
+      expect(instance.getVASPList.mock.calls[2][0]).toBe(true);
+      expect(instance.getVASPList.mock.calls.length).toBe(3);
+    });
+
+    it('should throw exception if getVASPList failed', async () => {
+      instance.getVASPList.mockImplementation(() => {
+        throw new Error('getVASPList failed')
+      })
+      try {
+        await instance.getVASPPublicKey(vasp_code);
+        fail('not throw error');
+      } catch (error) {
+        expect(error.message).toBe('getVASPList failed');
+      }
+    });
+
+    it('should throw exception if vasp not exists in api response', async () => {
+      try {
+        await instance.getVASPPublicKey('ABCDE');
+        fail('not throw error');
+      } catch (error) {
+        expect(error.message).toBe('Invalid vasp_code');
+      }
+    });
+
+
+    it('should return response if vasp exists in api response', async () => {
+      try {
+        const response = await instance.getVASPPublicKey(vasp_code);
+        expect(response).toBe(fakeVaspList[1].vasp_pubkey);
+      } catch (error) {
+        fail('unexpected error');
+      }
+    });
+
+  });
+
   describe('test postPermissionRequest', () => {
     const fakeData = {
-      data: {
-        signature: "359f313230b12e3bc00af64a5462026a4a29ff1be2fadf1c03012c7aec96f10ded5c37a27d38906345f2066ee3e6c94b323b5dec0f396333d7e116b8d81e8fc7",
-        expire_date: 123
+      "data": {
+        "private_info": "12345",
+        "transaction": {
+          "originator_vasp_code": "ABCDE",
+          "originator_addrs": [
+            "1234567890"
+          ],
+          "originator_addrs_extra": { "DT": "001" },
+          "beneficiary_vasp_code": "XYZ12",
+          "beneficiary_addrs": [
+            "0987654321"
+          ],
+          "beneficiary_addrs_extra": { "DT": "002" },
+          "transaction_currency": "0x80000000",
+          "amount": 1
+        },
+        "data_dt": "2019-07-29T06:29:00.123Z",
+        "signature": "12345"
       },
-      callback: {
-        callback_url: 'http://google.com/',
-        signature: "359f313230b12e3bc00af64a5462026a4a29ff1be2fadf1c03012c7aec96f10ded5c37a27d38906345f2066ee3e6c94b323b5dec0f396333d7e116b8d81e8fc7"
+      "callback": {
+        "callback_url": "http://google.com",
+        "signature": "12345"
       }
     }
 
@@ -88,9 +318,11 @@ describe('test api', () => {
 
   describe('test postPermission', () => {
     const fakeData = {
-      transfer_id: '6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b',
-      permission_status: ACCEPTED,
-      expire_date: 2529024749000
+      "transfer_id": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "permission_status": "REJECTED",
+      "reject_code": "BVRC001",
+      "reject_message": "unsupported_currency",
+      "signature": "12345"
     }
 
     const instance = new apiModule.API(api_key, domain);
