@@ -64,7 +64,7 @@ exports.validatePostPermissionRequestSchema = (paramObj) => {
   if (!valid[0]) {
     return valid;
   }
-  return validateExpireDate(paramObj.expire_date);
+  return validateExpireDate(paramObj.data.expire_date);
 }
 
 exports.validatePostRetrySchema = (paramObj) => {

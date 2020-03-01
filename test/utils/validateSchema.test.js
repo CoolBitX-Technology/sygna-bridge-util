@@ -25,10 +25,6 @@ describe('test validateSchema', () => {
     "signature": "abc",
     "permission_status": "abc"
   };
-  const fakeDataWithExpireDate = {
-    ...fakeData,
-    expire_date: 123
-  };
 
   let validateSchemaModulbe;
   jest.isolateModules(() => {
@@ -142,6 +138,16 @@ describe('test validateSchema', () => {
 
   describe('test validatePermissionSchema', () => {
     const { validatePermissionSchema } = validateSchemaModulbe;
+    const fakeData = {
+      "transfer_id": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "permission_status": "REJECTED",
+      "reject_code": "BVRC001",
+      "reject_message": "unsupported_currency"
+    }
+    const fakeDataWithExpireDate = {
+      ...fakeData
+    }
+    fakeDataWithExpireDate.expire_date = 1582255065000;
     it('should validateSchema,validateExpireDate and genPermissionSchema be called with correct parameters if validatePermissionSchema is called', () => {
       const valid = validatePermissionSchema(fakeData);
       expect(genPermissionSchema.mock.calls.length).toEqual(1);
@@ -169,6 +175,28 @@ describe('test validateSchema', () => {
   describe('test validatePermissionRequestSchema', () => {
     const schema = require('../../src/schema/data/permission_request.json');
     const { validatePermissionRequestSchema } = validateSchemaModulbe;
+    const fakeData = {
+      "private_info": "12345",
+      "transaction": {
+        "originator_vasp_code": "ABCDE",
+        "originator_addrs": [
+          "1234567890"
+        ],
+        "originator_addrs_extra": { "DT": "001" },
+        "beneficiary_vasp_code": "XYZ01",
+        "beneficiary_addrs": [
+          "0987654321"
+        ],
+        "beneficiary_addrs_extra": { "DT": "002" },
+        "transaction_currency": "0x80000000",
+        "amount": 1
+      },
+      "data_dt": "2019-07-29T06:29:00.123Z"
+    }
+    const fakeDataWithExpireDate = {
+      ...fakeData
+    }
+    fakeDataWithExpireDate.expire_date = 1582255065000;
     it('should validateSchema and validateExpireDate be called with correct parameters if validatePermissionRequestSchema is called', () => {
       const valid = validatePermissionRequestSchema(fakeData);
       expect(validateSchema.mock.calls.length).toEqual(1);
@@ -191,6 +219,17 @@ describe('test validateSchema', () => {
   describe('test validatePostPermissionSchema', () => {
     const { genPostPermissionSchema } = require('../../src/schema/api_input/post_permission');
     const { validatePostPermissionSchema } = validateSchemaModulbe;
+    const fakeData = {
+      "transfer_id": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
+      "permission_status": "REJECTED",
+      "reject_code": "BVRC001",
+      "reject_message": "unsupported_currency",
+      "signature": "12345"
+    }
+    const fakeDataWithExpireDate = {
+      ...fakeData
+    }
+    fakeDataWithExpireDate.expire_date = 1582255065000;
     it('should validateSchema,validateExpireDate and genPostPermissionSchema be called with correct parameters if validatePostPermissionSchema is called', () => {
       const valid = validatePostPermissionSchema(fakeData);
       expect(genPostPermissionSchema.mock.calls.length).toEqual(1);
@@ -217,6 +256,38 @@ describe('test validateSchema', () => {
   describe('test validatePostPermissionRequestSchema', () => {
     const schema = require('../../src/schema/api_input/post_permission_request.json');
     const { validatePostPermissionRequestSchema } = validateSchemaModulbe;
+    const fakeData = {
+      "data": {
+        "private_info": "12345",
+        "transaction": {
+          "originator_vasp_code": "ABCDE",
+          "originator_addrs": [
+            "1234567890"
+          ],
+          "originator_addrs_extra": { "DT": "001" },
+          "beneficiary_vasp_code": "XYZ12",
+          "beneficiary_addrs": [
+            "0987654321"
+          ],
+          "beneficiary_addrs_extra": { "DT": "002" },
+          "transaction_currency": "0x80000000",
+          "amount": 1
+        },
+        "data_dt": "2019-07-29T06:29:00.123Z",
+        "signature": "12345"
+      },
+      "callback": {
+        "callback_url": "http://google.com",
+        "signature": "12345"
+      }
+    }
+    const fakeDataWithExpireDate = {
+      ...fakeData
+    }
+    fakeDataWithExpireDate.data = {
+      ...fakeData.data
+    }
+    fakeDataWithExpireDate.data.expire_date = 1582255065000;
     it('should validateSchema and validateExpireDate be called with correct parameters if validatePostPermissionRequestSchema is called', () => {
       const valid = validatePostPermissionRequestSchema(fakeData);
       expect(validateSchema.mock.calls.length).toEqual(1);
@@ -231,7 +302,7 @@ describe('test validateSchema', () => {
       expect(validateSchema.mock.calls[1][0]).toEqual(fakeDataWithExpireDate);
       expect(validateSchema.mock.calls[1][1]).toEqual(schema);
       expect(validateExpireDate.mock.calls.length).toEqual(2);
-      expect(validateExpireDate.mock.calls[1][0]).toEqual(fakeDataWithExpireDate.expire_date);
+      expect(validateExpireDate.mock.calls[1][0]).toEqual(fakeDataWithExpireDate.data.expire_date);
       expect(valid1).toEqual(fakeValidatedExpireDateResult);
     });
   });
