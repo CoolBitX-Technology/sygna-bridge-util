@@ -1,4 +1,4 @@
-const { REJECTED } = require('../../config');
+const { REJECTED, RejectCode } = require('../../config');
 
 const schema = {
   "type": "object",
@@ -39,14 +39,7 @@ const schema = {
     },
     "reject_message": {
       "type": "string",
-      "minLength": 1,
-      "enum": [
-        "unsupported_currency",
-        "service_downtime",
-        "exceed_trading_volume",
-        "compliance_check_fail",
-        "other"
-      ]
+      "minLength": 1
     }
   },
   "required": [
@@ -63,7 +56,10 @@ exports.genPostPermissionSchema = (paramObj) => {
     return schema;
   }
   const clonedObjArray = [...schema.required];
-  clonedObjArray.push('reject_code', 'reject_message');
+  clonedObjArray.push('reject_code');
+  if(paramObj.reject_code === RejectCode.BVRC999){
+    clonedObjArray.push('reject_message');
+  }
   return {
     ...schema,
     required: clonedObjArray
