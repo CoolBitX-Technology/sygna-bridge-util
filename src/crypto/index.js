@@ -112,7 +112,9 @@ exports.signPermission = (data, privateKey) => {
     }
     if (permission_status === REJECTED) {
         dataToSign.reject_code = reject_code;
-        dataToSign.reject_message = reject_message;
+        if (reject_message) {
+            dataToSign.reject_message = reject_message;
+        }
     }
     return this.signObject(dataToSign, privateKey);
 };
