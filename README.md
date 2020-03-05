@@ -1,6 +1,6 @@
 # JavaScript Sygna Bridge Util
 
-This is a Javascript library to help you build servers/servies within Sygna Bridge Ecosystem. For more detail information about Sygna Bridge, please go through the [Official Sygna Bridge API Document](https://coolbitx.gitlab.io/sygna/bridge/api/#sygna-bridge).
+This is a Javascript library to help you build servers/servies within Sygna Bridge Ecosystem. For more detail information, please see [Sygna Bridge](https://www.sygna.io/).
 
 ## Installation
 
@@ -72,7 +72,7 @@ valid = sygnaBridgeUtil.crypto.verifyObject(signed_obj, originator_pubKey);
 
 ```
 
-We provide different methods like `signPermissionRequest`, `signCallback()` to sign different objects(or parameters) we specified in our [api doc](https://coolbitx.gitlab.io/sygna/bridge/api/#custom-objects). You can also find more examples in the following section.
+We provide different methods like `signPermissionRequest`, `signCallback()` to sign different objects(or parameters) we specified in our api doc. You can also find more examples in the following section.
 
 ## API
 
@@ -170,4 +170,4 @@ const finalresult = await sygnaAPI.postPermission(permissionObj);
 
 ```
 
-If you're trying to implement the beneficiary server on your own, we strongly recommand you to take a look at our [Nodejs sample](https://github.com/CoolBitX-Technology/) to get a big picture of how it should behave in the ecosystem.
+If you're trying to implement the beneficiary server on your own, we strongly recommand you to take a look at our [Nodejs sample](https://github.com/CoolBitX-Technology/sygna-bridge-sample) to get a big picture of how it should behave in the ecosystem.
