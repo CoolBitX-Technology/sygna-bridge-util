@@ -7,7 +7,7 @@ This is a Javascript library to help you build servers/servies within Sygna Brid
 <a href="https://nodei.co/npm/sygna-bridge-util/"><img src="https://nodei.co/npm/sygna-bridge-util.png"></a>
 
 ```shell
-npm i sygna-bridge-util
+npm i @sygna/bridge-util
 ```
 
 ## Crypto
@@ -66,7 +66,7 @@ sygnaBridgeUtil.crypto.signObject(obj, originator_privKey);
 const valid = sygnaBridgeUtil.crypto.verifyObject(obj, originator_pubKey);
 
 // or you can use the method that's built for `transfer` request:
-let signed_obj = sygnaBridgeUtil.crypto.signPermissionRequest(private_info, transaction, data_dt, originator_privKey)
+let signed_obj = sygnaBridgeUtil.crypto.signPermissionRequest(obj, originator_privKey)
 
 valid = sygnaBridgeUtil.crypto.verifyObject(signed_obj, originator_pubKey);
 
@@ -121,19 +121,35 @@ const transaction = {
 };
 const data_dt = "2019-07-29T07:29:80Z"
 
-const transferObj = sygnaBridgeUtil.crypto.signPermissionRequest(private_info, transaction, data_dt, sender_privKey)
+const signPermissionRequestData = {
+    private_info,
+    transaction,
+    data_dt
+};
+const transferObj = sygnaBridgeUtil.crypto.signPermissionRequest(signPermissionRequestData, sender_privKey)
 
 const callback_url = "https://81f7d956.ngrok.io/api/v1/originator/transaction/premission";
-const callbackObj = sygnaBridgeUtil.crypto.signCallBack(callback_url, sender_privKey);
 
-const { transfer_id } = await sbAPI.postPermissionRequest(tansferObj, callbackObj)
+const signCallBackData = {
+    callback_url
+};
+const callbackObj = sygnaBridgeUtil.crypto.signCallBack(signCallBackData, sender_privKey);
+
+const postPermissionRequestData = {
+    data:transferObj,
+    callback:callbackObj
+}
+const { transfer_id } = await sbAPI.postPermissionRequest(postPermissionRequestData)
 
 // Boradcast your transaction to blockchain after got and api reponse at your api server.
 const txid = "1a0c9bef489a136f7e05671f7f7fada2b9d96ac9f44598e1bcaa4779ac564dcd";
 
 // Inform Sygna Bridge that a specific transfer is successfully broadcasted to the blockchain.
-
-let sendTxIdObj = sygnaBridgeUtil.crypto.signTxId(transfer_id, txid, sender_privKey);
+const signTxIdData = {
+    transfer_id,
+    txid
+}
+let sendTxIdObj = sygnaBridgeUtil.crypto.signTxId(signTxIdData, sender_privKey);
 let result = await sygnaAPI.postTransactionId(sendTxIdObj);
 
 ```
@@ -144,8 +160,12 @@ There is only one api for Beneficiary VASP to call, which is `postPermission`. A
 
 ```javascript
 
-const permission_status = "ACCEPT"; // or "REJECT"
-const permissionObj = sygnaBridgeUtil.crypto.signPermission(transfer_id, permission_status, beneficiary_privKey);
+const permission_status = "ACCEPTED"; // or "REJECTED"
+const signPermissionData = {
+    transfer_id,
+    permission_status
+}
+const permissionObj = sygnaBridgeUtil.crypto.signPermission(signPermissionData, beneficiary_privKey);
 const finalresult = await sygnaAPI.postPermission(permissionObj);
 
 ```
