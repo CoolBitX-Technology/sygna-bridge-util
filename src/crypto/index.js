@@ -13,12 +13,15 @@ const {
 
 /**
  * Encrypt private info object to hex string.
- * @param {object} data priv_info in object format.
+ * @param {object|string} data priv_info in object or string format.
  * @param {string} publicKey recipeint public key in hex string.
  * @return {string} ECIES encoded privMsg.
  */
 exports.sygnaEncodePrivateObj = (data, publicKey) => {
-    const msgString = JSON.stringify(data);
+    let msgString = data;
+    if (typeof data === 'object') {
+        msgString = JSON.stringify(data);
+    }
     const encoded = ecies.ECIESEncode(msgString, publicKey);
     return encoded;
 };
@@ -31,7 +34,11 @@ exports.sygnaEncodePrivateObj = (data, publicKey) => {
  */
 exports.sygnaDecodePrivateObj = (privMsg, privateKey) => {
     const decoded = ecies.ECIESDecode(privMsg, privateKey);
-    return JSON.parse(decoded);
+    try {
+        return JSON.parse(decoded);
+    } catch (error) {
+        return decoded;
+    }
 };
 
 /**
