@@ -5,8 +5,11 @@ const {
     validateGetTransferStatusSchema,
     validatePostPermissionSchema,
     validatePostPermissionRequestSchema,
-    validatePostTxIdSchema
-} = require('../utils/validateSchema');
+    validatePostTxIdSchema,
+    sortPostPermissionData,
+    sortPostPermissionRequestData,
+    sortPostTransactionIdData
+} = require('../utils');
 
 class API {
     constructor(api_key, sygnaBridgeDomain) {
@@ -57,7 +60,8 @@ class API {
             throw valid[1];
         }
         const url = this.domain + 'api/v1/bridge/transaction/permission';
-        return await this.postSB(url, data);
+        const sortedData = sortPostPermissionData(data);
+        return await this.postSB(url, sortedData);
     }
 
     /**
@@ -86,22 +90,23 @@ class API {
             throw valid[1];
         }
         const url = this.domain + 'api/v1/bridge/transaction/permission-request';
-        const params = { data: data.data, callback: data.callback };
-        return await this.postSB(url, params);
+        const sortedData = sortPostPermissionRequestData(data);
+        return await this.postSB(url, sortedData);
     }
 
     /**
      * Send broadcasted transaction id to Sygna Bridge for purpose of storage.
-     * @param {{transfer_id: string, txid:string, signature:string}} sendTxIdObj
+     * @param {{transfer_id: string, txid:string, signature:string}} data
      * @return {Promise}
      */
-    async postTransactionId(sendTxIdObj) {
-        const valid = validatePostTxIdSchema(sendTxIdObj);
+    async postTransactionId(data) {
+        const valid = validatePostTxIdSchema(data);
         if (!valid[0]) {
             throw valid[1];
         }
         const url = this.domain + 'api/v1/bridge/transaction/txid';
-        return await this.postSB(url, sendTxIdObj);
+        const sortedData = sortPostTransactionIdData(data);
+        return await this.postSB(url, sortedData);
     }
 
     /**

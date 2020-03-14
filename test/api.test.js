@@ -1,14 +1,23 @@
-const { ACCEPTED, REJECTED, SYGNA_BRIDGE_CENTRAL_PUBKEY } = require('../src/config');
+const {
+  ACCEPTED,
+  REJECTED,
+  SYGNA_BRIDGE_CENTRAL_PUBKEY,
+  RejectCode
+} = require('../src/config');
 const crypto = require('../src/crypto');
 const fetch = require('node-fetch');
 const {
   validatePostPermissionRequestSchema,
   validatePostPermissionSchema,
   validateGetTransferStatusSchema,
-  validatePostTxIdSchema
-} = require('../src/utils/validateSchema');
+  validatePostTxIdSchema,
+  sortPostPermissionData,
+  sortPostPermissionRequestData,
+  sortPostTransactionIdData
+} = require('../src/utils');
 
-jest.mock('../src/utils/validateSchema', () => ({
+jest.mock('../src/utils', () => ({
+  ...jest.requireActual('../src/utils'),
   validatePostPermissionRequestSchema: jest.fn().mockReturnValue([true]),
   validatePostPermissionSchema: jest.fn().mockReturnValue([true]),
   validateGetTransferStatusSchema: jest.fn().mockReturnValue([true]),
@@ -123,7 +132,7 @@ describe('test api', () => {
       })
       try {
         const response = await instance.getVASPList(false);
-        fail('not throw error');
+        fail('expected error was not occurred');
       } catch (error) {
         expect(error.message).toBe('Request VASPs failed: test exception');
       }
@@ -141,7 +150,7 @@ describe('test api', () => {
       crypto.verifyObject.mockReturnValue(false);
       try {
         const response = await instance.getVASPList(true);
-        fail('not throw error');
+        fail('expected error was not occurred');
       } catch (error) {
         expect(error.message).toBe('get VASP info error: invalid signature.');
       }
@@ -207,7 +216,7 @@ describe('test api', () => {
       })
       try {
         await instance.getVASPPublicKey(vasp_code);
-        fail('not throw error');
+        fail('expected error was not occurred');
       } catch (error) {
         expect(error.message).toBe('getVASPList failed');
       }
@@ -216,7 +225,7 @@ describe('test api', () => {
     it('should throw exception if vasp not exists in api response', async () => {
       try {
         await instance.getVASPPublicKey('ABCDE');
-        fail('not throw error');
+        fail('expected error was not occurred');
       } catch (error) {
         expect(error.message).toBe('Invalid vasp_code');
       }
@@ -236,28 +245,29 @@ describe('test api', () => {
 
   describe('test postPermissionRequest', () => {
     const fakeData = {
-      "data": {
-        "private_info": "12345",
-        "transaction": {
-          "originator_vasp_code": "ABCDE",
-          "originator_addrs": [
-            "1234567890"
+      data: {
+        expire_date: 123,
+        transaction: {
+          amount: 1,
+          transaction_currency: '0x80000000',
+          originator_addrs_extra: { 'DT': '001' },
+          originator_addrs: [
+            '16bUGjvunVp7LqygLHrTvHyvbvfeuRCWAh'
           ],
-          "originator_addrs_extra": { "DT": "001" },
-          "beneficiary_vasp_code": "XYZ12",
-          "beneficiary_addrs": [
-            "0987654321"
+          beneficiary_addrs_extra: { 'DT': '002' },
+          beneficiary_vasp_code: 'VASPTWTP2',
+          beneficiary_addrs: [
+            '3CHgkx946yyueucCMiJhyH2Vg5kBBvfSGH'
           ],
-          "beneficiary_addrs_extra": { "DT": "002" },
-          "transaction_currency": "0x80000000",
-          "amount": 1
+          originator_vasp_code: 'VASPTWTP1'
         },
-        "data_dt": "2019-07-29T06:29:00.123Z",
-        "signature": "12345"
+        private_info: '6b51d431df5d7f141cbececcf79edf3dd861c3b4069f0b11661a3eefacbba918',
+        signature: '1234567890',
+        data_dt: '2019-07-29T06:29:00.123Z'
       },
-      "callback": {
-        "callback_url": "http://google.com",
-        "signature": "12345"
+      callback: {
+        signature: '1234567890',
+        callback_url: 'https://google.com'
       }
     }
 
@@ -292,7 +302,7 @@ describe('test api', () => {
 
       try {
         await instance.postPermissionRequest(fakeData);
-        fail('not throw error');
+        fail('expected error was not occurred');
       } catch (error) {
         const { keyword, message } = error[0];
         expect(keyword).toEqual('test');
@@ -304,13 +314,11 @@ describe('test api', () => {
       validatePostPermissionRequestSchema.mockReturnValue([true]);
     });
 
-    it('should postSB be called with correct parameters if postPermissionRequest is called', async () => {
+    it('should postSB be called with sorted data if postPermissionRequest is called', async () => {
+      const sortedData = sortPostPermissionRequestData(fakeData);
       await instance.postPermissionRequest(fakeData);
       expect(instance.postSB.mock.calls[0][0]).toBe(`${domain}api/v1/bridge/transaction/permission-request`);
-      expect(instance.postSB.mock.calls[0][1]).toEqual({
-        data: fakeData.data,
-        callback: fakeData.callback
-      });
+      expect(JSON.stringify(instance.postSB.mock.calls[0][1])).toBe(JSON.stringify(sortedData));
       expect(instance.postSB.mock.calls.length).toBe(1);
     });
 
@@ -318,11 +326,12 @@ describe('test api', () => {
 
   describe('test postPermission', () => {
     const fakeData = {
-      "transfer_id": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b",
-      "permission_status": "REJECTED",
-      "reject_code": "BVRC001",
-      "reject_message": "unsupported_currency",
-      "signature": "12345"
+      reject_code: RejectCode.BVRC001,
+      transfer_id: '6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b',
+      signature: '1234567890',
+      expire_date: 123,
+      permission_status: REJECTED,
+      reject_message: 'test'
     }
 
     const instance = new apiModule.API(api_key, domain);
@@ -356,7 +365,7 @@ describe('test api', () => {
 
       try {
         await instance.postPermission(fakeData);
-        fail('not throw error');
+        fail('expected error was not occurred');
       } catch (error) {
         const { keyword, message } = error[0];
         expect(keyword).toEqual('test');
@@ -369,10 +378,11 @@ describe('test api', () => {
     });
 
     it('should postSB be called with correct parameters if postPermission is called', async () => {
+      const sortedData = sortPostPermissionData(fakeData);
       await instance.postPermission(fakeData);
 
       expect(instance.postSB.mock.calls[0][0]).toBe(`${domain}api/v1/bridge/transaction/permission`);
-      expect(instance.postSB.mock.calls[0][1]).toEqual(fakeData);
+      expect(JSON.stringify(instance.postSB.mock.calls[0][1])).toBe(JSON.stringify(sortedData));
       expect(instance.postSB.mock.calls.length).toBe(1);
 
     });
@@ -412,7 +422,7 @@ describe('test api', () => {
 
       try {
         await instance.getStatus(transfer_id);
-        fail('not throw error');
+        fail('expected error was not occurred');
       } catch (error) {
         const { keyword, message } = error[0];
         expect(keyword).toEqual('test');
@@ -438,8 +448,9 @@ describe('test api', () => {
     const transfer_id = '6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b'
     const txid = '9d5f8e21aa87dd5e787b766990f74cf3a961b4e439a56670b07569c846fe375d';
     const fakeData = {
-      transfer_id,
-      txid
+      txid,
+      signature: '1234567890',
+      transfer_id
     }
     const instance = new apiModule.API(api_key, domain);
     instance.postSB = jest.fn();
@@ -472,7 +483,7 @@ describe('test api', () => {
 
       try {
         await instance.postTransactionId(fakeData);
-        fail('not throw error');
+        fail('expected error was not occurred');
       } catch (error) {
         const { keyword, message } = error[0];
         expect(keyword).toEqual('test');
@@ -485,10 +496,11 @@ describe('test api', () => {
     });
 
     it('should postSB be called with correct parameters if postPermission is called', async () => {
+      const sortedData = sortPostTransactionIdData(fakeData);
       await instance.postTransactionId(fakeData);
 
       expect(instance.postSB.mock.calls[0][0]).toBe(`${domain}api/v1/bridge/transaction/txid`);
-      expect(instance.postSB.mock.calls[0][1]).toEqual(fakeData);
+      expect(JSON.stringify(instance.postSB.mock.calls[0][1])).toBe(JSON.stringify(sortedData));
       expect(instance.postSB.mock.calls.length).toBe(1);
 
     });
