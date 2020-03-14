@@ -1,32 +1,63 @@
 const {
+  FAKE_PRIVATE_KEY,
+  FAKE_PUBLIC_KEY,
+} = require('./fakeKeys');
+
+const {
   validatePermissionRequestSchema,
   validatePermissionSchema,
   validateCallbackSchema,
-  validateTxIdSchema
-} = require('../src/utils/validateSchema');
+  validateTxIdSchema,
+  validatePrivateKey,
+  sortPermissionRequestData,
+  sortPermissionData,
+  sortCallbackData,
+  sortTxIdData
+} = require('../src/utils');
 
 const {
-  validatePrivateKey
-} = require('../src/utils/validatePrivateKey')
+  ACCEPTED,
+  REJECTED,
+  RejectCode
+} = require('../src/config');
 
-const { ACCEPTED, REJECTED } = require('../src/config');
-
-jest.mock('../src/utils/validateSchema', () => ({
+jest.mock('../src/utils', () => ({
+  ...jest.requireActual('../src/utils'),
   validatePermissionRequestSchema: jest.fn().mockReturnValue([true]),
   validatePermissionSchema: jest.fn().mockReturnValue([true]),
   validateCallbackSchema: jest.fn().mockReturnValue([true]),
-  validateTxIdSchema: jest.fn().mockReturnValue([true])
-}));
-
-jest.mock('../src/utils/validatePrivateKey', () => ({
+  validateTxIdSchema: jest.fn().mockReturnValue([true]),
   validatePrivateKey: jest.fn()
 }));
-
 
 describe('test crypto', () => {
   let crypto;
   jest.isolateModules(() => {
     crypto = require('../src/crypto');
+  });
+
+  describe('test sygnaEncodePrivateObj and sygnaDecodePrivateObj', () => {
+    it('should decode encoded object to original object', () => {
+      const fakeData = {
+        'originator': {
+          'name': 'Antoine Griezmann',
+          'date_of_birth': '1991-03-21',
+        },
+        'beneficiary': {
+          'name': 'Leo Messi'
+        }
+      };
+      const encodedPrivateData = crypto.sygnaEncodePrivateObj(fakeData, FAKE_PUBLIC_KEY);
+      const decodedPrivateData = crypto.sygnaDecodePrivateObj(encodedPrivateData, FAKE_PRIVATE_KEY);
+      expect(decodedPrivateData).toEqual(fakeData);
+    });
+
+    it('should decode encoded string to original string', () => {
+      const fakeData = "qwer";
+      const encodedPrivateData = crypto.sygnaEncodePrivateObj(fakeData, FAKE_PUBLIC_KEY);
+      const decodedPrivateData = crypto.sygnaDecodePrivateObj(encodedPrivateData, FAKE_PRIVATE_KEY);
+      expect(decodedPrivateData).toEqual(fakeData);
+    });
   });
 
   describe('test signPermissionRequest', () => {
@@ -42,11 +73,20 @@ describe('test crypto', () => {
 
     it('should validatePermissionRequestSchema be called with correct parameters if signPermissionRequest is called', () => {
       const fakeData = {
-        data: {
-          private_info: 123
-        },
-        callback: {
-          callback_url: 'http://google.com'
+        data_dt: '2019-07-29T06:29:00.123Z',
+        private_info: '6b51d431df5d7f141cbececcf79edf3dd861c3b4069f0b11661a3eefacbba918',
+        signature: '1234567890',
+        transaction: {
+          transaction_currency: '0x80000000',
+          originator_addrs: [
+            '16bUGjvunVp7LqygLHrTvHyvbvfeuRCWAh'
+          ],
+          originator_vasp_code: 'VASPTWTP1',
+          beneficiary_addrs: [
+            '3CHgkx946yyueucCMiJhyH2Vg5kBBvfSGH'
+          ],
+          amount: 1,
+          beneficiary_vasp_code: 'VASPTWTP2'
         }
       }
       const fakeError = [
@@ -64,13 +104,13 @@ describe('test crypto', () => {
         .mockReturnValueOnce([true])
         .mockReturnValue([false, fakeError]);
 
-      signPermissionRequest(fakeData);
+      signPermissionRequest(fakeData, FAKE_PRIVATE_KEY);
       expect(validatePermissionRequestSchema.mock.calls.length).toBe(1);
       expect(validatePermissionRequestSchema.mock.calls[0][0]).toEqual(fakeData);
 
       try {
-        signPermissionRequest(fakeData);
-        fail('not throw error');
+        signPermissionRequest(fakeData, FAKE_PRIVATE_KEY);
+        fail('expected error was not occurred');
       } catch (error) {
         const { keyword, message } = error[0];
         expect(keyword).toEqual('test');
@@ -83,19 +123,37 @@ describe('test crypto', () => {
     });
 
     it('should validatePrivateKey be called with correct parameters if signPermissionRequest is called', () => {
-      signPermissionRequest({}, 123);
+      const fakeData = {
+        data_dt: '2019-07-29T06:29:00.123Z',
+        private_info: '6b51d431df5d7f141cbececcf79edf3dd861c3b4069f0b11661a3eefacbba918',
+        signature: '1234567890',
+        transaction: {
+          transaction_currency: '0x80000000',
+          originator_addrs: [
+            '16bUGjvunVp7LqygLHrTvHyvbvfeuRCWAh'
+          ],
+          originator_vasp_code: 'VASPTWTP1',
+          beneficiary_addrs: [
+            '3CHgkx946yyueucCMiJhyH2Vg5kBBvfSGH'
+          ],
+          amount: 1,
+          beneficiary_vasp_code: 'VASPTWTP2'
+        }
+      };
+
+      signPermissionRequest(fakeData, 123);
       expect(validatePrivateKey.mock.calls.length).toBe(1);
       expect(validatePrivateKey.mock.calls[0][0]).toEqual(123);
 
-      signPermissionRequest({}, 'abc');
+      signPermissionRequest(fakeData, 'abc');
       expect(validatePrivateKey.mock.calls.length).toBe(2);
       expect(validatePrivateKey.mock.calls[1][0]).toEqual('abc');
 
       validatePrivateKey.mockReset();
       validatePrivateKey.mockImplementation(() => { throw new Error('error from validatePrivateKey'); });
       try {
-        signPermissionRequest({}, 'def');
-        fail('not throw error');
+        signPermissionRequest(fakeData, 'def');
+        fail('expected error was not occurred');
       } catch (error) {
         const { message } = error;
         expect(message).toEqual('error from validatePrivateKey');
@@ -104,84 +162,106 @@ describe('test crypto', () => {
     });
 
     it('should signObject be called with correct parameters if signPermissionRequest is called', () => {
-      const privateKey = "123";
-      const data = {
-        private_info: "private_info",
+      const fakeData = {
+        data_dt: '2019-07-29T06:29:00.123Z',
+        private_info: '6b51d431df5d7f141cbececcf79edf3dd861c3b4069f0b11661a3eefacbba918',
+        signature: '1234567890',
         transaction: {
-          originator_addrs: ['123'],
-          originator_vasp_code: "123",
-          beneficiary_vasp_code: '123',
-          beneficiary_addrs: ['123'],
-          transaction_currency: '123',
-          amount: 1
-        },
-        data_dt: '2019-07-29T06:29:00.123Z'
+          transaction_currency: '0x80000000',
+          originator_addrs: [
+            '16bUGjvunVp7LqygLHrTvHyvbvfeuRCWAh'
+          ],
+          originator_vasp_code: 'VASPTWTP1',
+          beneficiary_addrs: [
+            '3CHgkx946yyueucCMiJhyH2Vg5kBBvfSGH'
+          ],
+          amount: 1,
+          beneficiary_vasp_code: 'VASPTWTP2'
+        }
       };
-      signPermissionRequest(data, privateKey);
+      signPermissionRequest(fakeData, FAKE_PRIVATE_KEY);
       expect(crypto.signObject.mock.calls.length).toBe(1);
-      expect(crypto.signObject.mock.calls[0][0]).toEqual(
-        {
-          private_info: data.private_info,
-          data_dt: data.data_dt,
-          transaction: data.transaction
-        }
-      );
-      expect(crypto.signObject.mock.calls[0][1]).toEqual(privateKey);
+      expect(JSON.stringify(crypto.signObject.mock.calls[0][0])).toBe(JSON.stringify(sortPermissionRequestData(fakeData)));
+      expect(crypto.signObject.mock.calls[0][1]).toEqual(FAKE_PRIVATE_KEY);
 
-      data.expire_date = 123;
-      signPermissionRequest(data, privateKey);
+      fakeData.expire_date = 123;
+      signPermissionRequest(fakeData, FAKE_PRIVATE_KEY);
       expect(crypto.signObject.mock.calls.length).toBe(2);
-      expect(crypto.signObject.mock.calls[1][0]).toEqual(
-        {
-          private_info: data.private_info,
-          data_dt: data.data_dt,
-          transaction: data.transaction,
-          expire_date: data.expire_date
-        }
-      );
-      expect(crypto.signObject.mock.calls[1][1]).toEqual(privateKey);
+      expect(JSON.stringify(crypto.signObject.mock.calls[1][0])).toBe(JSON.stringify(sortPermissionRequestData(fakeData)));
+      expect(crypto.signObject.mock.calls[1][1]).toEqual(FAKE_PRIVATE_KEY);
     });
   });
 
   describe('test signPermissionRequest signature', () => {
-    const { signPermissionRequest } = crypto;
+    const { signPermissionRequest, verifyObject } = crypto;
 
     it('should object which is return by signPermissionRequest be correct', () => {
-      const privateKey = "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b";
-      const data = {
-        private_info: "private_info",
+      const fakeData = {
+        data_dt: '2019-07-29T06:29:00.123Z',
+        private_info: '6b51d431df5d7f141cbececcf79edf3dd861c3b4069f0b11661a3eefacbba918',
         transaction: {
-          originator_addrs: ['123'],
-          originator_vasp_code: "123",
-          beneficiary_vasp_code: '123',
-          beneficiary_addrs: ['123'],
-          transaction_currency: '123',
-          amount: 1
-        },
-        data_dt: '2019-07-29T06:29:00.123Z'
-      }
-      const signature = signPermissionRequest(data, privateKey);
-      expect(signature).toEqual(
-        {
-          private_info: data.private_info,
-          transaction: data.transaction,
-          data_dt: data.data_dt,
-          signature: "711f036525311d42dd9e741bf5ed42a713c5615cebd3b6bda628cd8fd901505803644d0c2702f153ee495efffa7fdd743749d21fcc76284e95135f9ad7023775"
+          transaction_currency: '0x80000000',
+          originator_addrs: [
+            '16bUGjvunVp7LqygLHrTvHyvbvfeuRCWAh'
+          ],
+          originator_vasp_code: 'VASPTWTP1',
+          beneficiary_addrs: [
+            '3CHgkx946yyueucCMiJhyH2Vg5kBBvfSGH'
+          ],
+          amount: 1,
+          beneficiary_vasp_code: 'VASPTWTP2'
         }
-      )
+      };
+      const signature = signPermissionRequest(fakeData, FAKE_PRIVATE_KEY);
+      const sortedFakeData = sortPermissionRequestData(fakeData);
+      expect(JSON.stringify(signature)).toBe(JSON.stringify(
+        {
+          ...sortedFakeData,
+          signature: "c7b9c1edc35e17dc0a78858d68786e5bcb26bbc09d02a0e1747e7eeabdc59d4e79c6d1156359a06b1662084d782bd86f4bdc6cc5aa6696f20c5ea8e20fa328e8"
+        }
+      ));
 
-      data.expire_date = 2529024749000;
-      const signature1 = signPermissionRequest(data, privateKey);
-      expect(signature1).toEqual(
+      const isValid = verifyObject(signature, FAKE_PUBLIC_KEY);
+      expect(isValid).toBe(true);
+
+      fakeData.expire_date = 2529024749000;
+      const signature1 = signPermissionRequest(fakeData, FAKE_PRIVATE_KEY);
+      const sortedFakeData1 = sortPermissionRequestData(fakeData);
+      expect(JSON.stringify(signature1)).toBe(JSON.stringify(
         {
-          private_info: data.private_info,
-          transaction: data.transaction,
-          data_dt: data.data_dt,
-          expire_date: data.expire_date,
-          signature: "69b1955e6e68d01095fce2287d7591ee9d3988e346666471cece909eceab86f2161777915f998b3ea5c794ffd9069611187d13034d06c62d491dcefd6faae2d5"
+          ...sortedFakeData1,
+          signature: "2727bc6be48b780bfd4712c2f8bfa39bcc24e7e2aa48e8fbfa02789b8bac31443c8dc991731108bddabc52761dc9bf97cb5938838c3c28fae1c4fcd31e5a7c5c"
         }
-      )
+      ));
+      const isValid1 = verifyObject(signature1, FAKE_PUBLIC_KEY);
+      expect(isValid1).toBe(true);
+
+      fakeData.transaction.originator_addrs_extra = { 'DT': '001' };
+      const signature2 = signPermissionRequest(fakeData, FAKE_PRIVATE_KEY);
+      const sortedFakeData2 = sortPermissionRequestData(fakeData);
+      expect(JSON.stringify(signature2)).toBe(JSON.stringify(
+        {
+          ...sortedFakeData2,
+          signature: "c758a58cc6920a3179c45a467d5cd7e297ba725c0c6fafd391f15e7345de7592344f8fa6f9a7c5433dd4e43da08f4d27ad17b2664697218df9bf7bce18fcd841"
+        }
+      ));
+      const isValid2 = verifyObject(signature2, FAKE_PUBLIC_KEY);
+      expect(isValid2).toBe(true);
+
+      fakeData.transaction.beneficiary_addrs_extra = { 'DT': '002' };
+      const signature3 = signPermissionRequest(fakeData, FAKE_PRIVATE_KEY);
+      const sortedFakeData3 = sortPermissionRequestData(fakeData);
+      expect(JSON.stringify(signature3)).toBe(JSON.stringify(
+        {
+          ...sortedFakeData3,
+          signature: "0b647c4803731fb6aa58613f979d38e01e1f69d953a104a326941c1700e2b2d6450da8d26f7490c323ec340c0274996b38527649f3cc4ef4fbfd65af69afbe28"
+        }
+      ));
+      const isValid3 = verifyObject(signature3, FAKE_PUBLIC_KEY);
+      expect(isValid3).toBe(true);
+
     });
+
   });
 
   describe('test signPermission', () => {
@@ -200,8 +280,8 @@ describe('test crypto', () => {
 
     it('should validatePermissionSchema be called with correct parameters if signPermission is called', () => {
       const fakeData = {
-        transfer_id: '123',
-        permission_status: ACCEPTED
+        transfer_id,
+        permission_status
       }
       const fakeError = [
         {
@@ -218,13 +298,13 @@ describe('test crypto', () => {
         .mockReturnValueOnce([true])
         .mockReturnValue([false, fakeError]);
 
-      signPermission(fakeData);
+      signPermission(fakeData, FAKE_PRIVATE_KEY);
       expect(validatePermissionSchema.mock.calls.length).toBe(1);
       expect(validatePermissionSchema.mock.calls[0][0]).toEqual(fakeData);
 
       try {
-        signPermission(fakeData);
-        fail('not throw error');
+        signPermission(fakeData, FAKE_PRIVATE_KEY);
+        fail('expected error was not occurred');
       } catch (error) {
         const { keyword, message } = error[0];
         expect(keyword).toEqual('test');
@@ -237,19 +317,23 @@ describe('test crypto', () => {
     });
 
     it('should validatePrivateKey be called with correct parameters if signPermission is called', () => {
-      signPermission({}, 123);
+      const fakeData = {
+        transfer_id,
+        permission_status
+      }
+      signPermission(fakeData, 123);
       expect(validatePrivateKey.mock.calls.length).toBe(1);
       expect(validatePrivateKey.mock.calls[0][0]).toEqual(123);
 
-      signPermission({}, 'abc');
+      signPermission(fakeData, 'abc');
       expect(validatePrivateKey.mock.calls.length).toBe(2);
       expect(validatePrivateKey.mock.calls[1][0]).toEqual('abc');
 
       validatePrivateKey.mockReset();
       validatePrivateKey.mockImplementation(() => { throw new Error('error from validatePrivateKey'); });
       try {
-        signPermission({}, 'def');
-        fail('not throw error');
+        signPermission(fakeData, 'def');
+        fail('expected error was not occurred');
       } catch (error) {
         const { message } = error;
         expect(message).toEqual('error from validatePrivateKey');
@@ -258,81 +342,114 @@ describe('test crypto', () => {
     });
 
     it('should signObject be called with correct parameters if signPermission is called', () => {
-      const privateKey = "123";
-      const data = {
-        transfer_id,
+      const fakeData = {
         permission_status,
+        transfer_id
       };
-      signPermission(data, privateKey);
+      let sortedData = sortPermissionData(fakeData);
+      signPermission(fakeData, FAKE_PRIVATE_KEY);
       expect(crypto.signObject.mock.calls.length).toBe(1);
-      expect(crypto.signObject.mock.calls[0][0]).toEqual(
-        {
-          transfer_id: data.transfer_id,
-          permission_status: data.permission_status
-        }
-      );
-      expect(crypto.signObject.mock.calls[0][1]).toEqual(privateKey);
+      expect(JSON.stringify(crypto.signObject.mock.calls[0][0])).toBe(JSON.stringify(sortPermissionData(fakeData)));
+      expect(crypto.signObject.mock.calls[0][1]).toEqual(FAKE_PRIVATE_KEY);
 
-      data.expire_date = 123;
-      signPermission(data, privateKey);
+      fakeData.expire_date = 123;
+      sortedData = sortPermissionData(fakeData);
+      signPermission(fakeData, FAKE_PRIVATE_KEY);
       expect(crypto.signObject.mock.calls.length).toBe(2);
-      expect(crypto.signObject.mock.calls[1][0]).toEqual(
-        {
-          transfer_id: data.transfer_id,
-          permission_status: data.permission_status,
-          expire_date: data.expire_date
-        }
-      );
-      expect(crypto.signObject.mock.calls[1][1]).toEqual(privateKey);
+      expect(JSON.stringify(crypto.signObject.mock.calls[1][0])).toBe(JSON.stringify(sortPermissionData(fakeData)));
+      expect(crypto.signObject.mock.calls[1][1]).toEqual(FAKE_PRIVATE_KEY);
+
+      fakeData.permission_status = REJECTED;
+      fakeData.reject_code = RejectCode.BVRC001;
+      sortedData = sortPermissionData(fakeData);
+      signPermission(fakeData, FAKE_PRIVATE_KEY);
+      expect(crypto.signObject.mock.calls.length).toBe(3);
+      expect(JSON.stringify(crypto.signObject.mock.calls[2][0])).toBe(JSON.stringify(sortPermissionData(fakeData)));
+      expect(crypto.signObject.mock.calls[2][1]).toEqual(FAKE_PRIVATE_KEY);
+
+      fakeData.reject_message = 'test';
+      sortedData = sortPermissionData(fakeData);
+      signPermission(fakeData, FAKE_PRIVATE_KEY);
+      expect(crypto.signObject.mock.calls.length).toBe(4);
+      expect(JSON.stringify(crypto.signObject.mock.calls[3][0])).toBe(JSON.stringify(sortPermissionData(fakeData)));
+      expect(crypto.signObject.mock.calls[3][1]).toEqual(FAKE_PRIVATE_KEY);
+
     });
   });
 
   describe('test signPermission signature', () => {
     const transfer_id = '6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b';
     const permission_status = ACCEPTED;
-    const { signPermission } = crypto;
+    const { signPermission, verifyObject } = crypto;
 
     it('should object which is return by signPermission be correct', () => {
-      const privateKey = "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b";
-      const data = {
-        transfer_id,
+      const fakeData = {
         permission_status,
-        reject_code: "BVRC001",
-        reject_message: "unsupported_currency"
-      };
-
-      const signature = signPermission(data, privateKey);
-      expect(signature).toEqual(
+        transfer_id
+      }
+      const sortedData = sortPermissionData(fakeData);
+      const signature = signPermission(fakeData, FAKE_PRIVATE_KEY);
+      expect(JSON.stringify(signature)).toBe(JSON.stringify(
         {
-          transfer_id: data.transfer_id,
-          permission_status: data.permission_status,
-          signature: "634dc1ee1127a94235b3e581f883d6b9f96aefc1b6b800b3dca6fc50de46f58174ff75594f8e997de1dabf8092b39fe37cad3f943f4f25fe9633a02756d167f9"
+          ...sortedData,
+          signature: "8500fde0806c6f8c94db848c4096cbc7deee3ee659b6dce3cb3accea8391c81122b46245801669b3da200e4311e8ef4012587be183bc00bed372204899a57595"
         }
-      )
+      ));
+      const isValid = verifyObject(signature, FAKE_PUBLIC_KEY);
+      expect(isValid).toBe(true);
 
-      data.expire_date = 2529024749000;
-      const signature1 = signPermission(data, privateKey);
-      expect(signature1).toEqual(
+      fakeData.expire_date = 2529024749000;
+      const sortedData1 = sortPermissionData(fakeData);
+      const signature1 = signPermission(fakeData, FAKE_PRIVATE_KEY);
+      expect(JSON.stringify(signature1)).toBe(JSON.stringify(
         {
-          transfer_id: data.transfer_id,
-          permission_status: data.permission_status,
-          expire_date: data.expire_date,
-          signature: "1980c80d04863d04f483cae5be02f3a8feb15a568d3e42813dd1d40c5a4dd30c4b5019cc04882aab8068e4a4aa98397e7d40667884a6b70e599ebc2eedc73b55"
+          ...sortedData1,
+          signature: "8d4c251420af74105bd6ad270dc69e5bc763a850041dd26c2b7c7bade943ea892a9e9f06fb5e6c087a0013cbefd5c355fc04bac6d0e9ac25b60b3d3969f67be7"
         }
-      )
+      ));
+      const isValid1 = verifyObject(signature1, FAKE_PUBLIC_KEY);
+      expect(isValid1).toBe(true);
 
-      data.permission_status = REJECTED;
-      const signature2 = signPermission(data, privateKey);
-      expect(signature2).toEqual(
+      const fakeRejectedData = {
+        permission_status: REJECTED,
+        reject_code: RejectCode.BVRC001,
+        transfer_id
+      }
+      const sortedData2 = sortPermissionData(fakeRejectedData);
+      const signature2 = signPermission(fakeRejectedData, FAKE_PRIVATE_KEY);
+      expect(JSON.stringify(signature2)).toBe(JSON.stringify(
         {
-          transfer_id: data.transfer_id,
-          permission_status: data.permission_status,
-          expire_date: data.expire_date,
-          reject_code: data.reject_code,
-          reject_message: data.reject_message,
-          signature: "11f9baa9a939ec0420ab5c4a4dcde7c6b88d4f345fcf6809ec88ae5ae51d0e4405e8832ee653a817f45e60977a835b45c6b236f527cfb2917e701f3ed22ad38a"
+          ...sortedData2,
+          signature: "d0aa0ef942207bfc2f478b72a654286ac8f99125c16c9969bb95da32aa374d0f235830398c2d35795f31d21958a9c3ee5eb6fd2f732efe363d2fd029e46b9243"
         }
-      )
+      ));
+      const isValid2 = verifyObject(signature2, FAKE_PUBLIC_KEY);
+      expect(isValid2).toBe(true);
+
+      fakeRejectedData.reject_message = 'unsupported_currency';
+      const sortedData3 = sortPermissionData(fakeRejectedData);
+      const signature3 = signPermission(fakeRejectedData, FAKE_PRIVATE_KEY);
+      expect(JSON.stringify(signature3)).toBe(JSON.stringify(
+        {
+          ...sortedData3,
+          signature: "6ce0f3dff883983fbd29cd3e41a8c1e76a33d9765de7c77c89c43f5fe9a500a31fe03b3efcfb39de9b2f41d5b3502b3b75eb88f87798a09b18259005385ed2d8"
+        }
+      ));
+      const isValid3 = verifyObject(signature3, FAKE_PUBLIC_KEY);
+      expect(isValid3).toBe(true);
+
+      fakeRejectedData.expire_date = 2529024749000;
+      const sortedData4 = sortPermissionData(fakeRejectedData);
+      const signature4 = signPermission(fakeRejectedData, FAKE_PRIVATE_KEY);
+      expect(JSON.stringify(signature4)).toBe(JSON.stringify(
+        {
+          ...sortedData4,
+          signature: "f3ba132acb7d681b3b05ebb119d61fa86806b68cf1eab13cfe1db6a78314990e5de887932dcebe98798d3325fae7c48072b4229c391082c50ba45d8b3d64ddff"
+        }
+      ));
+      const isValid4 = verifyObject(signature4, FAKE_PUBLIC_KEY);
+      expect(isValid4).toBe(true);
+
     });
   });
 
@@ -368,13 +485,13 @@ describe('test crypto', () => {
         .mockReturnValueOnce([true])
         .mockReturnValue([false, fakeError]);
 
-      signCallBack(fakeData);
+      signCallBack(fakeData, FAKE_PRIVATE_KEY);
       expect(validateCallbackSchema.mock.calls.length).toBe(1);
       expect(validateCallbackSchema.mock.calls[0][0]).toEqual(fakeData);
 
       try {
-        signCallBack(fakeData);
-        fail('not throw error');
+        signCallBack(fakeData, FAKE_PRIVATE_KEY);
+        fail('expected error was not occurred');
       } catch (error) {
         const { keyword, message } = error[0];
         expect(keyword).toEqual('test');
@@ -387,19 +504,22 @@ describe('test crypto', () => {
     });
 
     it('should validatePrivateKey be called with correct parameters if signCallBack is called', () => {
-      signCallBack({}, 123);
+      const fakeData = {
+        callback_url
+      }
+      signCallBack(fakeData, 123);
       expect(validatePrivateKey.mock.calls.length).toBe(1);
       expect(validatePrivateKey.mock.calls[0][0]).toEqual(123);
 
-      signCallBack({}, 'abc');
+      signCallBack(fakeData, 'abc');
       expect(validatePrivateKey.mock.calls.length).toBe(2);
       expect(validatePrivateKey.mock.calls[1][0]).toEqual('abc');
 
       validatePrivateKey.mockReset();
       validatePrivateKey.mockImplementation(() => { throw new Error('error from validatePrivateKey'); });
       try {
-        signCallBack({}, 'def');
-        fail('not throw error');
+        signCallBack(fakeData, 'def');
+        fail('expected error was not occurred');
       } catch (error) {
         const { message } = error;
         expect(message).toEqual('error from validatePrivateKey');
@@ -408,45 +528,45 @@ describe('test crypto', () => {
     });
 
     it('should signObject be called with correct parameters if signCallBack is called', () => {
-      const privateKey = '123';
-      const data = {
+      const fakeData = {
         callback_url
       };
-      signCallBack(data, privateKey);
+      const sortedData = sortCallbackData(fakeData);
+      signCallBack(fakeData, FAKE_PRIVATE_KEY);
       expect(crypto.signObject.mock.calls.length).toBe(1);
-      expect(crypto.signObject.mock.calls[0][0]).toEqual(
-        {
-          callback_url: data.callback_url
-        }
-      );
-      expect(crypto.signObject.mock.calls[0][1]).toEqual(privateKey);
+      expect(JSON.stringify(crypto.signObject.mock.calls[0][0])).toBe(JSON.stringify(sortedData));
+      expect(crypto.signObject.mock.calls[0][1]).toEqual(FAKE_PRIVATE_KEY);
     });
   });
 
   describe('test signCallBack signature', () => {
     const callback_url = 'https://www.google.com.tw/';
     const callback_url1 = 'https://stackoverflow.com/';
-    const { signCallBack } = crypto;
+    const { signCallBack, verifyObject } = crypto;
     it('should object which is return by signPermission be correct', () => {
-      const privateKey = "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b";
-      const data = { callback_url };
-
-      const signature = signCallBack(data, privateKey);
-      expect(signature).toEqual(
+      const fakeData = { callback_url };
+      const sortedData = sortCallbackData(fakeData);
+      const signature = signCallBack(fakeData, FAKE_PRIVATE_KEY);
+      expect(JSON.stringify(signature)).toBe(JSON.stringify(
         {
-          callback_url: data.callback_url,
-          signature: "019b9fb037826e24cd58031b0e58e86b5048657db08d094b475fea6f114ad28220d644d17b07badee58139e6d9b70a136be363155c5cdde8c9b865f877209505"
+          ...sortedData,
+          signature: "70523f954126b49ba96abed9cf0a28d2093bb8a8c3f04961e0de644c64ba959520a483b178502946e24e5f9a2ba3269310a883699cf9f72f5d92af00cd8d69fa"
         }
-      )
+      ));
+      const isValid = verifyObject(signature, FAKE_PUBLIC_KEY);
+      expect(isValid).toBe(true);
 
-      data.callback_url = callback_url1;
-      const signature1 = signCallBack(data, privateKey);
-      expect(signature1).toEqual(
+      fakeData.callback_url = callback_url1;
+      const sortedData1 = sortCallbackData(fakeData);
+      const signature1 = signCallBack(fakeData, FAKE_PRIVATE_KEY);
+      expect(JSON.stringify(signature1)).toBe(JSON.stringify(
         {
-          callback_url: data.callback_url,
-          signature: "ecf9c1501db07a336efc34f54b556cd1a122d1ef4dec336ecbf3d8d1af029dad2f75a26b7cd29831412cdef30b9e4ea04cb1a2d36b551f3afdb5c6916dcd52c9"
+          ...sortedData1,
+          signature: "36a5df2a18af5663f9ddc78e9895b5008fdc9b62c5a1a97adcd62e9ed96064420b3891f62d25391906710321419d3f8dd57edb4bd15e8520f029a074a1f1265c"
         }
-      )
+      ));
+      const isValid1 = verifyObject(signature1, FAKE_PUBLIC_KEY);
+      expect(isValid1).toBe(true);
     });
   });
 
@@ -484,13 +604,13 @@ describe('test crypto', () => {
         .mockReturnValueOnce([true])
         .mockReturnValue([false, fakeError]);
 
-      signTxId(fakeData);
+      signTxId(fakeData, FAKE_PRIVATE_KEY);
       expect(validateTxIdSchema.mock.calls.length).toBe(1);
       expect(validateTxIdSchema.mock.calls[0][0]).toEqual(fakeData);
 
       try {
-        signTxId(fakeData);
-        fail('not throw error');
+        signTxId(fakeData, FAKE_PRIVATE_KEY);
+        fail('expected error was not occurred');
       } catch (error) {
         const { keyword, message } = error[0];
         expect(keyword).toEqual('test');
@@ -503,19 +623,23 @@ describe('test crypto', () => {
     });
 
     it('should validatePrivateKey be called with correct parameters if signTxId is called', () => {
-      signTxId({}, 123);
+      const fakeData = {
+        transfer_id,
+        txid
+      }
+      signTxId(fakeData, 123);
       expect(validatePrivateKey.mock.calls.length).toBe(1);
       expect(validatePrivateKey.mock.calls[0][0]).toEqual(123);
 
-      signTxId({}, 'abc');
+      signTxId(fakeData, 'abc');
       expect(validatePrivateKey.mock.calls.length).toBe(2);
       expect(validatePrivateKey.mock.calls[1][0]).toEqual('abc');
 
       validatePrivateKey.mockReset();
       validatePrivateKey.mockImplementation(() => { throw new Error('error from validatePrivateKey'); });
       try {
-        signTxId({}, 'def');
-        fail('not throw error');
+        signTxId(fakeData, 'def');
+        fail('expected error was not occurred');
       } catch (error) {
         const { message } = error;
         expect(message).toEqual('error from validatePrivateKey');
@@ -524,20 +648,15 @@ describe('test crypto', () => {
     });
 
     it('should signObject be called with correct parameters if signTxId is called', () => {
-      const privateKey = '123';
-      const data = {
-        transfer_id,
-        txid
+      const fakeData = {
+        txid,
+        transfer_id
       };
-      signTxId(data, privateKey);
+      const sortedData = sortTxIdData(fakeData);
+      signTxId(fakeData, FAKE_PRIVATE_KEY);
       expect(crypto.signObject.mock.calls.length).toBe(1);
-      expect(crypto.signObject.mock.calls[0][0]).toEqual(
-        {
-          transfer_id,
-          txid
-        }
-      );
-      expect(crypto.signObject.mock.calls[0][1]).toEqual(privateKey);
+      expect(JSON.stringify(crypto.signObject.mock.calls[0][0])).toBe(JSON.stringify(sortedData));
+      expect(crypto.signObject.mock.calls[0][1]).toEqual(FAKE_PRIVATE_KEY);
     });
   });
 
@@ -545,29 +664,32 @@ describe('test crypto', () => {
     const txid = '9d5f8e32aa87dd5e787b766912345cf3a961b4e439a56670b07569c846fe473d';
     const transfer_id = '6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b';
 
-    const { signTxId } = crypto;
+    const { signTxId, verifyObject } = crypto;
     it('should object which is return by signPermission be correct', () => {
-      const privateKey = "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b";
-      const data = { txid, transfer_id };
-
-      const signature = signTxId(data, privateKey);
-      expect(signature).toEqual(
+      const fakeData = { txid, transfer_id };
+      const sortedData = sortTxIdData(fakeData);
+      const signature = signTxId(fakeData, FAKE_PRIVATE_KEY);
+      expect(JSON.stringify(signature)).toBe(JSON.stringify(
         {
-          transfer_id: data.transfer_id,
-          txid: data.txid,
-          signature: "e3872164c17a35be953661b17d74b0a1aa5d94c899c6d66781635030bb2850ad285fd440d61a581fda1292c08b23537cd8891f985844514cdd1cdf1fd15a99f2"
+          ...sortedData,
+          signature: "637b90ee3cf2fcb97fa155f7d99228ac41134ac01803575242b496166eac11ab4eb4d132829a2fda83ed9ee3d8b90c5360f752d8969b929344c73141ff03d318"
         }
-      )
+      ));
+      const isValid = verifyObject(signature, FAKE_PUBLIC_KEY);
+      expect(isValid).toBe(true);
 
-      data.txid = '9d5f8e32aa87dd5e787b766912345cf3a961b4e439a56670b07569c846fe375d';
-      const signature1 = signTxId(data, privateKey);
-      expect(signature1).toEqual(
+      fakeData.txid = '9d5f8e32aa87dd5e787b766912345cf3a961b4e439a56670b07569c846fe375d';
+      const sortedData1 = sortTxIdData(fakeData);
+      const signature1 = signTxId(fakeData, FAKE_PRIVATE_KEY);
+      expect(JSON.stringify(signature1)).toBe(JSON.stringify(
         {
-          transfer_id: data.transfer_id,
-          txid: data.txid,
-          signature: "0859dd11bdacfbfdb7cfa6d05efb41e5e373a458f72ae0632a054b380788d3fb796688eed664bf8546b64b5e4f0247368dad2650201ca67542291279c3bf15eb"
+          ...sortedData1,
+          signature: "30326aab59c7cbd2a04fc957ff2d3baa91bf3e4279db35735e48321b8cf973bd52f2aa64f6304e38a4f2f4b87f6f4b81eec0aa2dea4f00b34e2beddc74e795f7"
         }
-      )
+      ));
+      const isValid1 = verifyObject(signature1, FAKE_PUBLIC_KEY);
+      expect(isValid1).toBe(true);
+
     });
   });
 
