@@ -5,20 +5,25 @@ const {
     validateTxIdSchema,
     validateCallbackSchema,
     validatePermissionSchema,
-    validatePermissionRequestSchema
-} = require('../utils/validateSchema');
-const {
-    validatePrivateKey
-} = require('../utils/validatePrivateKey')
+    validatePermissionRequestSchema,
+    validatePrivateKey,
+    sortCallbackData,
+    sortTxIdData,
+    sortPermissionData,
+    sortPermissionRequestData
+} = require('../utils');
 
 /**
  * Encrypt private info object to hex string.
- * @param {object} data priv_info in object format.
+ * @param {object|string} data priv_info in object or string format.
  * @param {string} publicKey recipeint public key in hex string.
  * @return {string} ECIES encoded privMsg.
  */
 exports.sygnaEncodePrivateObj = (data, publicKey) => {
-    const msgString = JSON.stringify(data);
+    let msgString = data;
+    if (typeof data === 'object') {
+        msgString = JSON.stringify(data);
+    }
     const encoded = ecies.ECIESEncode(msgString, publicKey);
     return encoded;
 };
@@ -31,7 +36,11 @@ exports.sygnaEncodePrivateObj = (data, publicKey) => {
  */
 exports.sygnaDecodePrivateObj = (privMsg, privateKey) => {
     const decoded = ecies.ECIESDecode(privMsg, privateKey);
-    return JSON.parse(decoded);
+    try {
+        return JSON.parse(decoded);
+    } catch (error) {
+        return decoded;
+    }
 };
 
 /**
@@ -45,23 +54,8 @@ exports.signPermissionRequest = (data, privateKey) => {
         throw valid[1];
     }
     validatePrivateKey(privateKey);
-
-    const {
-        private_info,
-        transaction,
-        data_dt,
-        expire_date
-    } = data;
-
-    const dataToSign = {
-        private_info,
-        transaction,
-        data_dt
-    };
-    if (expire_date) {
-        dataToSign.expire_date = expire_date;
-    }
-    return this.signObject(dataToSign, privateKey);
+    const sortedData = sortPermissionRequestData(data);
+    return this.signObject(sortedData, privateKey);
 };
 
 /**
@@ -76,10 +70,8 @@ exports.signCallBack = (data, privateKey) => {
     }
     validatePrivateKey(privateKey);
 
-    const dataToSign = {
-        callback_url: data.callback_url,
-    };
-    return this.signObject(dataToSign, privateKey);
+    const sortedData = sortCallbackData(data);
+    return this.signObject(sortedData, privateKey);
 };
 
 /**
@@ -94,29 +86,8 @@ exports.signPermission = (data, privateKey) => {
     }
     validatePrivateKey(privateKey);
 
-    const {
-        transfer_id,
-        permission_status,
-        expire_date,
-        reject_code,
-        reject_message
-    } = data;
-
-    const dataToSign = {
-        transfer_id,
-        permission_status
-
-    };
-    if (expire_date) {
-        dataToSign.expire_date = expire_date;
-    }
-    if (permission_status === REJECTED) {
-        dataToSign.reject_code = reject_code;
-        if (reject_message) {
-            dataToSign.reject_message = reject_message;
-        }
-    }
-    return this.signObject(dataToSign, privateKey);
+    const sortedData = sortPermissionData(data);
+    return this.signObject(sortedData, privateKey);
 };
 
 /**
@@ -131,8 +102,8 @@ exports.signTxId = (data, privateKey) => {
     }
     validatePrivateKey(privateKey);
 
-    const dataToSign = { transfer_id: data.transfer_id, txid: data.txid };
-    return this.signObject(dataToSign, privateKey);
+    const sortedData = sortTxIdData(data);
+    return this.signObject(sortedData, privateKey);
 };
 
 /**
