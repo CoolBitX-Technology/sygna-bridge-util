@@ -101,7 +101,7 @@ describe('test validate post_permission_schema', () => {
     expect(message5).toEqual('should match pattern \"^[0123456789A-Fa-f]+$\"');
   });
 
-  it('validate failedif permission_status is not valid', () => {
+  it('validate failed if permission_status is not valid', () => {
     const data = { transfer_id };
     const valid = validatePostPermissionSchema(data, genPostPermissionSchema(data));
     expect(valid[0]).toBe(false);

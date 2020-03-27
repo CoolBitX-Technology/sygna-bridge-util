@@ -56,7 +56,7 @@ describe('test validate permission_schema', () => {
     expect(message2).toEqual('should NOT be longer than 64 characters');
   });
 
-  it('validate failedif permission_status is not valid', () => {
+  it('validate failed if permission_status is not valid', () => {
     const data = { transfer_id };
     const valid = validatePermissionSchema(data, genPermissionSchema(data));
     expect(valid[0]).toBe(false);
