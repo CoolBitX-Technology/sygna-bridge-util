@@ -12,24 +12,24 @@ describe('test validate permission_schema', () => {
     expect(permission_schema).toEqual(genPermissionSchema({}));
     expect(permission_schema).toEqual(genPermissionSchema({ permission_status }));
 
-    expect({
-      ...permission_schema,
-      "required": [
-        "transfer_id",
-        "permission_status",
-        "reject_code"
-      ]
-    }).toEqual(genPermissionSchema({ permission_status: REJECTED }));
+    // expect({
+    //   ...permission_schema,
+    //   "required": [
+    //     "transfer_id",
+    //     "permission_status",
+    //     "reject_code"
+    //   ]
+    // }).toEqual(genPermissionSchema({ permission_status: REJECTED }));
 
-    expect({
-      ...permission_schema,
-      "required": [
-        "transfer_id",
-        "permission_status",
-        "reject_code",
-        "reject_message"
-      ]
-    }).toEqual(genPermissionSchema({ permission_status: REJECTED, reject_code: RejectCode.BVRC999 }));
+    // expect({
+    //   ...permission_schema,
+    //   "required": [
+    //     "transfer_id",
+    //     "permission_status",
+    //     "reject_code",
+    //     "reject_message"
+    //   ]
+    // }).toEqual(genPermissionSchema({ permission_status: REJECTED, reject_code: RejectCode.BVRC999 }));
 
   });
 
@@ -162,32 +162,32 @@ describe('test validate permission_schema', () => {
     expect(message1).toEqual('should NOT be shorter than 1 characters');
   });
 
-  it('should validate failed if permission_status is REJECTED but missing reject_code', () => {
-    const data = {
-      transfer_id,
-      permission_status: REJECTED,
-      expire_date
-    };
-    const valid = validatePermissionSchema(data, genPermissionSchema(data));
-    expect(valid[0]).toBe(false);
-    const { dataPath, message } = valid[1][0];
-    expect(dataPath).toEqual('');
-    expect(message).toEqual('should have required property \'reject_code\'');
-  });
+  // it('should validate failed if permission_status is REJECTED but missing reject_code', () => {
+  //   const data = {
+  //     transfer_id,
+  //     permission_status: REJECTED,
+  //     expire_date
+  //   };
+  //   const valid = validatePermissionSchema(data, genPermissionSchema(data));
+  //   expect(valid[0]).toBe(false);
+  //   const { dataPath, message } = valid[1][0];
+  //   expect(dataPath).toEqual('');
+  //   expect(message).toEqual('should have required property \'reject_code\'');
+  // });
 
-  it('should validate failed if permission status is REJECTED and reject_code is BVRC999 but missing reject_message', () => {
-    const data = {
-      transfer_id,
-      permission_status: REJECTED,
-      expire_date,
-      reject_code: RejectCode.BVRC999
-    };
-    const valid = validatePermissionSchema(data, genPermissionSchema(data));
-    expect(valid[0]).toBe(false);
-    const { dataPath, message } = valid[1][0];
-    expect(dataPath).toEqual('');
-    expect(message).toEqual('should have required property \'reject_message\'');
-  });
+  // it('should validate failed if permission status is REJECTED and reject_code is BVRC999 but missing reject_message', () => {
+  //   const data = {
+  //     transfer_id,
+  //     permission_status: REJECTED,
+  //     expire_date,
+  //     reject_code: RejectCode.BVRC999
+  //   };
+  //   const valid = validatePermissionSchema(data, genPermissionSchema(data));
+  //   expect(valid[0]).toBe(false);
+  //   const { dataPath, message } = valid[1][0];
+  //   expect(dataPath).toEqual('');
+  //   expect(message).toEqual('should have required property \'reject_message\'');
+  // });
 
   it('should validate success', () => {
     const data = {
