@@ -40,7 +40,9 @@ exports.sortPermissionData = (data) => {
     sortedData.expire_date = data.expire_date;
   }
   if (data.permission_status === REJECTED) {
-    sortedData.reject_code = data.reject_code;
+    if (data.reject_code) {
+      sortedData.reject_code = data.reject_code;
+    }
     if (data.reject_message) {
       sortedData.reject_message = data.reject_message;
     }
