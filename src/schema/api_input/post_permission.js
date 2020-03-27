@@ -52,16 +52,17 @@ const schema = {
 
 exports.post_permission_schema = schema;
 exports.genPostPermissionSchema = (paramObj) => {
-  if (!paramObj || paramObj.permission_status !== REJECTED) {
-    return schema;
-  }
-  const clonedObjArray = [...schema.required];
-  clonedObjArray.push('reject_code');
-  if(paramObj.reject_code === RejectCode.BVRC999){
-    clonedObjArray.push('reject_message');
-  }
-  return {
-    ...schema,
-    required: clonedObjArray
-  };
+  // if (!paramObj || paramObj.permission_status !== REJECTED) {
+  //   return schema;
+  // }
+  // const clonedObjArray = [...schema.required];
+  // clonedObjArray.push('reject_code');
+  // if(paramObj.reject_code === RejectCode.BVRC999){
+  //   clonedObjArray.push('reject_message');
+  // }
+  // return {
+  //   ...schema,
+  //   required: clonedObjArray
+  // };
+  return schema;
 }
