@@ -1,6 +1,9 @@
 const crypto = require('../crypto');
 const fetch = require('node-fetch');
-const { SYGNA_BRIDGE_CENTRAL_PUBKEY } = require('../config');
+const {
+    SYGNA_BRIDGE_CENTRAL_PUBKEY,
+    SYGNA_BRIDGE_CENTRAL_PUBKEY_TEST
+} = require('../config');
 const {
     validateGetTransferStatusSchema,
     validatePostPermissionSchema,
@@ -21,10 +24,11 @@ class API {
      * A Wrapper function of getVASPList to return specific VASP's publickey.
      * @param {string} vasp_code 
      * @param {boolean?} validate whether to validate returned vasp list data.
+     * @param {boolean?} isProd whether to use production public key
      * @return {Promise<string>} uncompressed publickey
      */
-    async getVASPPublicKey(vasp_code, validate = true) {
-        const vasps = await this.getVASPList(validate);
+    async getVASPPublicKey(vasp_code, validate = true, isProd = false) {
+        const vasps = await this.getVASPList(validate, isProd);
         const targetVasp = vasps.find((vasp) => {
             return vasp.vasp_code === vasp_code;
         });
@@ -35,15 +39,16 @@ class API {
     /**
      * get list of registered VASP associated with publicKey.
      * @param {boolean?} validate whether to validate returned vasp list data.
+     * @param {boolean?} isProd whether to use production public key
      * @return {Promise<Array<{ vasp_name:string, vasp_code:string, vasp_pubkey:string }>>}
      */
-    async getVASPList(validate = true) {
+    async getVASPList(validate = true, isProd = false) {
         const url = this.domain + 'api/v1/bridge/vasp';
         const result = await this.getSB(url);
         if (!result.vasp_data) { throw new Error(`Request VASPs failed: ${result.message}`) }
         if (!validate) return result.vasp_data;
 
-        const valid = crypto.verifyObject(result, SYGNA_BRIDGE_CENTRAL_PUBKEY);
+        const valid = crypto.verifyObject(result, isProd ? SYGNA_BRIDGE_CENTRAL_PUBKEY : SYGNA_BRIDGE_CENTRAL_PUBKEY_TEST);
         if (valid) return result.vasp_data;
         throw Error("get VASP info error: invalid signature.");
     }

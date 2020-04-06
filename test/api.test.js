@@ -2,6 +2,7 @@ const {
   ACCEPTED,
   REJECTED,
   SYGNA_BRIDGE_CENTRAL_PUBKEY,
+  SYGNA_BRIDGE_CENTRAL_PUBKEY_TEST,
   RejectCode
 } = require('../src/config');
 const crypto = require('../src/crypto');
@@ -141,6 +142,22 @@ describe('test api', () => {
     it('should verifyObject be called with correct parameters if validate is true', async () => {
       const response = await instance.getVASPList(true);
       expect(crypto.verifyObject.mock.calls[0][0]).toEqual(fakeResponse);
+      expect(crypto.verifyObject.mock.calls[0][1]).toBe(SYGNA_BRIDGE_CENTRAL_PUBKEY_TEST);
+      expect(crypto.verifyObject.mock.calls.length).toBe(1);
+      expect(response).toEqual(fakeResponse.vasp_data);
+    });
+
+    it('should verifyObject be called with correct parameters if validate is true and isProd is false', async () => {
+      const response = await instance.getVASPList(true, false);
+      expect(crypto.verifyObject.mock.calls[0][0]).toEqual(fakeResponse);
+      expect(crypto.verifyObject.mock.calls[0][1]).toBe(SYGNA_BRIDGE_CENTRAL_PUBKEY_TEST);
+      expect(crypto.verifyObject.mock.calls.length).toBe(1);
+      expect(response).toEqual(fakeResponse.vasp_data);
+    });
+
+    it('should verifyObject be called with correct parameters if validate is true and isProd is true', async () => {
+      const response = await instance.getVASPList(true, true);
+      expect(crypto.verifyObject.mock.calls[0][0]).toEqual(fakeResponse);
       expect(crypto.verifyObject.mock.calls[0][1]).toBe(SYGNA_BRIDGE_CENTRAL_PUBKEY);
       expect(crypto.verifyObject.mock.calls.length).toBe(1);
       expect(response).toEqual(fakeResponse.vasp_data);
@@ -160,7 +177,7 @@ describe('test api', () => {
       try {
         const response = await instance.getVASPList(true);
         expect(crypto.verifyObject.mock.calls[0][0]).toEqual(fakeResponse);
-        expect(crypto.verifyObject.mock.calls[0][1]).toBe(SYGNA_BRIDGE_CENTRAL_PUBKEY);
+        expect(crypto.verifyObject.mock.calls[0][1]).toBe(SYGNA_BRIDGE_CENTRAL_PUBKEY_TEST);
         expect(crypto.verifyObject.mock.calls.length).toBe(1);
         expect(response).toEqual(fakeResponse.vasp_data);
       } catch (error) {
@@ -199,15 +216,33 @@ describe('test api', () => {
     it('should getVASPList be called with correct parameters if getVASPPublicKey is called', async () => {
       await instance.getVASPPublicKey(vasp_code);
       expect(instance.getVASPList.mock.calls[0][0]).toBe(true);
+      expect(instance.getVASPList.mock.calls[0][1]).toBe(false);
       expect(instance.getVASPList.mock.calls.length).toBe(1);
 
       await instance.getVASPPublicKey(vasp_code, false);
       expect(instance.getVASPList.mock.calls[1][0]).toBe(false);
+      expect(instance.getVASPList.mock.calls[1][1]).toBe(false);
       expect(instance.getVASPList.mock.calls.length).toBe(2);
 
-      await instance.getVASPPublicKey(vasp_code, true);
-      expect(instance.getVASPList.mock.calls[2][0]).toBe(true);
+      await instance.getVASPPublicKey(vasp_code, false, true);
+      expect(instance.getVASPList.mock.calls[2][0]).toBe(false);
+      expect(instance.getVASPList.mock.calls[2][1]).toBe(true);
       expect(instance.getVASPList.mock.calls.length).toBe(3);
+
+      await instance.getVASPPublicKey(vasp_code, true);
+      expect(instance.getVASPList.mock.calls[3][0]).toBe(true);
+      expect(instance.getVASPList.mock.calls[3][1]).toBe(false);
+      expect(instance.getVASPList.mock.calls.length).toBe(4);
+
+      await instance.getVASPPublicKey(vasp_code, true, false);
+      expect(instance.getVASPList.mock.calls[4][0]).toBe(true);
+      expect(instance.getVASPList.mock.calls[4][1]).toBe(false);
+      expect(instance.getVASPList.mock.calls.length).toBe(5);
+
+      await instance.getVASPPublicKey(vasp_code, true, true);
+      expect(instance.getVASPList.mock.calls[5][0]).toBe(true);
+      expect(instance.getVASPList.mock.calls[5][1]).toBe(true);
+      expect(instance.getVASPList.mock.calls.length).toBe(6);
     });
 
     it('should throw exception if getVASPList failed', async () => {
