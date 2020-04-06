@@ -28,5 +28,6 @@ exports.verify = (message, signature, publicKey) => {
     .createHash('sha256')
     .update(message, 'utf8')
     .digest()
-  return secp256k1.ecdsaVerify(Buffer.from(signature, 'hex'), msgHash, Buffer.from(publicKey, 'hex'))
+  const normalizedSignature = secp256k1.signatureNormalize(Uint8Array.from(Buffer.from(signature, 'hex')))
+  return secp256k1.ecdsaVerify(normalizedSignature, msgHash, Buffer.from(publicKey, 'hex'))
 }
