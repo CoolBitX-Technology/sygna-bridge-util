@@ -12,7 +12,9 @@ exports.sign = (message, privateKey) => {
     .createHash('sha256')
     .update(message, 'utf8')
     .digest()
-  const sigObj = secp256k1.ecdsaSign(msgHash, Buffer.from(privateKey, 'hex'))
+  const msgHashUint8Array = Uint8Array.from(msgHash)
+  const privKeyUint8Array = Uint8Array.from(Buffer.from(privateKey, 'hex'))
+  const sigObj = secp256k1.ecdsaSign(msgHashUint8Array, privKeyUint8Array)
   return Buffer.from(sigObj.signature).toString('hex')
 }
 
@@ -28,6 +30,10 @@ exports.verify = (message, signature, publicKey) => {
     .createHash('sha256')
     .update(message, 'utf8')
     .digest()
-  const normalizedSignature = secp256k1.signatureNormalize(Uint8Array.from(Buffer.from(signature, 'hex')))
-  return secp256k1.ecdsaVerify(normalizedSignature, msgHash, Buffer.from(publicKey, 'hex'))
+  const msgHashUint8Array = Uint8Array.from(msgHash)
+  const signatureUint8Array = Uint8Array.from(Buffer.from(signature, 'hex'))
+  const normalizedSignature = secp256k1.signatureNormalize(signatureUint8Array)
+  const pubKeyUint8Array = Uint8Array.from(Buffer.from(publicKey, 'hex'))
+
+  return secp256k1.ecdsaVerify(normalizedSignature, msgHashUint8Array, pubKeyUint8Array)
 }
