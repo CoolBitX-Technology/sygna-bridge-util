@@ -125,3 +125,26 @@ exports.sortPostTransactionIdData = (data) => {
   sortedTxIdData.signature = data.signature;
   return sortedTxIdData;
 }
+
+/**
+ * Sort beneficiaryEndpointUrl data for signBeneficiaryEndpointUrl.
+ * @param {{vasp_code:string,beneficiary_endpoint_url:string}} data
+ * @return  {{vasp_code:string,beneficiary_endpoint_url:string}} sorted data
+ */
+exports.sortBeneficiaryEndpointUrlData = (data) => {
+  return {
+    vasp_code: data.vasp_code,
+    beneficiary_endpoint_url: data.beneficiary_endpoint_url,
+  }
+}
+
+/**
+ * Sort postBeneficiaryEndpointUrl data for postBeneficiaryEndpointUrl.
+ * @param  {{vasp_code: string, beneficiary_endpoint_url:string, signature:string}} data
+ * @return  {{vasp_code: string, beneficiary_endpoint_url:string, signature:string}} sorted data
+ */
+exports.sortPostBeneficiaryEndpointUrlData = (data) => {
+  const sortedBeneficiaryEndpointUrlData = this.sortBeneficiaryEndpointUrlData(data);
+  sortedBeneficiaryEndpointUrlData.signature = data.signature;
+  return sortedBeneficiaryEndpointUrlData;
+}
