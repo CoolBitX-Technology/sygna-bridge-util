@@ -10,7 +10,9 @@ const {
     sortCallbackData,
     sortTxIdData,
     sortPermissionData,
-    sortPermissionRequestData
+    sortPermissionRequestData,
+    validateBeneficiaryEndpointUrlSchema,
+    sortBeneficiaryEndpointUrlData
 } = require('../utils');
 
 /**
@@ -132,4 +134,20 @@ exports.verifyObject = (obj, publicKey = SYGNA_BRIDGE_CENTRAL_PUBKEY) => {
     clone.signature = "";
     const msgStr = JSON.stringify(clone);
     return sygnaSign.verify(msgStr, signature, publicKey);
+};
+
+/**
+ * @param {{vasp_code:string,beneficiary_endpoint_url:string}} data
+ * @param {string} privateKey
+ * @return {{vasp_code:string, txid:beneficiary_endpoint_url, signature:string}}
+ */
+exports.signBeneficiaryEndpointUrl = (data, privateKey) => {
+    const valid = validateBeneficiaryEndpointUrlSchema(data);
+    if (!valid[0]) {
+        throw valid[1];
+    }
+    validatePrivateKey(privateKey);
+
+    const sortedData = sortBeneficiaryEndpointUrlData(data);
+    return this.signObject(sortedData, privateKey);
 };
