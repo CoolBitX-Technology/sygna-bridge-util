@@ -628,7 +628,7 @@ describe('test api', () => {
       await instance.postBeneficiaryEndpointUrl(fakeData);
 
       expect(instance.postSB.mock.calls[0][0]).toBe(
-        `${domain}api/v1/bridge/transaction/beneficiary-endpoint-url`,
+        `${domain}api/v1/bridge/vasp/beneficiary-endpoint-url`,
       );
       expect(JSON.stringify(instance.postSB.mock.calls[0][1])).toBe(
         JSON.stringify(sortedData),

@@ -162,8 +162,7 @@ class API {
     if (!valid[0]) {
       throw valid[1];
     }
-    const url =
-      this.domain + 'api/v1/bridge/transaction/beneficiary-endpoint-url';
+    const url = this.domain + 'api/v1/bridge/vasp/beneficiary-endpoint-url';
     const sortedData = sortPostBeneficiaryEndpointUrlData(data);
     return await this.postSB(url, sortedData);
   }
