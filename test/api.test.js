@@ -623,7 +623,7 @@ describe('test api', () => {
       validatePostBeneficiaryEndpointUrlSchema.mockReturnValue([true]);
     });
 
-    it('should postSB be called with correct parameters if postPermission is called', async () => {
+    it('should postSB be called with correct parameters if postBeneficiaryEndpointUrl is called', async () => {
       const sortedData = sortPostBeneficiaryEndpointUrlData(fakeData);
       await instance.postBeneficiaryEndpointUrl(fakeData);
 
