@@ -17,6 +17,9 @@ const res_ok_schema = require('../schema/api_response/res_ok.json');
 const res_post_permission_request_schema = require('../schema/api_response/res_post_permission_request.json');
 const res_retry_schema = require('../schema/api_response/res_retry.json');
 
+const beneficiary_endpoint_url_schema = require('../schema/data/beneficiary_endpoint_url.json');
+const post_beneficiary_endpoint_url_schema = require('../schema/api_input/post_beneficiary_endpoint_url.json');
+
 exports.validateSchema = (paramObj, schema) => {
   const ajv = new Ajv();
   const valid = ajv.validate(schema, paramObj);
@@ -98,4 +101,12 @@ exports.validateResPostPermissionRequestSchema = (paramObj) => {
 
 exports.validateResRetrySchema = (paramObj) => {
   return this.validateSchema(paramObj, res_retry_schema);
+}
+
+exports.validateBeneficiaryEndpointUrlSchema = (paramObj)=>{
+  return this.validateSchema(paramObj, beneficiary_endpoint_url_schema);
+}
+
+exports.validatePostBeneficiaryEndpointUrlSchema = (paramObj)=>{
+  return this.validateSchema(paramObj, post_beneficiary_endpoint_url_schema);
 }

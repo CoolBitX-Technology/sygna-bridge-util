@@ -1,0 +1,25 @@
+{
+  "type": "object",
+  "properties": {
+    "vasp_code": {
+      "type": "string",
+      "minLength": 1
+    },
+    "beneficiary_endpoint_url": {
+      "type": "string",
+      "format": "uri"
+    },
+    "signature": {
+      "type": "string",
+      "minLength": 128,
+      "maxLength": 128,
+      "pattern": "^[0123456789A-Fa-f]+$"
+    }
+  },
+  "required": [
+    "vasp_code",
+    "beneficiary_endpoint_url",
+    "signature"
+  ],
+  "additionalProperties": false
+}
