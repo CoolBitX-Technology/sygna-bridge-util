@@ -4,7 +4,7 @@ const {
 
 describe('test validate beneficiary_endpoint_url_schema', () => {
   const vasp_code = 'QQQQKRQQ';
-  const beneficiary_endpoint_url = 'http://google.com';
+  const beneficiary_endpoint_url = 'https://api.sygna.io/api/v1.1.0/bridge/';
 
   it('should validate failed if vasp_code is not valid', () => {
     const data = {};

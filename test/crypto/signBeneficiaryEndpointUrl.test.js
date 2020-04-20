@@ -13,8 +13,8 @@ jest.mock('../../src/utils', () => ({
 }));
 
 describe('test signBeneficiaryEndpointUrl', () => {
-  const vasp_code = 'QQQQKRQQ';
-  const beneficiary_endpoint_url = 'http://google.com';
+  const vasp_code = 'VASPUSNY1';
+  const beneficiary_endpoint_url = 'https://api.sygna.io/api/v1.1.0/bridge/';
 
   let crypto;
   jest.isolateModules(() => {
@@ -120,7 +120,7 @@ describe('test signBeneficiaryEndpointUrl', () => {
 
   describe('test signature', () => {
     const { signBeneficiaryEndpointUrl, verifyObject } = crypto;
-    it('should object which is return by signCallback be correct', () => {
+    it('should object which is return by signBeneficiaryEndpointUrl be correct', () => {
       const fakeData = { beneficiary_endpoint_url, vasp_code };
       const sortedData = sortBeneficiaryEndpointUrlData(fakeData);
       const signature = signBeneficiaryEndpointUrl(fakeData, FAKE_PRIVATE_KEY);
@@ -128,7 +128,7 @@ describe('test signBeneficiaryEndpointUrl', () => {
         JSON.stringify({
           ...sortedData,
           signature:
-            '2c9339dd88f89f60280d66575c3c6868f3e12b56838538ebf5bed7d148cfa5c96ac7ef9365a3b67eacff8fca4d7c10f9f226089a9947a1408d1d09416325ba6d',
+            '72283fb8ba3ceba13bcb29e263fb283eabe4b76c9db114dfad5f9da4ef1d664077e74b1f27133efb7450ef5bd4b72b35f59ee609703a74f6692e9b5ca9c4f8f5',
         }),
       );
       const isValid = verifyObject(signature, FAKE_PUBLIC_KEY);

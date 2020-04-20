@@ -1,7 +1,7 @@
 const { validateCallbackSchema } = require('../../../src/utils/validateSchema');
 
 describe('test validate callback_schema', () => {
-  const callback_url = 'http://google.com';
+  const callback_url = 'https://api.sygna.io/api/v1.1.0/bridge/';
   it('should validate failed if callback_url is not valid', () => {
     const data = {};
     const valid = validateCallbackSchema(data);

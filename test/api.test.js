@@ -41,7 +41,7 @@ jest.mock('../src/crypto', () => ({
 
 describe('test api', () => {
   const apiModule = require('../src/api');
-  const domain = 'http://google.com/';
+  const domain = 'https://api.sygna.io/api/v1.1.0/bridge/';
   const api_key = '1234567890';
 
   beforeEach(() => {
@@ -55,7 +55,7 @@ describe('test api', () => {
 
     it('should fetch be called with correct parameters if getSB is called', async () => {
       const headers = { api_key };
-      const url = 'http://google.com/';
+      const url = 'https://api.sygna.io/api/v1.1.0/bridge/';
       const response = await instance.getSB(url);
       expect(fetch.mock.calls[0][0]).toBe(url);
       expect(fetch.mock.calls[0][1]).toEqual({ headers });
@@ -73,7 +73,7 @@ describe('test api', () => {
         api_key,
       };
       //await fetch(url, { method: 'POST', body: JSON.stringify(json), headers: headers });
-      const url = 'http://google.com/';
+      const url = 'https://api.sygna.io/api/v1.1.0/bridge/';
       const body = {
         key: 'value',
       };
@@ -120,7 +120,7 @@ describe('test api', () => {
     it('should getSB be called with correct parameters if getVASPList is called', async () => {
       const response = await instance.getVASPList(false);
       expect(instance.getSB.mock.calls[0][0]).toBe(
-        `${domain}api/v1/bridge/vasp`,
+        `${domain}api/v1.1.0/bridge/vasp`,
       );
       expect(instance.getSB.mock.calls.length).toBe(1);
       expect(response).toEqual(fakeResponse.vasp_data);
@@ -305,7 +305,7 @@ describe('test api', () => {
       },
       callback: {
         signature: '1234567890',
-        callback_url: 'https://google.com',
+        callback_url: 'https://api.sygna.io/api/v1.1.0/bridge/',
       },
     };
 
@@ -361,7 +361,7 @@ describe('test api', () => {
       const sortedData = sortPostPermissionRequestData(fakeData);
       await instance.postPermissionRequest(fakeData);
       expect(instance.postSB.mock.calls[0][0]).toBe(
-        `${domain}api/v1/bridge/transaction/permission-request`,
+        `${domain}api/v1.1.0/bridge/transaction/permission-request`,
       );
       expect(JSON.stringify(instance.postSB.mock.calls[0][1])).toBe(
         JSON.stringify(sortedData),
@@ -428,7 +428,7 @@ describe('test api', () => {
       await instance.postPermission(fakeData);
 
       expect(instance.postSB.mock.calls[0][0]).toBe(
-        `${domain}api/v1/bridge/transaction/permission`,
+        `${domain}api/v1.1.0/bridge/transaction/permission`,
       );
       expect(JSON.stringify(instance.postSB.mock.calls[0][1])).toBe(
         JSON.stringify(sortedData),
@@ -491,7 +491,7 @@ describe('test api', () => {
       await instance.getStatus(transfer_id);
 
       expect(instance.getSB.mock.calls[0][0]).toBe(
-        `${domain}api/v1/bridge/transaction/status?transfer_id=${transfer_id}`,
+        `${domain}api/v1.1.0/bridge/transaction/status?transfer_id=${transfer_id}`,
       );
       expect(instance.getSB.mock.calls.length).toBe(1);
     });
@@ -554,7 +554,7 @@ describe('test api', () => {
       await instance.postTransactionId(fakeData);
 
       expect(instance.postSB.mock.calls[0][0]).toBe(
-        `${domain}api/v1/bridge/transaction/txid`,
+        `${domain}api/v1.1.0/bridge/transaction/txid`,
       );
       expect(JSON.stringify(instance.postSB.mock.calls[0][1])).toBe(
         JSON.stringify(sortedData),
@@ -565,7 +565,7 @@ describe('test api', () => {
 
   describe('test postBeneficiaryEndpointUrl', () => {
     const vasp_code = 'QQQQKRQQ';
-    const beneficiary_endpoint_url = 'http://google.com';
+    const beneficiary_endpoint_url = 'https://api.sygna.io/api/v1.1.0/bridge/';
     const fakeData = {
       beneficiary_endpoint_url,
       signature: '1234567890',
@@ -628,7 +628,7 @@ describe('test api', () => {
       await instance.postBeneficiaryEndpointUrl(fakeData);
 
       expect(instance.postSB.mock.calls[0][0]).toBe(
-        `${domain}api/v1/bridge/vasp/beneficiary-endpoint-url`,
+        `${domain}api/v1.1.0/bridge/vasp/beneficiary-endpoint-url`,
       );
       expect(JSON.stringify(instance.postSB.mock.calls[0][1])).toBe(
         JSON.stringify(sortedData),

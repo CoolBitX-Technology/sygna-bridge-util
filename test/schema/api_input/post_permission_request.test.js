@@ -18,7 +18,7 @@ describe('test validate post_permission_request_schema', () => {
   const expire_date = 2529024749000;
   const signature =
     '6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b';
-  const callback_url = 'http://google.com';
+  const callback_url = 'https://api.sygna.io/api/v1.1.0/bridge/';
 
   it('should validate failed if data is not valid', () => {
     const data = {};

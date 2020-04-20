@@ -25,7 +25,7 @@ jest.mock('../../src/schema/api_input/post_permission', () => ({
 describe('test validateSchema', () => {
   const fakeValidatedResult = 'validated';
   const fakeData = {
-    callback_url: 'http://google.com',
+    callback_url: 'https://api.sygna.io/api/v1.1.0/bridge/',
     signature: 'abc',
     permission_status: 'abc',
   };
@@ -77,7 +77,7 @@ describe('test validateSchema', () => {
       const validate = (Ajv.prototype.validate = jest.fn());
 
       const data = {
-        callback_url: 'http://google.com',
+        callback_url: 'https://api.sygna.io/api/v1.1.0/bridge/',
         signature: 'abc',
       };
       const valid = validateSchema(data, schemaKeyRef);
@@ -110,7 +110,7 @@ describe('test validateSchema', () => {
       Ajv.prototype.errors = fakeError;
 
       const data = {
-        callback_url: 'http://google.com',
+        callback_url: 'https://api.sygna.io/api/v1.1.0/bridge/',
         signature: 'abc',
       };
       const valid = validateSchema(data, schemaKeyRef);
@@ -291,7 +291,7 @@ describe('test validateSchema', () => {
         signature: '12345',
       },
       callback: {
-        callback_url: 'http://google.com',
+        callback_url: 'https://api.sygna.io/api/v1.1.0/bridge/',
         signature: '12345',
       },
     };
