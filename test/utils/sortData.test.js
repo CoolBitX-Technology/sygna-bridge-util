@@ -16,7 +16,7 @@ describe('test sortData', () => {
   describe('test sortCallbackData', () => {
     it('should return sorted data', () => {
       const fakeData = {
-        callback_url: 'https://google.com',
+        callback_url: 'https://api.sygna.io/api/v1.1.0/bridge/',
       };
       expect(JSON.stringify(sortCallbackData(fakeData))).toBe(
         JSON.stringify({
@@ -26,8 +26,8 @@ describe('test sortData', () => {
     });
     it('should ignore additional key', () => {
       const fakeData = {
-        callback_url: 'https://google.com',
-        callback_url1: 'https://stackoverflow.com/',
+        callback_url: 'https://api.sygna.io/api/v1.1.0/bridge/',
+        callback_url1: 'https://api.sygna.io/api/v1/bridge/',
       };
       expect(JSON.stringify(sortCallbackData(fakeData))).toBe(
         JSON.stringify({
@@ -617,7 +617,7 @@ describe('test sortData', () => {
         },
         callback: {
           signature: '1234567890',
-          callback_url: 'https://google.com',
+          callback_url: 'https://api.sygna.io/api/v1.1.0/bridge/',
         },
       };
       expect(JSON.stringify(sortPostPermissionRequestData(fakeData))).toBe(
@@ -663,7 +663,7 @@ describe('test sortData', () => {
         },
         callback: {
           signature: '1234567890',
-          callback_url: 'https://google.com',
+          callback_url: 'https://api.sygna.io/api/v1.1.0/bridge/',
         },
       };
       expect(JSON.stringify(sortPostPermissionRequestData(fakeData))).toBe(
@@ -712,7 +712,7 @@ describe('test sortData', () => {
         },
         callback: {
           signature: '1234567890',
-          callback_url: 'https://google.com',
+          callback_url: 'https://api.sygna.io/api/v1.1.0/bridge/',
         },
       };
       expect(JSON.stringify(sortPostPermissionRequestData(fakeData))).toBe(
@@ -764,7 +764,7 @@ describe('test sortData', () => {
         },
         callback: {
           signature: '1234567890',
-          callback_url: 'https://google.com',
+          callback_url: 'https://api.sygna.io/api/v1.1.0/bridge/',
         },
       };
       expect(JSON.stringify(sortPostPermissionRequestData(fakeData))).toBe(
@@ -819,7 +819,7 @@ describe('test sortData', () => {
         callback: {
           key: '123',
           signature: '1234567890',
-          callback_url: 'https://google.com',
+          callback_url: 'https://api.sygna.io/api/v1.1.0/bridge/',
         },
       };
       expect(JSON.stringify(sortPostPermissionRequestData(fakeData))).toBe(
@@ -850,7 +850,7 @@ describe('test sortData', () => {
   });
   describe('test sortBeneficiaryEndpointUrlData', () => {
     const vasp_code = 'QQQQKRQQ';
-    const beneficiary_endpoint_url = 'http://google.com';
+    const beneficiary_endpoint_url = 'https://api.sygna.io/api/v1.1.0/bridge/';
     it('should return sorted data', () => {
       const fakeData = {
         beneficiary_endpoint_url,
@@ -865,7 +865,7 @@ describe('test sortData', () => {
     });
     it('should ignore additional key', () => {
       const fakeData = {
-        callback_url: 'https://google.com',
+        callback_url: 'https://api.sygna.io/api/v1.1.0/bridge/',
         beneficiary_endpoint_url,
         vasp_code,
       };
@@ -879,7 +879,7 @@ describe('test sortData', () => {
   });
   describe('test sortPostBeneficiaryEndpointUrlData', () => {
     const vasp_code = 'QQQQKRQQ';
-    const beneficiary_endpoint_url = 'http://google.com';
+    const beneficiary_endpoint_url = 'https://api.sygna.io/api/v1.1.0/bridge/';
     const signature =
       '6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b';
 
@@ -900,7 +900,7 @@ describe('test sortData', () => {
     it('should ignore additional key', () => {
       const fakeData = {
         signature,
-        callback_url: 'https://google.com',
+        callback_url: 'https://api.sygna.io/api/v1.1.0/bridge/',
         beneficiary_endpoint_url,
         vasp_code,
       };

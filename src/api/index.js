@@ -45,7 +45,7 @@ class API {
    * @return {Promise<Array<{ vasp_name:string, vasp_code:string, vasp_pubkey:string }>>}
    */
   async getVASPList(validate = true, isProd = false) {
-    const url = this.domain + 'api/v1/bridge/vasp';
+    const url = this.domain + 'api/v1.1.0/bridge/vasp';
     const result = await this.getSB(url);
     if (!result.vasp_data) {
       throw new Error(`Request VASPs failed: ${result.message}`);
@@ -71,7 +71,7 @@ class API {
     if (!valid[0]) {
       throw valid[1];
     }
-    const url = this.domain + 'api/v1/bridge/transaction/permission';
+    const url = this.domain + 'api/v1.1.0/bridge/transaction/permission';
     const sortedData = sortPostPermissionData(data);
     return await this.postSB(url, sortedData);
   }
@@ -87,7 +87,7 @@ class API {
     }
     const url =
       this.domain +
-      'api/v1/bridge/transaction/status?transfer_id=' +
+      'api/v1.1.0/bridge/transaction/status?transfer_id=' +
       transfer_id;
     const result = await this.getSB(url);
     return result;
@@ -104,7 +104,8 @@ class API {
     if (!valid[0]) {
       throw valid[1];
     }
-    const url = this.domain + 'api/v1/bridge/transaction/permission-request';
+    const url =
+      this.domain + 'api/v1.1.0/bridge/transaction/permission-request';
     const sortedData = sortPostPermissionRequestData(data);
     return await this.postSB(url, sortedData);
   }
@@ -119,7 +120,7 @@ class API {
     if (!valid[0]) {
       throw valid[1];
     }
-    const url = this.domain + 'api/v1/bridge/transaction/txid';
+    const url = this.domain + 'api/v1.1.0/bridge/transaction/txid';
     const sortedData = sortPostTransactionIdData(data);
     return await this.postSB(url, sortedData);
   }
@@ -162,7 +163,7 @@ class API {
     if (!valid[0]) {
       throw valid[1];
     }
-    const url = this.domain + 'api/v1/bridge/vasp/beneficiary-endpoint-url';
+    const url = this.domain + 'api/v1.1.0/bridge/vasp/beneficiary-endpoint-url';
     const sortedData = sortPostBeneficiaryEndpointUrlData(data);
     return await this.postSB(url, sortedData);
   }

@@ -4,7 +4,7 @@ const {
 
 describe('test validate post_beneficiary_endpoint_url', () => {
   const vasp_code = 'QQQQKRQQ';
-  const beneficiary_endpoint_url = 'http://google.com';
+  const beneficiary_endpoint_url = 'https://api.sygna.io/api/v1.1.0/bridge/';
   const signature =
     '6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b';
 
