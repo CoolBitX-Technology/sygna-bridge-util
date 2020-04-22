@@ -39,7 +39,7 @@ describe('test signPermissionRequest', () => {
           originator_addrs: ['16bUGjvunVp7LqygLHrTvHyvbvfeuRCWAh'],
           originator_vasp_code: 'VASPTWTP1',
           beneficiary_addrs: ['3CHgkx946yyueucCMiJhyH2Vg5kBBvfSGH'],
-          amount: 1,
+          amount: '1.0',
           beneficiary_vasp_code: 'VASPTWTP2',
         },
       };
@@ -91,7 +91,7 @@ describe('test signPermissionRequest', () => {
           originator_addrs: ['16bUGjvunVp7LqygLHrTvHyvbvfeuRCWAh'],
           originator_vasp_code: 'VASPTWTP1',
           beneficiary_addrs: ['3CHgkx946yyueucCMiJhyH2Vg5kBBvfSGH'],
-          amount: 1,
+          amount: '1.0',
           beneficiary_vasp_code: 'VASPTWTP2',
         },
       };
@@ -129,7 +129,7 @@ describe('test signPermissionRequest', () => {
           originator_addrs: ['16bUGjvunVp7LqygLHrTvHyvbvfeuRCWAh'],
           originator_vasp_code: 'VASPTWTP1',
           beneficiary_addrs: ['3CHgkx946yyueucCMiJhyH2Vg5kBBvfSGH'],
-          amount: 1,
+          amount: '1',
           beneficiary_vasp_code: 'VASPTWTP2',
         },
       };
@@ -163,7 +163,7 @@ describe('test signPermissionRequest', () => {
           originator_addrs: ['16bUGjvunVp7LqygLHrTvHyvbvfeuRCWAh'],
           originator_vasp_code: 'VASPTWTP1',
           beneficiary_addrs: ['3CHgkx946yyueucCMiJhyH2Vg5kBBvfSGH'],
-          amount: 1,
+          amount: '1.0',
           beneficiary_vasp_code: 'VASPTWTP2',
         },
       };
@@ -173,7 +173,7 @@ describe('test signPermissionRequest', () => {
         JSON.stringify({
           ...sortedFakeData,
           signature:
-            'c7b9c1edc35e17dc0a78858d68786e5bcb26bbc09d02a0e1747e7eeabdc59d4e79c6d1156359a06b1662084d782bd86f4bdc6cc5aa6696f20c5ea8e20fa328e8',
+            '2602414daa89a80aee10a922f9c7dc22b8abe45922cc6a30c78a06ec4ee365c9501b4c884518cfb9e8aba09633520298848d7a6ff2d1f494f618c4f7beb0f7df',
         }),
       );
 
@@ -187,7 +187,7 @@ describe('test signPermissionRequest', () => {
         JSON.stringify({
           ...sortedFakeData1,
           signature:
-            '2727bc6be48b780bfd4712c2f8bfa39bcc24e7e2aa48e8fbfa02789b8bac31443c8dc991731108bddabc52761dc9bf97cb5938838c3c28fae1c4fcd31e5a7c5c',
+            '6c0bf58d98963507564deba9b98724dae59c03b78456cbb5fdbfb1f1b900b4e750ed811a306ab84aa16781c9ab2bb3cc354a98451d6336ef13ccf7bae52b7093',
         }),
       );
       const isValid1 = verifyObject(signature1, FAKE_PUBLIC_KEY);
@@ -200,7 +200,7 @@ describe('test signPermissionRequest', () => {
         JSON.stringify({
           ...sortedFakeData2,
           signature:
-            'c758a58cc6920a3179c45a467d5cd7e297ba725c0c6fafd391f15e7345de7592344f8fa6f9a7c5433dd4e43da08f4d27ad17b2664697218df9bf7bce18fcd841',
+            'd2d5c94b0e121ce97c5f94869c8032fad18e5fc1b6112844dd0f6ec2594fbc756cf1738ef498337b32789d744d2f5a5ea571d2d97938ae496b2e708c70f361ae',
         }),
       );
       const isValid2 = verifyObject(signature2, FAKE_PUBLIC_KEY);
@@ -213,11 +213,24 @@ describe('test signPermissionRequest', () => {
         JSON.stringify({
           ...sortedFakeData3,
           signature:
-            '0b647c4803731fb6aa58613f979d38e01e1f69d953a104a326941c1700e2b2d6450da8d26f7490c323ec340c0274996b38527649f3cc4ef4fbfd65af69afbe28',
+            '0a8d3a29af5e52975aef3276d8260193b2465441b05788db0ccfe4eea45b972e672f831e6320189e758dd4f5f697f84f95d5e5ba034b51f7aecf3c80abc3330e',
         }),
       );
       const isValid3 = verifyObject(signature3, FAKE_PUBLIC_KEY);
       expect(isValid3).toBe(true);
+
+      fakeData.transaction.amount = '1';
+      const signature4 = signPermissionRequest(fakeData, FAKE_PRIVATE_KEY);
+      const sortedFakeData4 = sortPermissionRequestData(fakeData);
+      expect(JSON.stringify(signature4)).toBe(
+        JSON.stringify({
+          ...sortedFakeData4,
+          signature:
+            '2ff2140b4050d8464d02a0f7e26b92d8376ec9796f43ad779c74384ac281390914592a235c88f971d91deeefed95727029d8f9999ff6460644749b551b8bff35',
+        }),
+      );
+      const isValid4 = verifyObject(signature4, FAKE_PUBLIC_KEY);
+      expect(isValid4).toBe(true);
     });
   });
 });

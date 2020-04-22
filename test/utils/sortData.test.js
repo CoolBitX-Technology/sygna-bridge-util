@@ -221,7 +221,7 @@ describe('test sortData', () => {
           originator_addrs: ['16bUGjvunVp7LqygLHrTvHyvbvfeuRCWAh'],
           originator_vasp_code: 'VASPTWTP1',
           beneficiary_addrs: ['3CHgkx946yyueucCMiJhyH2Vg5kBBvfSGH'],
-          amount: 1,
+          amount: '1',
           beneficiary_vasp_code: 'VASPTWTP2',
         },
       };
@@ -242,7 +242,7 @@ describe('test sortData', () => {
 
       fakeData = {
         transaction: {
-          amount: 1,
+          amount: '1',
           originator_addrs: ['16bUGjvunVp7LqygLHrTvHyvbvfeuRCWAh'],
           transaction_currency: '0x80000000',
           beneficiary_addrs: ['3CHgkx946yyueucCMiJhyH2Vg5kBBvfSGH'],
@@ -275,7 +275,7 @@ describe('test sortData', () => {
           '6b51d431df5d7f141cbececcf79edf3dd861c3b4069f0b11661a3eefacbba918',
         data_dt: '2019-07-29T06:29:00.123Z',
         transaction: {
-          amount: 1,
+          amount: '1',
           transaction_currency: '0x80000000',
           originator_addrs_extra: { DT: '001' },
           originator_addrs: ['16bUGjvunVp7LqygLHrTvHyvbvfeuRCWAh'],
@@ -308,7 +308,7 @@ describe('test sortData', () => {
         expire_date: 123,
         transaction: {
           beneficiary_vasp_code: 'VASPTWTP2',
-          amount: 1,
+          amount: '1',
           originator_addrs: ['16bUGjvunVp7LqygLHrTvHyvbvfeuRCWAh'],
           originator_addrs_extra: { DT: '001' },
           beneficiary_addrs_extra: { DT: '002' },
@@ -349,7 +349,7 @@ describe('test sortData', () => {
           originator_addrs: ['16bUGjvunVp7LqygLHrTvHyvbvfeuRCWAh'],
           originator_vasp_code: 'VASPTWTP1',
           beneficiary_addrs: ['3CHgkx946yyueucCMiJhyH2Vg5kBBvfSGH'],
-          amount: 1,
+          amount: '1',
           beneficiary_vasp_code: 'VASPTWTP2',
           key: 123,
         },
@@ -611,7 +611,7 @@ describe('test sortData', () => {
             originator_addrs: ['16bUGjvunVp7LqygLHrTvHyvbvfeuRCWAh'],
             originator_vasp_code: 'VASPTWTP1',
             beneficiary_addrs: ['3CHgkx946yyueucCMiJhyH2Vg5kBBvfSGH'],
-            amount: 1,
+            amount: '1',
             beneficiary_vasp_code: 'VASPTWTP2',
           },
         },
@@ -648,7 +648,7 @@ describe('test sortData', () => {
       fakeData = {
         data: {
           transaction: {
-            amount: 1,
+            amount: '1',
             originator_addrs: ['16bUGjvunVp7LqygLHrTvHyvbvfeuRCWAh'],
             transaction_currency: '0x80000000',
             beneficiary_addrs: ['3CHgkx946yyueucCMiJhyH2Vg5kBBvfSGH'],
@@ -699,7 +699,7 @@ describe('test sortData', () => {
             '6b51d431df5d7f141cbececcf79edf3dd861c3b4069f0b11661a3eefacbba918',
           data_dt: '2019-07-29T06:29:00.123Z',
           transaction: {
-            amount: 1,
+            amount: '1',
             transaction_currency: '0x80000000',
             originator_addrs_extra: { DT: '001' },
             originator_addrs: ['16bUGjvunVp7LqygLHrTvHyvbvfeuRCWAh'],
@@ -751,7 +751,7 @@ describe('test sortData', () => {
           expire_date: 123,
           transaction: {
             beneficiary_vasp_code: 'VASPTWTP2',
-            amount: 1,
+            amount: '1',
             originator_addrs: ['16bUGjvunVp7LqygLHrTvHyvbvfeuRCWAh'],
             originator_addrs_extra: { DT: '001' },
             beneficiary_addrs_extra: { DT: '002' },
@@ -810,7 +810,7 @@ describe('test sortData', () => {
             originator_addrs: ['16bUGjvunVp7LqygLHrTvHyvbvfeuRCWAh'],
             originator_vasp_code: 'VASPTWTP1',
             beneficiary_addrs: ['3CHgkx946yyueucCMiJhyH2Vg5kBBvfSGH'],
-            amount: 1,
+            amount: '1',
             beneficiary_vasp_code: 'VASPTWTP2',
             key: 123,
           },

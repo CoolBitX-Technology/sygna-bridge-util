@@ -289,7 +289,7 @@ describe('test api', () => {
       data: {
         expire_date: 123,
         transaction: {
-          amount: 1,
+          amount: '1',
           transaction_currency: '0x80000000',
           originator_addrs_extra: { DT: '001' },
           originator_addrs: ['16bUGjvunVp7LqygLHrTvHyvbvfeuRCWAh'],
