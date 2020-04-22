@@ -15,7 +15,7 @@ describe('test validate res_get_transfer_status_schema', () => {
     beneficiary_addrs: ['123'],
     beneficiary_addrs_extra: { DT: '002' },
     transaction_currency: '123',
-    amount: 1,
+    amount: '1',
   };
   const data_dt = '2019-07-29T06:29:00.123Z';
   const permission_request_data_signature =
@@ -360,12 +360,19 @@ describe('test validate res_get_transfer_status_schema', () => {
     expect(dataPath).toEqual('.transferData.transaction');
     expect(message).toEqual("should have required property 'amount'");
 
-    data.transferData.transaction.amount = '123';
+    data.transferData.transaction.amount = 123;
     const valid1 = validateResGetTransferStatusSchema(data);
     expect(valid1[0]).toBe(false);
     const { dataPath: dataPath1, message: message1 } = valid1[1][0];
     expect(dataPath1).toEqual('.transferData.transaction.amount');
-    expect(message1).toEqual('should be number');
+    expect(message1).toEqual('should be string');
+
+    data.transferData.transaction.amount = 'abc';
+    const valid2 = validateResGetTransferStatusSchema(data);
+    expect(valid2[0]).toBe(false);
+    const { dataPath: dataPath2, message: message2 } = valid2[1][0];
+    expect(dataPath2).toEqual('.transferData.transaction.amount');
+    expect(message2).toEqual('should match pattern "^\\d*\\.?\\d*$"');
   });
 
   it('should validate failed if transferData.transaction.originator_addrs_extra is not valid', () => {
@@ -379,7 +386,7 @@ describe('test validate res_get_transfer_status_schema', () => {
           beneficiary_vasp_code: '123',
           beneficiary_addrs: ['123'],
           transaction_currency: '123',
-          amount: 123,
+          amount: '123',
           originator_addrs_extra: 123,
         },
       },
@@ -413,7 +420,7 @@ describe('test validate res_get_transfer_status_schema', () => {
           beneficiary_vasp_code: '123',
           beneficiary_addrs: ['123'],
           transaction_currency: '123',
-          amount: 123,
+          amount: '123',
           originator_addrs_extra: { DT: '001' },
           beneficiary_addrs_extra: 123,
         },
@@ -449,7 +456,7 @@ describe('test validate res_get_transfer_status_schema', () => {
           beneficiary_vasp_code: '123',
           beneficiary_addrs: ['123'],
           transaction_currency: '123',
-          amount: 123,
+          amount: '123',
           originator_addrs_extra: { DT: '001' },
           beneficiary_addrs_extra: { DT: '002' },
         },

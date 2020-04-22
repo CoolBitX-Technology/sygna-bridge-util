@@ -10,17 +10,11 @@
           "maxLength": 64
         },
         "private_info": {
-          "type": [
-            "string",
-            "null"
-          ],
+          "type": ["string", "null"],
           "minLength": 1
         },
         "transaction": {
-          "type": [
-            "object",
-            "null"
-          ],
+          "type": ["object", "null"],
           "properties": {
             "originator_vasp_code": {
               "type": "string",
@@ -63,7 +57,8 @@
               "minLength": 1
             },
             "amount": {
-              "type": "number"
+              "type": "string",
+              "pattern": "^\\d*\\.?\\d*$"
             }
           },
           "required": [
@@ -80,10 +75,7 @@
           "format": "date-time"
         },
         "permission_request_data_signature": {
-          "type": [
-            "string",
-            "null"
-          ],
+          "type": ["string", "null"],
           "minLength": 128,
           "maxLength": 128,
           "pattern": "^[0123456789A-Fa-f]+$"
@@ -96,50 +88,32 @@
             {
               "type": "string",
               "minLength": 1,
-              "enum": [
-                "ACCEPTED",
-                "REJECTED"
-              ]
+              "enum": ["ACCEPTED", "REJECTED"]
             }
           ]
         },
         "permission_signature": {
-          "type": [
-            "string",
-            "null"
-          ],
+          "type": ["string", "null"],
           "minLength": 128,
           "maxLength": 128,
           "pattern": "^[0123456789A-Fa-f]+$"
         },
         "txid": {
-          "type": [
-            "string",
-            "null"
-          ],
+          "type": ["string", "null"],
           "minLength": 1
         },
         "txid_signature": {
-          "type": [
-            "string",
-            "null"
-          ],
+          "type": ["string", "null"],
           "minLength": 128,
           "maxLength": 128,
           "pattern": "^[0123456789A-Fa-f]+$"
         },
         "created_at": {
-          "type": [
-            "string",
-            "null"
-          ],
+          "type": ["string", "null"],
           "minLength": 1
         },
         "transfer_to_originator_time": {
-          "type": [
-            "string",
-            "null"
-          ],
+          "type": ["string", "null"],
           "minLength": 1
         },
         "expire_date": {
@@ -154,13 +128,7 @@
             {
               "type": "string",
               "minLength": 1,
-              "enum": [
-                "BVRC001",
-                "BVRC002",
-                "BVRC003",
-                "BVRC004",
-                "BVRC999"
-              ]
+              "enum": ["BVRC001", "BVRC002", "BVRC003", "BVRC004", "BVRC999"]
             }
           ]
         },
@@ -197,9 +165,6 @@
       "pattern": "^[0123456789A-Fa-f]+$"
     }
   },
-  "required": [
-    "transferData",
-    "signature"
-  ],
+  "required": ["transferData", "signature"],
   "additionalProperties": false
 }
