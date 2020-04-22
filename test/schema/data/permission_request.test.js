@@ -12,7 +12,7 @@ describe('test validate permission_request_schema', () => {
     beneficiary_addrs: ['123'],
     beneficiary_addrs_extra: { DT: '002' },
     transaction_currency: '123',
-    amount: 1,
+    amount: '1.0',
   };
   const data_dt = '2019-07-29T06:29:00.123Z';
   const expire_date = 2529024749000;
@@ -298,19 +298,19 @@ describe('test validate permission_request_schema', () => {
     expect(dataPath).toEqual('.transaction');
     expect(message).toEqual("should have required property 'amount'");
 
-    data.transaction.amount = '123';
+    data.transaction.amount = 123;
     const valid1 = validatePermissionRequestSchema(data);
     expect(valid1[0]).toBe(false);
     const { dataPath: dataPath1, message: message1 } = valid1[1][0];
     expect(dataPath1).toEqual('.transaction.amount');
-    expect(message1).toEqual('should be number');
+    expect(message1).toEqual('should be string');
 
-    data.transaction.amount = 0;
+    data.transaction.amount = 'abc';
     const valid2 = validatePermissionRequestSchema(data);
     expect(valid2[0]).toBe(false);
     const { dataPath: dataPath2, message: message2 } = valid2[1][0];
     expect(dataPath2).toEqual('.transaction.amount');
-    expect(message2).toEqual('should be > 0');
+    expect(message2).toEqual('should match pattern "^\\d*\\.?\\d*$"');
   });
 
   it('should validate failed if data_dt is not valid', () => {
