@@ -52,8 +52,8 @@
               "minLength": 1
             },
             "amount": {
-              "type": "number",
-              "exclusiveMinimum": 0
+              "type": "string",
+              "pattern": "^\\d*\\.?\\d*$"
             }
           },
           "required": [
@@ -80,12 +80,7 @@
           "minimum": 0
         }
       },
-      "required": [
-        "private_info",
-        "transaction",
-        "data_dt",
-        "signature"
-      ],
+      "required": ["private_info", "transaction", "data_dt", "signature"],
       "additionalProperties": false
     },
     "callback": {
@@ -102,16 +97,10 @@
           "pattern": "^[0123456789A-Fa-f]+$"
         }
       },
-      "required": [
-        "callback_url",
-        "signature"
-      ],
+      "required": ["callback_url", "signature"],
       "additionalProperties": false
     }
   },
-  "required": [
-    "data",
-    "callback"
-  ],
+  "required": ["data", "callback"],
   "additionalProperties": false
 }

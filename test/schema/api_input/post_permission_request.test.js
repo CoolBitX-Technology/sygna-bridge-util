@@ -12,7 +12,7 @@ describe('test validate post_permission_request_schema', () => {
     beneficiary_addrs: ['123'],
     beneficiary_addrs_extra: { DT: '002' },
     transaction_currency: '123',
-    amount: 1,
+    amount: '1',
   };
   const data_dt = '2019-07-29T06:29:00.123Z';
   const expire_date = 2529024749000;
@@ -282,19 +282,19 @@ describe('test validate post_permission_request_schema', () => {
     expect(dataPath).toEqual('.data.transaction');
     expect(message).toEqual("should have required property 'amount'");
 
-    data.data.transaction.amount = '123';
+    data.data.transaction.amount = 123;
     const valid1 = validatePostPermissionRequestSchema(data);
     expect(valid1[0]).toBe(false);
     const { dataPath: dataPath1, message: message1 } = valid1[1][0];
     expect(dataPath1).toEqual('.data.transaction.amount');
-    expect(message1).toEqual('should be number');
+    expect(message1).toEqual('should be string');
 
-    data.data.transaction.amount = 0;
+    data.data.transaction.amount = 'abc';
     const valid2 = validatePostPermissionRequestSchema(data);
     expect(valid2[0]).toBe(false);
     const { dataPath: dataPath2, message: message2 } = valid2[1][0];
     expect(dataPath2).toEqual('.data.transaction.amount');
-    expect(message2).toEqual('should be > 0');
+    expect(message2).toEqual('should match pattern "^\\d*\\.?\\d*$"');
   });
 
   it('should validate failed if data.transaction.originator_addrs_extra is not valid', () => {
@@ -307,7 +307,7 @@ describe('test validate post_permission_request_schema', () => {
           beneficiary_vasp_code: '123',
           beneficiary_addrs: ['123'],
           transaction_currency: '123',
-          amount: 123,
+          amount: '123',
           originator_addrs_extra: 123,
         },
       },
@@ -336,7 +336,7 @@ describe('test validate post_permission_request_schema', () => {
           beneficiary_vasp_code: '123',
           beneficiary_addrs: ['123'],
           transaction_currency: '123',
-          amount: 123,
+          amount: '123',
           originator_addrs_extra: { DT: '001' },
           beneficiary_addrs_extra: 123,
         },
