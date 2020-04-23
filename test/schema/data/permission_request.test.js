@@ -279,40 +279,6 @@ describe('test validate permission_request_schema', () => {
     expect(message2).toEqual('should NOT be shorter than 1 characters');
   });
 
-  it('should validate failed if transaction.amount is not valid', () => {
-    const data = {
-      private_info: 'private_info',
-      transaction: {
-        originator_addrs: ['123'],
-        originator_vasp_code: '123',
-        originator_addrs_extra: { DT: '001' },
-        beneficiary_vasp_code: '123',
-        beneficiary_addrs: ['123'],
-        beneficiary_addrs_extra: { DT: '002' },
-        transaction_currency: '123',
-      },
-    };
-    const valid = validatePermissionRequestSchema(data);
-    expect(valid[0]).toBe(false);
-    const { dataPath, message } = valid[1][0];
-    expect(dataPath).toEqual('.transaction');
-    expect(message).toEqual("should have required property 'amount'");
-
-    data.transaction.amount = 123;
-    const valid1 = validatePermissionRequestSchema(data);
-    expect(valid1[0]).toBe(false);
-    const { dataPath: dataPath1, message: message1 } = valid1[1][0];
-    expect(dataPath1).toEqual('.transaction.amount');
-    expect(message1).toEqual('should be string');
-
-    data.transaction.amount = 'abc';
-    const valid2 = validatePermissionRequestSchema(data);
-    expect(valid2[0]).toBe(false);
-    const { dataPath: dataPath2, message: message2 } = valid2[1][0];
-    expect(dataPath2).toEqual('.transaction.amount');
-    expect(message2).toEqual('should match pattern "^\\d*\\.?\\d*$"');
-  });
-
   it('should validate failed if data_dt is not valid', () => {
     const data = {
       private_info,
@@ -337,6 +303,70 @@ describe('test validate permission_request_schema', () => {
     const { dataPath: dataPath2, message: message2 } = valid2[1][0];
     expect(dataPath2).toEqual('.data_dt');
     expect(message2).toEqual('should match format "date-time"');
+  });
+
+  it('should validate failed if transaction.amount is not valid', () => {
+    const data = {
+      private_info: 'private_info',
+      transaction: {
+        originator_addrs: ['123'],
+        originator_vasp_code: '123',
+        originator_addrs_extra: { DT: '001' },
+        beneficiary_vasp_code: '123',
+        beneficiary_addrs: ['123'],
+        beneficiary_addrs_extra: { DT: '002' },
+        transaction_currency: '123',
+      },
+      data_dt,
+    };
+    const valid = validatePermissionRequestSchema(data);
+    expect(valid[0]).toBe(false);
+    const { dataPath, message } = valid[1][0];
+    expect(dataPath).toEqual('.transaction');
+    expect(message).toEqual("should have required property 'amount'");
+
+    data.transaction.amount = 123;
+    const valid1 = validatePermissionRequestSchema(data);
+    expect(valid1[0]).toBe(false);
+    const { dataPath: dataPath1, message: message1 } = valid1[1][0];
+    expect(dataPath1).toEqual('.transaction.amount');
+    expect(message1).toEqual('should be string');
+
+    data.transaction.amount = '';
+    const valid2 = validatePermissionRequestSchema(data);
+    expect(valid2[0]).toBe(false);
+    const { dataPath: dataPath2, message: message2 } = valid2[1][0];
+    expect(dataPath2).toEqual('.transaction.amount');
+    expect(message2).toEqual('should NOT be shorter than 1 characters');
+
+    data.transaction.amount = 'abc';
+    const valid3 = validatePermissionRequestSchema(data);
+    expect(valid3[0]).toBe(false);
+
+    const { dataPath: dataPath3, message: message3 } = valid3[1][0];
+    expect(dataPath3).toEqual('.transaction.amount');
+    expect(message3).toEqual('should be valid number');
+
+    data.transaction.amount = '1.a';
+    const valid4 = validatePermissionRequestSchema(data);
+    expect(valid4[0]).toBe(false);
+    const { dataPath: dataPath4, message: message4 } = valid4[1][0];
+    expect(dataPath4).toEqual('.transaction.amount');
+    expect(message4).toEqual('should be valid number');
+
+    data.transaction.amount = '0';
+    const valid5 = validatePermissionRequestSchema(data);
+    expect(valid5[0]).toBe(false);
+    const { dataPath: dataPath5, message: message5 } = valid5[1][0];
+    expect(dataPath5).toEqual('.transaction.amount');
+    expect(message5).toEqual('should be > 0');
+
+    data.transaction.amount = '-1';
+    const valid6 = validatePermissionRequestSchema(data);
+    expect(valid6[0]).toBe(false);
+    const { dataPath: dataPath6, message: message6 } = valid6[1][0];
+    expect(dataPath6).toEqual('.transaction.amount');
+    expect(message6).toEqual('should be > 0');
   });
 
   it('should validate failed if expire_date is not valid', () => {

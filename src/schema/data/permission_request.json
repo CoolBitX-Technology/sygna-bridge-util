@@ -50,7 +50,7 @@
         },
         "amount": {
           "type": "string",
-          "pattern": "^\\d*\\.?\\d*$"
+          "minLength": 1
         }
       },
       "required": [
