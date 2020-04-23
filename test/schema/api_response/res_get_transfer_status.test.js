@@ -340,41 +340,6 @@ describe('test validate res_get_transfer_status_schema', () => {
     expect(message2).toEqual('should NOT be shorter than 1 characters');
   });
 
-  it('should validate failed if transferData.transaction.amount is not valid', () => {
-    const data = {
-      transferData: {
-        transfer_id,
-        private_info: 'private_info',
-        transaction: {
-          originator_addrs: ['123'],
-          originator_vasp_code: '123',
-          beneficiary_vasp_code: '123',
-          beneficiary_addrs: ['123'],
-          transaction_currency: '123',
-        },
-      },
-    };
-    const valid = validateResGetTransferStatusSchema(data);
-    expect(valid[0]).toBe(false);
-    const { dataPath, message } = valid[1][0];
-    expect(dataPath).toEqual('.transferData.transaction');
-    expect(message).toEqual("should have required property 'amount'");
-
-    data.transferData.transaction.amount = 123;
-    const valid1 = validateResGetTransferStatusSchema(data);
-    expect(valid1[0]).toBe(false);
-    const { dataPath: dataPath1, message: message1 } = valid1[1][0];
-    expect(dataPath1).toEqual('.transferData.transaction.amount');
-    expect(message1).toEqual('should be string');
-
-    data.transferData.transaction.amount = 'abc';
-    const valid2 = validateResGetTransferStatusSchema(data);
-    expect(valid2[0]).toBe(false);
-    const { dataPath: dataPath2, message: message2 } = valid2[1][0];
-    expect(dataPath2).toEqual('.transferData.transaction.amount');
-    expect(message2).toEqual('should match pattern "^\\d*\\.?\\d*$"');
-  });
-
   it('should validate failed if transferData.transaction.originator_addrs_extra is not valid', () => {
     const data = {
       transferData: {
@@ -888,6 +853,80 @@ describe('test validate res_get_transfer_status_schema', () => {
     const { dataPath: dataPath5, message: message5 } = valid5[1][0];
     expect(dataPath5).toEqual('.signature');
     expect(message5).toEqual('should match pattern "^[0123456789A-Fa-f]+$"');
+  });
+
+  it('should validate failed if transferData.transaction.amount is not valid', () => {
+    const data = {
+      transferData: {
+        transfer_id,
+        private_info,
+        transaction: {
+          originator_addrs: ['123'],
+          originator_vasp_code: '123',
+          originator_addrs_extra: { DT: '001' },
+          beneficiary_vasp_code: '123',
+          beneficiary_addrs: ['123'],
+          beneficiary_addrs_extra: { DT: '002' },
+          transaction_currency: '123',
+        },
+        data_dt,
+        permission_request_data_signature,
+        permission_status: ACCEPTED,
+        permission_signature,
+        txid,
+        txid_signature,
+        created_at,
+        transfer_to_originator_time,
+      },
+      signature,
+    };
+    const valid = validateResGetTransferStatusSchema(data);
+    expect(valid[0]).toBe(false);
+    const { dataPath, message } = valid[1][0];
+    expect(dataPath).toEqual('.transferData.transaction');
+    expect(message).toEqual("should have required property 'amount'");
+
+    data.transferData.transaction.amount = 123;
+    const valid1 = validateResGetTransferStatusSchema(data);
+    expect(valid1[0]).toBe(false);
+    const { dataPath: dataPath1, message: message1 } = valid1[1][0];
+    expect(dataPath1).toEqual('.transferData.transaction.amount');
+    expect(message1).toEqual('should be string');
+
+    data.transferData.transaction.amount = '';
+    const valid2 = validateResGetTransferStatusSchema(data);
+    expect(valid2[0]).toBe(false);
+    const { dataPath: dataPath2, message: message2 } = valid2[1][0];
+    expect(dataPath2).toEqual('.transferData.transaction.amount');
+    expect(message2).toEqual('should NOT be shorter than 1 characters');
+
+    data.transferData.transaction.amount = 'abc';
+    const valid3 = validateResGetTransferStatusSchema(data);
+    expect(valid3[0]).toBe(false);
+    const { dataPath: dataPath3, message: message3 } = valid3[1][0];
+    expect(dataPath3).toEqual('.transferData.transaction.amount');
+    expect(message3).toEqual('should be valid number');
+
+    data.transferData.transaction.amount = '1.a';
+    const valid4 = validateResGetTransferStatusSchema(data);
+    expect(valid4[0]).toBe(false);
+    const { dataPath: dataPath4, message: message4 } = valid4[1][0];
+    expect(dataPath4).toEqual('.transferData.transaction.amount');
+    expect(message4).toEqual('should be valid number');
+
+    data.transferData.transaction.amount = '0';
+    const valid5 = validateResGetTransferStatusSchema(data);
+    expect(valid5[0]).toBe(false);
+    const { dataPath: dataPath5, message: message5 } = valid5[1][0];
+    expect(dataPath5).toEqual('.transferData.transaction.amount');
+    expect(message5).toEqual('should be > 0');
+
+    data.transferData.transaction.amount = '-1';
+    const valid6 = validateResGetTransferStatusSchema(data);
+    expect(valid6[0]).toBe(false);
+    const { dataPath: dataPath6, message: message6 } = valid6[1][0];
+    expect(dataPath6).toEqual('.transferData.transaction.amount');
+    expect(message6).toEqual('should be > 0');
   });
 
   it('should validate success', () => {
