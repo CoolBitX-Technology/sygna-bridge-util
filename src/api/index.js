@@ -154,8 +154,8 @@ class API {
   }
 
   /**
-   * revise beneficiary endpoint url
-   * @param {{vasp_code: string, beneficiary_endpoint_url:string, signature:string}} data
+   * This allows VASP to update the Beneficiary's callback URL programmatically.
+   * @param {{vasp_code: string,callback_permission_request_url?:string,callback_txid_url?:string, signature:string}} data
    * @return {Promise}
    */
   async postBeneficiaryEndpointUrl(data) {
