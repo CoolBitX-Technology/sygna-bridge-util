@@ -14,7 +14,9 @@ jest.mock('../../src/utils', () => ({
 
 describe('test signBeneficiaryEndpointUrl', () => {
   const vasp_code = 'VASPUSNY1';
-  const beneficiary_endpoint_url = 'https://api.sygna.io/api/v1.1.0/bridge/';
+  const callback_permission_request_url =
+    'https://api.sygna.io/api/v1.1.0/bridge/permission-request';
+  const callback_txid_url = 'https://api.sygna.io/api/v1.1.0/bridge/txid';
 
   let crypto;
   jest.isolateModules(() => {
@@ -35,7 +37,7 @@ describe('test signBeneficiaryEndpointUrl', () => {
     it('should validateBeneficiaryEndpointUrlSchema be called with correct parameters if signBeneficiaryEndpointUrl is called', () => {
       const fakeData = {
         vasp_code,
-        beneficiary_endpoint_url,
+        callback_permission_request_url,
       };
       const fakeError = [
         {
@@ -79,7 +81,7 @@ describe('test signBeneficiaryEndpointUrl', () => {
     it('should validatePrivateKey be called with correct parameters if signBeneficiaryEndpointUrl is called', () => {
       const fakeData = {
         vasp_code,
-        beneficiary_endpoint_url,
+        callback_permission_request_url,
       };
       signBeneficiaryEndpointUrl(fakeData, 123);
       expect(validatePrivateKey.mock.calls.length).toBe(1);
@@ -103,10 +105,10 @@ describe('test signBeneficiaryEndpointUrl', () => {
       validatePrivateKey.mockReset();
     });
 
-    it('should signObject be called with correct parameters if signTxId is called', () => {
+    it('should signObject be called with correct parameters if signBeneficiaryEndpointUrl is called', () => {
       const fakeData = {
         vasp_code,
-        beneficiary_endpoint_url,
+        callback_permission_request_url,
       };
       const sortedData = sortBeneficiaryEndpointUrlData(fakeData);
       signBeneficiaryEndpointUrl(fakeData, FAKE_PRIVATE_KEY);
@@ -121,18 +123,93 @@ describe('test signBeneficiaryEndpointUrl', () => {
   describe('test signature', () => {
     const { signBeneficiaryEndpointUrl, verifyObject } = crypto;
     it('should object which is return by signBeneficiaryEndpointUrl be correct', () => {
-      const fakeData = { beneficiary_endpoint_url, vasp_code };
+      const fakeData = { callback_permission_request_url, vasp_code };
       const sortedData = sortBeneficiaryEndpointUrlData(fakeData);
       const signature = signBeneficiaryEndpointUrl(fakeData, FAKE_PRIVATE_KEY);
       expect(JSON.stringify(signature)).toBe(
         JSON.stringify({
           ...sortedData,
           signature:
-            '72283fb8ba3ceba13bcb29e263fb283eabe4b76c9db114dfad5f9da4ef1d664077e74b1f27133efb7450ef5bd4b72b35f59ee609703a74f6692e9b5ca9c4f8f5',
+            '0d02fa6a3661fa4cd9beeda27b04a1b990aa191307e6c192e943499855d49e2e7ebdec9fee5714fcb3b43d145fba13e02a9a7f5282fb270ad6c05a72cfe85ec4',
         }),
       );
       const isValid = verifyObject(signature, FAKE_PUBLIC_KEY);
       expect(isValid).toBe(true);
+
+      const fakeData1 = { callback_txid_url, vasp_code };
+      const sortedData1 = sortBeneficiaryEndpointUrlData(fakeData1);
+      const signature1 = signBeneficiaryEndpointUrl(
+        fakeData1,
+        FAKE_PRIVATE_KEY,
+      );
+      expect(JSON.stringify(signature1)).toBe(
+        JSON.stringify({
+          ...sortedData1,
+          signature:
+            '9520de437bc7f8bd47404fa630faeb2d0c408fc895245f29cc292fdac564a50853ccd5014415f01580361ad2cc317f0d45b940c21b6464fbedeaf7829dc11c76',
+        }),
+      );
+      const isValid1 = verifyObject(signature1, FAKE_PUBLIC_KEY);
+      expect(isValid1).toBe(true);
+
+      const fakeData2 = {
+        callback_txid_url,
+        vasp_code,
+        callback_permission_request_url,
+      };
+      const sortedData2 = sortBeneficiaryEndpointUrlData(fakeData2);
+      const signature2 = signBeneficiaryEndpointUrl(
+        fakeData2,
+        FAKE_PRIVATE_KEY,
+      );
+      expect(JSON.stringify(signature2)).toBe(
+        JSON.stringify({
+          ...sortedData2,
+          signature:
+            'dfd9cd0a52ae368d8e149985791cedc3a52960fb67df15d327d7b9221f3ec1677d9f673ef75151c6f4964294f9bdce3e2dfc87a269c4f2b0722a809ad9f67e00',
+        }),
+      );
+      const isValid2 = verifyObject(signature2, FAKE_PUBLIC_KEY);
+      expect(isValid2).toBe(true);
+
+      const fakeData3 = {
+        callback_txid_url: null,
+        vasp_code,
+      };
+      const sortedData3 = sortBeneficiaryEndpointUrlData(fakeData3);
+      const signature3 = signBeneficiaryEndpointUrl(
+        fakeData3,
+        FAKE_PRIVATE_KEY,
+      );
+      expect(JSON.stringify(signature3)).toBe(
+        JSON.stringify({
+          ...sortedData3,
+          signature:
+            '4e08225e0c74cff9078b13a1b19fb330d2b59c66b986ec046ce3063c7cab13b06adf476d09ab35b8f02143f80cba9e888b7bd4ba0b1bb43bfc9cac6b3d73ee73',
+        }),
+      );
+      const isValid3 = verifyObject(signature3, FAKE_PUBLIC_KEY);
+      expect(isValid3).toBe(true);
+
+      const fakeData4 = {
+        callback_txid_url: null,
+        vasp_code,
+        callback_permission_request_url,
+      };
+      const sortedData4 = sortBeneficiaryEndpointUrlData(fakeData4);
+      const signature4 = signBeneficiaryEndpointUrl(
+        fakeData4,
+        FAKE_PRIVATE_KEY,
+      );
+      expect(JSON.stringify(signature4)).toBe(
+        JSON.stringify({
+          ...sortedData4,
+          signature:
+            '579df16183440bd73df59985242ae53aa79a37484f7951b82cb91c081e5e543101a3b9ff8f89fda3a10dfd18edbbdca06fd50b890b214497b980fced3b01bbd7',
+        }),
+      );
+      const isValid4 = verifyObject(signature4, FAKE_PUBLIC_KEY);
+      expect(isValid4).toBe(true);
     });
   });
 });
