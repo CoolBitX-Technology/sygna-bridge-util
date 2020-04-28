@@ -77,39 +77,16 @@ describe('test validate callback_permission_request_url_schema', () => {
     data.callback_txid_url = 123;
     const valid = validateBeneficiaryEndpointUrlSchema(data);
     expect(valid[0]).toBe(false);
-    const messages = valid[1];
-    expect(messages.length).toBe(3);
-
-    const { dataPath, message } = messages[0];
+    const { dataPath, message } = valid[1][0];
     expect(dataPath).toEqual('.callback_txid_url');
-    expect(message).toEqual('should be null');
-
-    const { dataPath: dataPath1, message: message1 } = messages[1];
-    expect(dataPath1).toEqual('.callback_txid_url');
-    expect(message1).toEqual('should be string');
-
-    const { dataPath: dataPath2, message: message2 } = messages[2];
-    expect(dataPath2).toEqual('.callback_txid_url');
-    expect(message2).toEqual('should match exactly one schema in oneOf');
+    expect(message).toEqual('should be string');
 
     data.callback_txid_url = 'abcde';
     const valid1 = validateBeneficiaryEndpointUrlSchema(data);
     expect(valid1[0]).toBe(false);
-
-    const messages_1 = valid1[1];
-    expect(messages_1.length).toBe(3);
-
-    const { dataPath: dataPath_1, message: message_1 } = messages_1[0];
-    expect(dataPath_1).toEqual('.callback_txid_url');
-    expect(message_1).toEqual('should be null');
-
-    const { dataPath: dataPath_2, message: message_2 } = messages_1[1];
-    expect(dataPath_2).toEqual('.callback_txid_url');
-    expect(message_2).toEqual('should match format "uri"');
-
-    const { dataPath: dataPath_3, message: message_3 } = messages_1[2];
-    expect(dataPath_3).toEqual('.callback_txid_url');
-    expect(message_3).toEqual('should match exactly one schema in oneOf');
+    const { dataPath: dataPath1, message: message1 } = valid1[1][0];
+    expect(dataPath1).toEqual('.callback_txid_url');
+    expect(message1).toEqual('should match format "uri"');
   });
 
   it('should validate success', () => {
@@ -134,20 +111,5 @@ describe('test validate callback_permission_request_url_schema', () => {
     };
     const valid2 = validateBeneficiaryEndpointUrlSchema(data2);
     expect(valid2[0]).toBe(true);
-
-    const data3 = {
-      vasp_code,
-      callback_txid_url: null,
-    };
-    const valid3 = validateBeneficiaryEndpointUrlSchema(data3);
-    expect(valid3[0]).toBe(true);
-
-    const data4 = {
-      vasp_code,
-      callback_permission_request_url,
-      callback_txid_url: null,
-    };
-    const valid4 = validateBeneficiaryEndpointUrlSchema(data4);
-    expect(valid4[0]).toBe(true);
   });
 });

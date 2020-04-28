@@ -137,7 +137,7 @@ exports.sortBeneficiaryEndpointUrlData = (data) => {
     sortedData.callback_permission_request_url =
       data.callback_permission_request_url;
   }
-  if (data.callback_txid_url || data.callback_txid_url === null) {
+  if (data.callback_txid_url) {
     sortedData.callback_txid_url = data.callback_txid_url;
   }
   return sortedData;

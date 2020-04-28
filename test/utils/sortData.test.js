@@ -889,30 +889,6 @@ describe('test sortData', () => {
           callback_permission_request_url,
         }),
       );
-
-      const fakeData3 = {
-        callback_txid_url: null,
-        vasp_code,
-      };
-      expect(JSON.stringify(sortBeneficiaryEndpointUrlData(fakeData3))).toBe(
-        JSON.stringify({
-          vasp_code,
-          callback_txid_url: null,
-        }),
-      );
-
-      const fakeData4 = {
-        callback_txid_url: null,
-        vasp_code,
-        callback_permission_request_url,
-      };
-      expect(JSON.stringify(sortBeneficiaryEndpointUrlData(fakeData4))).toBe(
-        JSON.stringify({
-          vasp_code,
-          callback_permission_request_url,
-          callback_txid_url: null,
-        }),
-      );
     });
     it('should ignore additional key', () => {
       const fakeData = {
@@ -980,38 +956,6 @@ describe('test sortData', () => {
         JSON.stringify({
           vasp_code,
           callback_txid_url,
-          signature,
-        }),
-      );
-
-      const fakeData3 = {
-        signature,
-        callback_txid_url: null,
-        vasp_code,
-      };
-      expect(
-        JSON.stringify(sortPostBeneficiaryEndpointUrlData(fakeData3)),
-      ).toBe(
-        JSON.stringify({
-          vasp_code,
-          callback_txid_url: null,
-          signature,
-        }),
-      );
-
-      const fakeData4 = {
-        callback_txid_url: null,
-        signature,
-        vasp_code,
-        callback_permission_request_url,
-      };
-      expect(
-        JSON.stringify(sortPostBeneficiaryEndpointUrlData(fakeData4)),
-      ).toBe(
-        JSON.stringify({
-          vasp_code,
-          callback_permission_request_url,
-          callback_txid_url: null,
           signature,
         }),
       );

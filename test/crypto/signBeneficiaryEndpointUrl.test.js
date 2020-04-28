@@ -171,45 +171,6 @@ describe('test signBeneficiaryEndpointUrl', () => {
       );
       const isValid2 = verifyObject(signature2, FAKE_PUBLIC_KEY);
       expect(isValid2).toBe(true);
-
-      const fakeData3 = {
-        callback_txid_url: null,
-        vasp_code,
-      };
-      const sortedData3 = sortBeneficiaryEndpointUrlData(fakeData3);
-      const signature3 = signBeneficiaryEndpointUrl(
-        fakeData3,
-        FAKE_PRIVATE_KEY,
-      );
-      expect(JSON.stringify(signature3)).toBe(
-        JSON.stringify({
-          ...sortedData3,
-          signature:
-            '4e08225e0c74cff9078b13a1b19fb330d2b59c66b986ec046ce3063c7cab13b06adf476d09ab35b8f02143f80cba9e888b7bd4ba0b1bb43bfc9cac6b3d73ee73',
-        }),
-      );
-      const isValid3 = verifyObject(signature3, FAKE_PUBLIC_KEY);
-      expect(isValid3).toBe(true);
-
-      const fakeData4 = {
-        callback_txid_url: null,
-        vasp_code,
-        callback_permission_request_url,
-      };
-      const sortedData4 = sortBeneficiaryEndpointUrlData(fakeData4);
-      const signature4 = signBeneficiaryEndpointUrl(
-        fakeData4,
-        FAKE_PRIVATE_KEY,
-      );
-      expect(JSON.stringify(signature4)).toBe(
-        JSON.stringify({
-          ...sortedData4,
-          signature:
-            '579df16183440bd73df59985242ae53aa79a37484f7951b82cb91c081e5e543101a3b9ff8f89fda3a10dfd18edbbdca06fd50b890b214497b980fced3b01bbd7',
-        }),
-      );
-      const isValid4 = verifyObject(signature4, FAKE_PUBLIC_KEY);
-      expect(isValid4).toBe(true);
     });
   });
 });

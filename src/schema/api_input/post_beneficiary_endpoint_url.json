@@ -10,15 +10,8 @@
       "format": "uri"
     },
     "callback_txid_url": {
-      "oneOf": [
-        {
-          "type": "null"
-        },
-        {
-          "type": "string",
-          "format": "uri"
-        }
-      ]
+      "type": "string",
+      "format": "uri"
     },
     "signature": {
       "type": "string",
