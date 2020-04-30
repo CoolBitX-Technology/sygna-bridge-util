@@ -565,10 +565,15 @@ describe('test api', () => {
 
   describe('test postBeneficiaryEndpointUrl', () => {
     const vasp_code = 'QQQQKRQQ';
-    const beneficiary_endpoint_url = 'https://api.sygna.io/api/v1.1.0/bridge/';
+    const callback_permission_request_url =
+      'https://api.sygna.io/api/v1.1.0/bridge/permission-request';
+    const callback_txid_url = 'https://api.sygna.io/api/v1.1.0/bridge/txid';
+    const signature =
+      '6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b';
+
     const fakeData = {
-      beneficiary_endpoint_url,
-      signature: '1234567890',
+      callback_permission_request_url,
+      signature,
       vasp_code,
     };
     const instance = new apiModule.API(api_key, domain);
@@ -603,6 +608,7 @@ describe('test api', () => {
         fakeData,
       );
 
+      fakeData.callback_txid_url = callback_txid_url;
       try {
         await instance.postBeneficiaryEndpointUrl(fakeData);
         fail('expected error was not occurred');
@@ -616,9 +622,9 @@ describe('test api', () => {
       expect(validatePostBeneficiaryEndpointUrlSchema.mock.calls.length).toBe(
         2,
       );
-      expect(validatePostBeneficiaryEndpointUrlSchema.mock.calls[1][0]).toEqual(
-        fakeData,
-      );
+      expect(
+        validatePostBeneficiaryEndpointUrlSchema.mock.calls[1][0],
+      ).toEqual({ ...fakeData, callback_txid_url });
 
       validatePostBeneficiaryEndpointUrlSchema.mockReturnValue([true]);
     });
@@ -634,6 +640,59 @@ describe('test api', () => {
         JSON.stringify(sortedData),
       );
       expect(instance.postSB.mock.calls.length).toBe(1);
+
+      const fakeData1 = {
+        signature,
+        callback_txid_url,
+        vasp_code,
+      };
+
+      const sortedData1 = sortPostBeneficiaryEndpointUrlData(fakeData1);
+      await instance.postBeneficiaryEndpointUrl(fakeData1);
+
+      expect(instance.postSB.mock.calls[1][0]).toBe(
+        `${domain}api/v1.1.0/bridge/vasp/beneficiary-endpoint-url`,
+      );
+      expect(JSON.stringify(instance.postSB.mock.calls[1][1])).toBe(
+        JSON.stringify(sortedData1),
+      );
+      expect(instance.postSB.mock.calls.length).toBe(2);
+
+      const fakeData2 = {
+        signature,
+        callback_txid_url,
+        vasp_code,
+        callback_permission_request_url,
+      };
+
+      const sortedData2 = sortPostBeneficiaryEndpointUrlData(fakeData2);
+      await instance.postBeneficiaryEndpointUrl(fakeData2);
+
+      expect(instance.postSB.mock.calls[2][0]).toBe(
+        `${domain}api/v1.1.0/bridge/vasp/beneficiary-endpoint-url`,
+      );
+      expect(JSON.stringify(instance.postSB.mock.calls[2][1])).toBe(
+        JSON.stringify(sortedData2),
+      );
+      expect(instance.postSB.mock.calls.length).toBe(3);
+
+      const fakeData3 = {
+        signature,
+        callback_txid_url: null,
+        vasp_code,
+        callback_permission_request_url,
+      };
+
+      const sortedData3 = sortPostBeneficiaryEndpointUrlData(fakeData3);
+      await instance.postBeneficiaryEndpointUrl(fakeData3);
+
+      expect(instance.postSB.mock.calls[3][0]).toBe(
+        `${domain}api/v1.1.0/bridge/vasp/beneficiary-endpoint-url`,
+      );
+      expect(JSON.stringify(instance.postSB.mock.calls[3][1])).toBe(
+        JSON.stringify(sortedData3),
+      );
+      expect(instance.postSB.mock.calls.length).toBe(4);
     });
   });
 });

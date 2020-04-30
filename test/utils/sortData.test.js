@@ -850,64 +850,129 @@ describe('test sortData', () => {
   });
   describe('test sortBeneficiaryEndpointUrlData', () => {
     const vasp_code = 'QQQQKRQQ';
-    const beneficiary_endpoint_url = 'https://api.sygna.io/api/v1.1.0/bridge/';
+    const callback_permission_request_url =
+      'https://api.sygna.io/api/v1.1.0/bridge/permission-request';
+    const callback_txid_url = 'https://api.sygna.io/api/v1.1.0/bridge/txid';
+
     it('should return sorted data', () => {
       const fakeData = {
-        beneficiary_endpoint_url,
+        callback_txid_url,
         vasp_code,
+        callback_permission_request_url,
       };
       expect(JSON.stringify(sortBeneficiaryEndpointUrlData(fakeData))).toBe(
         JSON.stringify({
           vasp_code,
-          beneficiary_endpoint_url,
+          callback_permission_request_url,
+          callback_txid_url,
+        }),
+      );
+
+      const fakeData1 = {
+        callback_txid_url,
+        vasp_code,
+      };
+      expect(JSON.stringify(sortBeneficiaryEndpointUrlData(fakeData1))).toBe(
+        JSON.stringify({
+          vasp_code,
+          callback_txid_url,
+        }),
+      );
+
+      const fakeData2 = {
+        callback_permission_request_url,
+        vasp_code,
+      };
+      expect(JSON.stringify(sortBeneficiaryEndpointUrlData(fakeData2))).toBe(
+        JSON.stringify({
+          vasp_code,
+          callback_permission_request_url,
         }),
       );
     });
     it('should ignore additional key', () => {
       const fakeData = {
         callback_url: 'https://api.sygna.io/api/v1.1.0/bridge/',
-        beneficiary_endpoint_url,
+        callback_txid_url,
         vasp_code,
+        callback_permission_request_url,
       };
       expect(JSON.stringify(sortBeneficiaryEndpointUrlData(fakeData))).toBe(
         JSON.stringify({
           vasp_code,
-          beneficiary_endpoint_url,
+          callback_permission_request_url,
+          callback_txid_url,
         }),
       );
     });
   });
   describe('test sortPostBeneficiaryEndpointUrlData', () => {
     const vasp_code = 'QQQQKRQQ';
-    const beneficiary_endpoint_url = 'https://api.sygna.io/api/v1.1.0/bridge/';
+    const callback_permission_request_url =
+      'https://api.sygna.io/api/v1.1.0/bridge/permission-request';
+    const callback_txid_url = 'https://api.sygna.io/api/v1.1.0/bridge/txid';
     const signature =
       '6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b';
 
     it('should return sorted data', () => {
       const fakeData = {
-        beneficiary_endpoint_url,
+        callback_txid_url,
         signature,
         vasp_code,
+        callback_permission_request_url,
       };
       expect(JSON.stringify(sortPostBeneficiaryEndpointUrlData(fakeData))).toBe(
         JSON.stringify({
           vasp_code,
-          beneficiary_endpoint_url,
+          callback_permission_request_url,
+          callback_txid_url,
+          signature,
+        }),
+      );
+
+      const fakeData1 = {
+        signature,
+        vasp_code,
+        callback_permission_request_url,
+      };
+      expect(
+        JSON.stringify(sortPostBeneficiaryEndpointUrlData(fakeData1)),
+      ).toBe(
+        JSON.stringify({
+          vasp_code,
+          callback_permission_request_url,
+          signature,
+        }),
+      );
+
+      const fakeData2 = {
+        signature,
+        callback_txid_url,
+        vasp_code,
+      };
+      expect(
+        JSON.stringify(sortPostBeneficiaryEndpointUrlData(fakeData2)),
+      ).toBe(
+        JSON.stringify({
+          vasp_code,
+          callback_txid_url,
           signature,
         }),
       );
     });
     it('should ignore additional key', () => {
       const fakeData = {
+        callback_txid_url,
         signature,
         callback_url: 'https://api.sygna.io/api/v1.1.0/bridge/',
-        beneficiary_endpoint_url,
+        callback_permission_request_url,
         vasp_code,
       };
       expect(JSON.stringify(sortPostBeneficiaryEndpointUrlData(fakeData))).toBe(
         JSON.stringify({
           vasp_code,
-          beneficiary_endpoint_url,
+          callback_permission_request_url,
+          callback_txid_url,
           signature,
         }),
       );
