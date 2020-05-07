@@ -23,7 +23,7 @@ const beneficiary_endpoint_url_schema = require('../schema/data/beneficiary_endp
 const post_beneficiary_endpoint_url_schema = require('../schema/api_input/post_beneficiary_endpoint_url.json');
 
 const get_currencies_querystring_schema = require('../schema/api_input/get_currencies_querystring.json');
-const res_get_currencies_schema = require('../schema/api_response/res_get_currencies_schema.json');
+const res_get_currencies_schema = require('../schema/api_response/res_get_currencies.json');
 
 exports.validateSchema = (paramObj, schema) => {
   const ajv = new Ajv();
