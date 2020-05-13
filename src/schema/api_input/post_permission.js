@@ -34,6 +34,9 @@ const schema = {
         "BVRC002",
         "BVRC003",
         "BVRC004",
+        "BVRC005",
+        "BVRC006",
+        "BVRC007",
         "BVRC999"
       ]
     },
