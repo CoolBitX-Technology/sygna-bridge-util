@@ -1,4 +1,2 @@
-node_modules/
-.jshintrc
-package-lock.json
-.idea/
+coverage
+node_modules

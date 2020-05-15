@@ -1,0 +1,43 @@
+{
+  "type": "object",
+  "properties": {
+    "supported_coins": {
+      "type": "array",
+      "items": [
+        {
+          "type": "object",
+          "properties": {
+            "currency_id": {
+              "type": "string",
+              "minLength": 1
+            },
+            "currency_symbol": {
+              "type": "string",
+              "minLength": 1
+            },
+            "currency_name": {
+              "type": "string",
+              "minLength": 1
+            },
+            "is_active": {
+              "type": "boolean"
+            },
+            "addr_extra_info": {
+              "type": "array",
+              "items": { "type": "string" }
+            }
+          },
+          "required": [
+            "currency_id",
+            "currency_symbol",
+            "currency_name",
+            "is_active",
+            "addr_extra_info"
+          ]
+        }
+      ]
+    }
+  },
+  "required": ["supported_coins"],
+  "additionalProperties": false
+}
