@@ -1,14 +1,9 @@
 const { FAKE_PRIVATE_KEY, FAKE_PUBLIC_KEY } = require('../fakeKeys');
 
-const {
-  validatePermissionRequestSchema,
-  validatePrivateKey,
-  sortPermissionRequestData,
-} = require('../../src/utils');
+const { validatePrivateKey } = require('../../src/utils');
 
 jest.mock('../../src/utils', () => ({
   ...jest.requireActual('../../src/utils'),
-  validatePermissionRequestSchema: jest.fn().mockReturnValue([true]),
   validatePrivateKey: jest.fn(),
 }));
 
@@ -24,60 +19,7 @@ describe('test signPermissionRequest', () => {
     const { signPermissionRequest } = crypto;
     beforeEach(() => {
       crypto.signObject.mockClear();
-      validatePermissionRequestSchema.mockClear();
       validatePrivateKey.mockClear();
-    });
-
-    it('should validatePermissionRequestSchema be called with correct parameters if signPermissionRequest is called', () => {
-      const fakeData = {
-        data_dt: '2019-07-29T06:29:00.123Z',
-        private_info:
-          '6b51d431df5d7f141cbececcf79edf3dd861c3b4069f0b11661a3eefacbba918',
-        signature: '1234567890',
-        transaction: {
-          transaction_currency: '0x80000000',
-          originator_addrs: ['16bUGjvunVp7LqygLHrTvHyvbvfeuRCWAh'],
-          originator_vasp_code: 'VASPTWTP1',
-          beneficiary_addrs: ['3CHgkx946yyueucCMiJhyH2Vg5kBBvfSGH'],
-          amount: 1,
-          beneficiary_vasp_code: 'VASPTWTP2',
-        },
-      };
-      const fakeError = [
-        {
-          keyword: 'test',
-          dataPath: '',
-          schemaPath: '#/properties',
-          params: { comparison: '>=' },
-          message: `error from validatePermissionRequestSchema`,
-        },
-      ];
-      validatePermissionRequestSchema.mockReset();
-
-      validatePermissionRequestSchema
-        .mockReturnValueOnce([true])
-        .mockReturnValue([false, fakeError]);
-
-      signPermissionRequest(fakeData, FAKE_PRIVATE_KEY);
-      expect(validatePermissionRequestSchema.mock.calls.length).toBe(1);
-      expect(validatePermissionRequestSchema.mock.calls[0][0]).toEqual(
-        fakeData,
-      );
-
-      try {
-        signPermissionRequest(fakeData, FAKE_PRIVATE_KEY);
-        fail('expected error was not occurred');
-      } catch (error) {
-        const { keyword, message } = error[0];
-        expect(keyword).toEqual('test');
-        expect(message).toEqual('error from validatePermissionRequestSchema');
-      }
-      expect(validatePermissionRequestSchema.mock.calls.length).toBe(2);
-      expect(validatePermissionRequestSchema.mock.calls[1][0]).toEqual(
-        fakeData,
-      );
-
-      validatePermissionRequestSchema.mockReturnValue([true]);
     });
 
     it('should validatePrivateKey be called with correct parameters if signPermissionRequest is called', () => {
@@ -87,12 +29,35 @@ describe('test signPermissionRequest', () => {
           '6b51d431df5d7f141cbececcf79edf3dd861c3b4069f0b11661a3eefacbba918',
         signature: '1234567890',
         transaction: {
-          transaction_currency: '0x80000000',
-          originator_addrs: ['16bUGjvunVp7LqygLHrTvHyvbvfeuRCWAh'],
-          originator_vasp_code: 'VASPTWTP1',
-          beneficiary_addrs: ['3CHgkx946yyueucCMiJhyH2Vg5kBBvfSGH'],
-          amount: 1,
-          beneficiary_vasp_code: 'VASPTWTP2',
+          originator_vasp: {
+            vasp_code: 'VASPJPJT4',
+            addrs: [
+              {
+                address: 'bnb1vynn9hamtqg9me7y6frja0rvfva9saprl55gl4',
+                addr_extra_info: [
+                  {
+                    memo_text: '634346542',
+                  },
+                ],
+              },
+            ],
+          },
+          beneficiary_vasp: {
+            vasp_code: 'VASPJPJT3',
+            addrs: [
+              {
+                address: 'bnb1hj767k8nlf0jn6p3c3wvl0r0qfwfrvuxrqlxce',
+                addr_extra_info: [
+                  {
+                    memo_text: 'Idzl1532434853',
+                  },
+                ],
+              },
+            ],
+          },
+          currency_id:
+            'sygna:0x800002ca.bnb1u9j9hkst6gf09dkdvxlj7puk8c7vh68a0kkmht',
+          amount: '0.1234',
         },
       };
 
@@ -125,18 +90,45 @@ describe('test signPermissionRequest', () => {
           '6b51d431df5d7f141cbececcf79edf3dd861c3b4069f0b11661a3eefacbba918',
         signature: '1234567890',
         transaction: {
-          transaction_currency: '0x80000000',
-          originator_addrs: ['16bUGjvunVp7LqygLHrTvHyvbvfeuRCWAh'],
-          originator_vasp_code: 'VASPTWTP1',
-          beneficiary_addrs: ['3CHgkx946yyueucCMiJhyH2Vg5kBBvfSGH'],
-          amount: 1,
-          beneficiary_vasp_code: 'VASPTWTP2',
+          title: 'Transaction',
+          description: 'Please see [Transaction](ref:transaction)',
+          example: {
+            originator_vasp: {
+              vasp_code: 'VASPJPJT4',
+              addrs: [
+                {
+                  address: 'bnb1vynn9hamtqg9me7y6frja0rvfva9saprl55gl4',
+                  addr_extra_info: [
+                    {
+                      memo_text: '634346542',
+                    },
+                  ],
+                },
+              ],
+            },
+            beneficiary_vasp: {
+              vasp_code: 'VASPJPJT3',
+              addrs: [
+                {
+                  address: 'bnb1hj767k8nlf0jn6p3c3wvl0r0qfwfrvuxrqlxce',
+                  addr_extra_info: [
+                    {
+                      memo_text: 'Idzl1532434853',
+                    },
+                  ],
+                },
+              ],
+            },
+            currency_id:
+              'sygna:0x800002ca.bnb1u9j9hkst6gf09dkdvxlj7puk8c7vh68a0kkmht',
+            amount: '0.1234',
+          },
         },
       };
       signPermissionRequest(fakeData, FAKE_PRIVATE_KEY);
       expect(crypto.signObject.mock.calls.length).toBe(1);
       expect(JSON.stringify(crypto.signObject.mock.calls[0][0])).toBe(
-        JSON.stringify(sortPermissionRequestData(fakeData)),
+        JSON.stringify(fakeData),
       );
       expect(crypto.signObject.mock.calls[0][1]).toEqual(FAKE_PRIVATE_KEY);
 
@@ -144,7 +136,7 @@ describe('test signPermissionRequest', () => {
       signPermissionRequest(fakeData, FAKE_PRIVATE_KEY);
       expect(crypto.signObject.mock.calls.length).toBe(2);
       expect(JSON.stringify(crypto.signObject.mock.calls[1][0])).toBe(
-        JSON.stringify(sortPermissionRequestData(fakeData)),
+        JSON.stringify(fakeData),
       );
       expect(crypto.signObject.mock.calls[1][1]).toEqual(FAKE_PRIVATE_KEY);
     });
@@ -159,61 +151,77 @@ describe('test signPermissionRequest', () => {
         private_info:
           '6b51d431df5d7f141cbececcf79edf3dd861c3b4069f0b11661a3eefacbba918',
         transaction: {
-          transaction_currency: '0x80000000',
-          originator_addrs: ['16bUGjvunVp7LqygLHrTvHyvbvfeuRCWAh'],
-          originator_vasp_code: 'VASPTWTP1',
-          beneficiary_addrs: ['3CHgkx946yyueucCMiJhyH2Vg5kBBvfSGH'],
-          amount: 1,
-          beneficiary_vasp_code: 'VASPTWTP2',
+          originator_vasp: {
+            vasp_code: 'VASPJPJT4',
+            addrs: [
+              {
+                address: 'bnb1vynn9hamtqg9me7y6frja0rvfva9saprl55gl4',
+              },
+            ],
+          },
+          beneficiary_vasp: {
+            vasp_code: 'VASPJPJT3',
+            addrs: [
+              {
+                address: 'bnb1hj767k8nlf0jn6p3c3wvl0r0qfwfrvuxrqlxce',
+              },
+            ],
+          },
+          currency_id:
+            'sygna:0x800002ca.bnb1u9j9hkst6gf09dkdvxlj7puk8c7vh68a0kkmht',
+          amount: '0.1234',
         },
       };
       const signature = signPermissionRequest(fakeData, FAKE_PRIVATE_KEY);
-      const sortedFakeData = sortPermissionRequestData(fakeData);
       expect(JSON.stringify(signature)).toBe(
         JSON.stringify({
-          ...sortedFakeData,
+          ...fakeData,
           signature:
-            'c7b9c1edc35e17dc0a78858d68786e5bcb26bbc09d02a0e1747e7eeabdc59d4e79c6d1156359a06b1662084d782bd86f4bdc6cc5aa6696f20c5ea8e20fa328e8',
+            '02234ca0d321b8e5c00f5cf81fc5c8f69234a712d820abb1633c6fc1bb0808c2171cb7b96e972d369b7aa700ccc7e6ca9d0de28e1b53e5fa7a2d7d9a6550536b',
         }),
       );
 
       const isValid = verifyObject(signature, FAKE_PUBLIC_KEY);
       expect(isValid).toBe(true);
 
+      delete fakeData.signature;
       fakeData.expire_date = 2529024749000;
       const signature1 = signPermissionRequest(fakeData, FAKE_PRIVATE_KEY);
-      const sortedFakeData1 = sortPermissionRequestData(fakeData);
       expect(JSON.stringify(signature1)).toBe(
         JSON.stringify({
-          ...sortedFakeData1,
+          ...fakeData,
           signature:
-            '2727bc6be48b780bfd4712c2f8bfa39bcc24e7e2aa48e8fbfa02789b8bac31443c8dc991731108bddabc52761dc9bf97cb5938838c3c28fae1c4fcd31e5a7c5c',
+            '2378723939dd98533d6e9e5dd02d5fd0c46651445d462a1e10d71e39d9b41a2d44dc81d41c16a65ae607583ff990b880252f265473fed2de64d4657235e19a34',
         }),
       );
       const isValid1 = verifyObject(signature1, FAKE_PUBLIC_KEY);
       expect(isValid1).toBe(true);
 
-      fakeData.transaction.originator_addrs_extra = { DT: '001' };
+      delete fakeData.signature;
+      fakeData.transaction.originator_vasp.addrs[0].addr_extra_info = {
+        DT: '001',
+      };
       const signature2 = signPermissionRequest(fakeData, FAKE_PRIVATE_KEY);
-      const sortedFakeData2 = sortPermissionRequestData(fakeData);
       expect(JSON.stringify(signature2)).toBe(
         JSON.stringify({
-          ...sortedFakeData2,
+          ...fakeData,
           signature:
-            'c758a58cc6920a3179c45a467d5cd7e297ba725c0c6fafd391f15e7345de7592344f8fa6f9a7c5433dd4e43da08f4d27ad17b2664697218df9bf7bce18fcd841',
+            '568eed81f0cc96d9542833f988528d6afc223c365bde8db3419b1123c8d96f3d6bcf704df307555b768e9e68ae6036637749cbc9dbdcede09c1182518778e69b',
         }),
       );
       const isValid2 = verifyObject(signature2, FAKE_PUBLIC_KEY);
       expect(isValid2).toBe(true);
 
-      fakeData.transaction.beneficiary_addrs_extra = { DT: '002' };
+      delete fakeData.signature;
+      fakeData.transaction.beneficiary_vasp.addrs[0].addr_extra_info = {
+        DT: '002',
+      };
       const signature3 = signPermissionRequest(fakeData, FAKE_PRIVATE_KEY);
-      const sortedFakeData3 = sortPermissionRequestData(fakeData);
       expect(JSON.stringify(signature3)).toBe(
         JSON.stringify({
-          ...sortedFakeData3,
+          ...fakeData,
           signature:
-            '0b647c4803731fb6aa58613f979d38e01e1f69d953a104a326941c1700e2b2d6450da8d26f7490c323ec340c0274996b38527649f3cc4ef4fbfd65af69afbe28',
+            'b465ce6753576b1b28723c77ccb633ad13786523362c2061f96d7b48155d0a1c31b544213cf50f146d0bc2855160413d1a407737bfc71cfd06b09eb20b766ae8',
         }),
       );
       const isValid3 = verifyObject(signature3, FAKE_PUBLIC_KEY);
