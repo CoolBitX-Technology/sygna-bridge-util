@@ -34,7 +34,7 @@ class API {
    * @return {Promise<Array<{ vasp_name:string, vasp_code:string, vasp_pubkey:string }>>}
    */
   async getVASPList(validate = true, isProd = false) {
-    const url = this.domain + 'api/v1.1.0/bridge/vasp';
+    const url = this.domain + 'api/v2/bridge/vasp';
     const result = await this.getSB(url);
     if (!result.vasp_data) {
       throw new Error(`Request VASPs failed: ${result.message}`);
@@ -56,7 +56,7 @@ class API {
    * @return {Promise}
    */
   async postPermission(data) {
-    const url = this.domain + 'api/v1.1.0/bridge/transaction/permission';
+    const url = this.domain + 'api/v2/bridge/transaction/permission';
     return await this.postSB(url, data);
   }
 
@@ -67,7 +67,7 @@ class API {
   async getStatus(transfer_id) {
     const url =
       this.domain +
-      'api/v1.1.0/bridge/transaction/status?transfer_id=' +
+      'api/v2/bridge/transaction/status?transfer_id=' +
       transfer_id;
     const result = await this.getSB(url);
     return result;
@@ -80,8 +80,7 @@ class API {
    * @return {Promise<{transfer_id: string}>} transfer-id
    */
   async postPermissionRequest(data) {
-    const url =
-      this.domain + 'api/v1.1.0/bridge/transaction/permission-request';
+    const url = this.domain + 'api/v2/bridge/transaction/permission-request';
     return await this.postSB(url, data);
   }
 
@@ -91,7 +90,7 @@ class API {
    * @return {Promise}
    */
   async postTransactionId(data) {
-    const url = this.domain + 'api/v1.1.0/bridge/transaction/txid';
+    const url = this.domain + 'api/v2/bridge/transaction/txid';
     return await this.postSB(url, data);
   }
 
@@ -129,7 +128,7 @@ class API {
    * @return {Promise}
    */
   async postBeneficiaryEndpointUrl(data) {
-    const url = this.domain + 'api/v1.1.0/bridge/vasp/beneficiary-endpoint-url';
+    const url = this.domain + 'api/v2/bridge/vasp/beneficiary-endpoint-url';
     return await this.postSB(url, data);
   }
 }

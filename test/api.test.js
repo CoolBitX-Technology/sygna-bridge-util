@@ -21,7 +21,7 @@ jest.mock('../src/crypto', () => ({
 
 describe('test api', () => {
   const apiModule = require('../src/api');
-  const domain = 'https://api.sygna.io/api/v1.1.0/bridge/';
+  const domain = 'https://api.sygna.io/api/v2/bridge/';
   const api_key = '1234567890';
 
   beforeEach(() => {
@@ -35,7 +35,7 @@ describe('test api', () => {
 
     it('should fetch be called with correct parameters if getSB is called', async () => {
       const headers = { api_key };
-      const url = 'https://api.sygna.io/api/v1.1.0/bridge/';
+      const url = 'https://api.sygna.io/api/v2/bridge/';
       const response = await instance.getSB(url);
       expect(fetch.mock.calls[0][0]).toBe(url);
       expect(fetch.mock.calls[0][1]).toEqual({ headers });
@@ -53,7 +53,7 @@ describe('test api', () => {
         api_key,
       };
       //await fetch(url, { method: 'POST', body: JSON.stringify(json), headers: headers });
-      const url = 'https://api.sygna.io/api/v1.1.0/bridge/';
+      const url = 'https://api.sygna.io/api/v2/bridge/';
       const body = {
         key: 'value',
       };
@@ -100,7 +100,7 @@ describe('test api', () => {
     it('should getSB be called with correct parameters if getVASPList is called', async () => {
       const response = await instance.getVASPList(false);
       expect(instance.getSB.mock.calls[0][0]).toBe(
-        `${domain}api/v1.1.0/bridge/vasp`,
+        `${domain}api/v2/bridge/vasp`,
       );
       expect(instance.getSB.mock.calls.length).toBe(1);
       expect(response).toEqual(fakeResponse.vasp_data);
@@ -285,7 +285,7 @@ describe('test api', () => {
       },
       callback: {
         signature: '1234567890',
-        callback_url: 'https://api.sygna.io/api/v1.1.0/bridge/',
+        callback_url: 'https://api.sygna.io/api/v2/bridge/',
       },
     };
 
@@ -299,7 +299,7 @@ describe('test api', () => {
     it('should postSB be called with correct data if postPermissionRequest is called', async () => {
       await instance.postPermissionRequest(fakeData);
       expect(instance.postSB.mock.calls[0][0]).toBe(
-        `${domain}api/v1.1.0/bridge/transaction/permission-request`,
+        `${domain}api/v2/bridge/transaction/permission-request`,
       );
       expect(JSON.stringify(instance.postSB.mock.calls[0][1])).toBe(
         JSON.stringify(fakeData),
@@ -330,7 +330,7 @@ describe('test api', () => {
       await instance.postPermission(fakeData);
 
       expect(instance.postSB.mock.calls[0][0]).toBe(
-        `${domain}api/v1.1.0/bridge/transaction/permission`,
+        `${domain}api/v2/bridge/transaction/permission`,
       );
       expect(JSON.stringify(instance.postSB.mock.calls[0][1])).toBe(
         JSON.stringify(fakeData),
@@ -354,7 +354,7 @@ describe('test api', () => {
       await instance.getStatus(transfer_id);
 
       expect(instance.getSB.mock.calls[0][0]).toBe(
-        `${domain}api/v1.1.0/bridge/transaction/status?transfer_id=${transfer_id}`,
+        `${domain}api/v2/bridge/transaction/status?transfer_id=${transfer_id}`,
       );
       expect(instance.getSB.mock.calls.length).toBe(1);
     });
@@ -381,7 +381,7 @@ describe('test api', () => {
       await instance.postTransactionId(fakeData);
 
       expect(instance.postSB.mock.calls[0][0]).toBe(
-        `${domain}api/v1.1.0/bridge/transaction/txid`,
+        `${domain}api/v2/bridge/transaction/txid`,
       );
       expect(JSON.stringify(instance.postSB.mock.calls[0][1])).toBe(
         JSON.stringify(fakeData),
@@ -393,8 +393,8 @@ describe('test api', () => {
   describe('test postBeneficiaryEndpointUrl', () => {
     const vasp_code = 'QQQQKRQQ';
     const callback_permission_request_url =
-      'https://api.sygna.io/api/v1.1.0/bridge/permission-request';
-    const callback_txid_url = 'https://api.sygna.io/api/v1.1.0/bridge/txid';
+      'https://api.sygna.io/api/v2/bridge/permission-request';
+    const callback_txid_url = 'https://api.sygna.io/api/v2/bridge/txid';
     const signature =
       '6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b';
 
@@ -414,7 +414,7 @@ describe('test api', () => {
       await instance.postBeneficiaryEndpointUrl(fakeData);
 
       expect(instance.postSB.mock.calls[0][0]).toBe(
-        `${domain}api/v1.1.0/bridge/vasp/beneficiary-endpoint-url`,
+        `${domain}api/v2/bridge/vasp/beneficiary-endpoint-url`,
       );
       expect(JSON.stringify(instance.postSB.mock.calls[0][1])).toBe(
         JSON.stringify(fakeData),
@@ -430,7 +430,7 @@ describe('test api', () => {
       await instance.postBeneficiaryEndpointUrl(fakeData1);
 
       expect(instance.postSB.mock.calls[1][0]).toBe(
-        `${domain}api/v1.1.0/bridge/vasp/beneficiary-endpoint-url`,
+        `${domain}api/v2/bridge/vasp/beneficiary-endpoint-url`,
       );
       expect(JSON.stringify(instance.postSB.mock.calls[1][1])).toBe(
         JSON.stringify(fakeData1),
@@ -447,7 +447,7 @@ describe('test api', () => {
       await instance.postBeneficiaryEndpointUrl(fakeData2);
 
       expect(instance.postSB.mock.calls[2][0]).toBe(
-        `${domain}api/v1.1.0/bridge/vasp/beneficiary-endpoint-url`,
+        `${domain}api/v2/bridge/vasp/beneficiary-endpoint-url`,
       );
       expect(JSON.stringify(instance.postSB.mock.calls[2][1])).toBe(
         JSON.stringify(fakeData2),
@@ -464,7 +464,7 @@ describe('test api', () => {
       await instance.postBeneficiaryEndpointUrl(fakeData3);
 
       expect(instance.postSB.mock.calls[3][0]).toBe(
-        `${domain}api/v1.1.0/bridge/vasp/beneficiary-endpoint-url`,
+        `${domain}api/v2/bridge/vasp/beneficiary-endpoint-url`,
       );
       expect(JSON.stringify(instance.postSB.mock.calls[3][1])).toBe(
         JSON.stringify(fakeData3),
