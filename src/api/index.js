@@ -4,17 +4,6 @@ const {
   SYGNA_BRIDGE_CENTRAL_PUBKEY,
   SYGNA_BRIDGE_CENTRAL_PUBKEY_TEST,
 } = require('../config');
-const {
-  validateGetTransferStatusSchema,
-  validatePostPermissionSchema,
-  validatePostPermissionRequestSchema,
-  validatePostTxIdSchema,
-  sortPostPermissionData,
-  sortPostPermissionRequestData,
-  sortPostTransactionIdData,
-  validatePostBeneficiaryEndpointUrlSchema,
-  sortPostBeneficiaryEndpointUrlData,
-} = require('../utils');
 
 class API {
   constructor(api_key, sygnaBridgeDomain) {
@@ -67,13 +56,8 @@ class API {
    * @return {Promise}
    */
   async postPermission(data) {
-    const valid = validatePostPermissionSchema(data);
-    if (!valid[0]) {
-      throw valid[1];
-    }
     const url = this.domain + 'api/v1.1.0/bridge/transaction/permission';
-    const sortedData = sortPostPermissionData(data);
-    return await this.postSB(url, sortedData);
+    return await this.postSB(url, data);
   }
 
   /**
@@ -81,10 +65,6 @@ class API {
    * @param {string} transfer_id
    */
   async getStatus(transfer_id) {
-    const valid = validateGetTransferStatusSchema({ transfer_id });
-    if (!valid[0]) {
-      throw valid[1];
-    }
     const url =
       this.domain +
       'api/v1.1.0/bridge/transaction/status?transfer_id=' +
@@ -100,14 +80,9 @@ class API {
    * @return {Promise<{transfer_id: string}>} transfer-id
    */
   async postPermissionRequest(data) {
-    const valid = validatePostPermissionRequestSchema(data);
-    if (!valid[0]) {
-      throw valid[1];
-    }
     const url =
       this.domain + 'api/v1.1.0/bridge/transaction/permission-request';
-    const sortedData = sortPostPermissionRequestData(data);
-    return await this.postSB(url, sortedData);
+    return await this.postSB(url, data);
   }
 
   /**
@@ -116,13 +91,8 @@ class API {
    * @return {Promise}
    */
   async postTransactionId(data) {
-    const valid = validatePostTxIdSchema(data);
-    if (!valid[0]) {
-      throw valid[1];
-    }
     const url = this.domain + 'api/v1.1.0/bridge/transaction/txid';
-    const sortedData = sortPostTransactionIdData(data);
-    return await this.postSB(url, sortedData);
+    return await this.postSB(url, data);
   }
 
   /**
@@ -159,13 +129,8 @@ class API {
    * @return {Promise}
    */
   async postBeneficiaryEndpointUrl(data) {
-    const valid = validatePostBeneficiaryEndpointUrlSchema(data);
-    if (!valid[0]) {
-      throw valid[1];
-    }
     const url = this.domain + 'api/v1.1.0/bridge/vasp/beneficiary-endpoint-url';
-    const sortedData = sortPostBeneficiaryEndpointUrlData(data);
-    return await this.postSB(url, sortedData);
+    return await this.postSB(url, data);
   }
 }
 
