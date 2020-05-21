@@ -1,19 +1,7 @@
 const ecies = require('./ecies');
 const sygnaSign = require('./sign');
 const { SYGNA_BRIDGE_CENTRAL_PUBKEY, REJECTED } = require('../config');
-const {
-  validateTxIdSchema,
-  validateCallbackSchema,
-  validatePermissionSchema,
-  validatePermissionRequestSchema,
-  validatePrivateKey,
-  sortCallbackData,
-  sortTxIdData,
-  sortPermissionData,
-  sortPermissionRequestData,
-  validateBeneficiaryEndpointUrlSchema,
-  sortBeneficiaryEndpointUrlData,
-} = require('../utils');
+const { validatePrivateKey } = require('../utils');
 
 /**
  * Encrypt private info object to hex string.
@@ -51,13 +39,8 @@ exports.sygnaDecodePrivateObj = (privMsg, privateKey) => {
  * @return {{private_info: string, transaction:{}, data_dt:string, signature:string, expire_date?:number}}
  */
 exports.signPermissionRequest = (data, privateKey) => {
-  const valid = validatePermissionRequestSchema(data);
-  if (!valid[0]) {
-    throw valid[1];
-  }
   validatePrivateKey(privateKey);
-  const sortedData = sortPermissionRequestData(data);
-  return this.signObject(sortedData, privateKey);
+  return this.signObject(data, privateKey);
 };
 
 /**
@@ -66,14 +49,8 @@ exports.signPermissionRequest = (data, privateKey) => {
  * @return {{callback_url, signature: string}}
  */
 exports.signCallBack = (data, privateKey) => {
-  const valid = validateCallbackSchema(data);
-  if (!valid[0]) {
-    throw valid[1];
-  }
   validatePrivateKey(privateKey);
-
-  const sortedData = sortCallbackData(data);
-  return this.signObject(sortedData, privateKey);
+  return this.signObject(data, privateKey);
 };
 
 /**
@@ -82,14 +59,8 @@ exports.signCallBack = (data, privateKey) => {
  * @return {{transfer_id:string, permission_status:REJECTED| ACCEPTED, signature: string, expire_date?:number, reject_code?:string, reject_message?:string}}}
  */
 exports.signPermission = (data, privateKey) => {
-  const valid = validatePermissionSchema(data);
-  if (!valid[0]) {
-    throw valid[1];
-  }
   validatePrivateKey(privateKey);
-
-  const sortedData = sortPermissionData(data);
-  return this.signObject(sortedData, privateKey);
+  return this.signObject(data, privateKey);
 };
 
 /**
@@ -98,14 +69,8 @@ exports.signPermission = (data, privateKey) => {
  * @return {{transfer_id:string, txid:string, signature:string}}
  */
 exports.signTxId = (data, privateKey) => {
-  const valid = validateTxIdSchema(data);
-  if (!valid[0]) {
-    throw valid[1];
-  }
   validatePrivateKey(privateKey);
-
-  const sortedData = sortTxIdData(data);
-  return this.signObject(sortedData, privateKey);
+  return this.signObject(data, privateKey);
 };
 
 /**
@@ -142,12 +107,6 @@ exports.verifyObject = (obj, publicKey = SYGNA_BRIDGE_CENTRAL_PUBKEY) => {
  * @return {{vasp_code:string,callback_permission_request_url?:string,,callback_txid_url?:string,signature:string}}
  */
 exports.signBeneficiaryEndpointUrl = (data, privateKey) => {
-  const valid = validateBeneficiaryEndpointUrlSchema(data);
-  if (!valid[0]) {
-    throw valid[1];
-  }
   validatePrivateKey(privateKey);
-
-  const sortedData = sortBeneficiaryEndpointUrlData(data);
-  return this.signObject(sortedData, privateKey);
+  return this.signObject(data, privateKey);
 };
