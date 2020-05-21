@@ -7,26 +7,6 @@ const {
 } = require('../src/config');
 const crypto = require('../src/crypto');
 const fetch = require('node-fetch');
-const {
-  validatePostPermissionRequestSchema,
-  validatePostPermissionSchema,
-  validateGetTransferStatusSchema,
-  validatePostTxIdSchema,
-  sortPostPermissionData,
-  sortPostPermissionRequestData,
-  sortPostTransactionIdData,
-  validatePostBeneficiaryEndpointUrlSchema,
-  sortPostBeneficiaryEndpointUrlData,
-} = require('../src/utils');
-
-jest.mock('../src/utils', () => ({
-  ...jest.requireActual('../src/utils'),
-  validatePostPermissionRequestSchema: jest.fn().mockReturnValue([true]),
-  validatePostPermissionSchema: jest.fn().mockReturnValue([true]),
-  validateGetTransferStatusSchema: jest.fn().mockReturnValue([true]),
-  validatePostTxIdSchema: jest.fn().mockReturnValue([true]),
-  validatePostBeneficiaryEndpointUrlSchema: jest.fn().mockReturnValue([true]),
-}));
 
 jest.mock('node-fetch');
 fetch.mockImplementation(() => {
@@ -313,58 +293,16 @@ describe('test api', () => {
     instance.postSB = jest.fn();
 
     beforeEach(() => {
-      validatePostPermissionRequestSchema.mockClear();
       instance.postSB.mockClear();
     });
 
-    it('should validatePostPermissionRequestSchema be called with correct parameters if postPermissionRequest is called', async () => {
-      const fakeError = [
-        {
-          keyword: 'test',
-          dataPath: '',
-          schemaPath: '#/properties',
-          params: { comparison: '>=' },
-          message: `error from validatePostPermissionRequestSchema`,
-        },
-      ];
-      validatePostPermissionRequestSchema.mockReset();
-
-      validatePostPermissionRequestSchema
-        .mockReturnValueOnce([true])
-        .mockReturnValue([false, fakeError]);
-
-      await instance.postPermissionRequest(fakeData);
-      expect(validatePostPermissionRequestSchema.mock.calls.length).toBe(1);
-      expect(validatePostPermissionRequestSchema.mock.calls[0][0]).toEqual(
-        fakeData,
-      );
-
-      try {
-        await instance.postPermissionRequest(fakeData);
-        fail('expected error was not occurred');
-      } catch (error) {
-        const { keyword, message } = error[0];
-        expect(keyword).toEqual('test');
-        expect(message).toEqual(
-          'error from validatePostPermissionRequestSchema',
-        );
-      }
-      expect(validatePostPermissionRequestSchema.mock.calls.length).toBe(2);
-      expect(validatePostPermissionRequestSchema.mock.calls[1][0]).toEqual(
-        fakeData,
-      );
-
-      validatePostPermissionRequestSchema.mockReturnValue([true]);
-    });
-
-    it('should postSB be called with sorted data if postPermissionRequest is called', async () => {
-      const sortedData = sortPostPermissionRequestData(fakeData);
+    it('should postSB be called with correct data if postPermissionRequest is called', async () => {
       await instance.postPermissionRequest(fakeData);
       expect(instance.postSB.mock.calls[0][0]).toBe(
         `${domain}api/v1.1.0/bridge/transaction/permission-request`,
       );
       expect(JSON.stringify(instance.postSB.mock.calls[0][1])).toBe(
-        JSON.stringify(sortedData),
+        JSON.stringify(fakeData),
       );
       expect(instance.postSB.mock.calls.length).toBe(1);
     });
@@ -385,53 +323,17 @@ describe('test api', () => {
     instance.postSB = jest.fn();
 
     beforeEach(() => {
-      validatePostPermissionSchema.mockClear();
       instance.postSB.mockClear();
     });
 
-    it('should validatePostPermissionSchema be called with correct parameters if postPermissionRequest is called', async () => {
-      const fakeError = [
-        {
-          keyword: 'test',
-          dataPath: '',
-          schemaPath: '#/properties',
-          params: { comparison: '>=' },
-          message: `error from validatePostPermissionSchema`,
-        },
-      ];
-      validatePostPermissionSchema.mockReset();
-
-      validatePostPermissionSchema
-        .mockReturnValueOnce([true])
-        .mockReturnValue([false, fakeError]);
-
-      await instance.postPermission(fakeData);
-      expect(validatePostPermissionSchema.mock.calls.length).toBe(1);
-      expect(validatePostPermissionSchema.mock.calls[0][0]).toEqual(fakeData);
-
-      try {
-        await instance.postPermission(fakeData);
-        fail('expected error was not occurred');
-      } catch (error) {
-        const { keyword, message } = error[0];
-        expect(keyword).toEqual('test');
-        expect(message).toEqual('error from validatePostPermissionSchema');
-      }
-      expect(validatePostPermissionSchema.mock.calls.length).toBe(2);
-      expect(validatePostPermissionSchema.mock.calls[1][0]).toEqual(fakeData);
-
-      validatePostPermissionSchema.mockReturnValue([true]);
-    });
-
     it('should postSB be called with correct parameters if postPermission is called', async () => {
-      const sortedData = sortPostPermissionData(fakeData);
       await instance.postPermission(fakeData);
 
       expect(instance.postSB.mock.calls[0][0]).toBe(
         `${domain}api/v1.1.0/bridge/transaction/permission`,
       );
       expect(JSON.stringify(instance.postSB.mock.calls[0][1])).toBe(
-        JSON.stringify(sortedData),
+        JSON.stringify(fakeData),
       );
       expect(instance.postSB.mock.calls.length).toBe(1);
     });
@@ -445,46 +347,7 @@ describe('test api', () => {
     instance.getSB = jest.fn();
 
     beforeEach(() => {
-      validateGetTransferStatusSchema.mockClear();
       instance.getSB.mockClear();
-    });
-
-    it('should validateGetTransferStatusSchema be called with correct parameters if getStatus is called', async () => {
-      const fakeError = [
-        {
-          keyword: 'test',
-          dataPath: '',
-          schemaPath: '#/properties',
-          params: { comparison: '>=' },
-          message: `error from validateGetTransferStatusSchema`,
-        },
-      ];
-      validateGetTransferStatusSchema.mockReset();
-
-      validateGetTransferStatusSchema
-        .mockReturnValueOnce([true])
-        .mockReturnValue([false, fakeError]);
-
-      await instance.getStatus(transfer_id);
-      expect(validateGetTransferStatusSchema.mock.calls.length).toBe(1);
-      expect(validateGetTransferStatusSchema.mock.calls[0][0]).toEqual({
-        transfer_id,
-      });
-
-      try {
-        await instance.getStatus(transfer_id);
-        fail('expected error was not occurred');
-      } catch (error) {
-        const { keyword, message } = error[0];
-        expect(keyword).toEqual('test');
-        expect(message).toEqual('error from validateGetTransferStatusSchema');
-      }
-      expect(validateGetTransferStatusSchema.mock.calls.length).toBe(2);
-      expect(validateGetTransferStatusSchema.mock.calls[1][0]).toEqual({
-        transfer_id,
-      });
-
-      validateGetTransferStatusSchema.mockReturnValue([true]);
     });
 
     it('should getSB be called with correct parameters if getStatus is called', async () => {
@@ -511,53 +374,17 @@ describe('test api', () => {
     instance.postSB = jest.fn();
 
     beforeEach(() => {
-      validatePostTxIdSchema.mockClear();
       instance.postSB.mockClear();
     });
 
-    it('should validatePostTxIdSchema be called with correct parameters if postTransactionId is called', async () => {
-      const fakeError = [
-        {
-          keyword: 'test',
-          dataPath: '',
-          schemaPath: '#/properties',
-          params: { comparison: '>=' },
-          message: `error from validatePostTxIdSchema`,
-        },
-      ];
-      validatePostTxIdSchema.mockReset();
-
-      validatePostTxIdSchema
-        .mockReturnValueOnce([true])
-        .mockReturnValue([false, fakeError]);
-
-      await instance.postTransactionId(fakeData);
-      expect(validatePostTxIdSchema.mock.calls.length).toBe(1);
-      expect(validatePostTxIdSchema.mock.calls[0][0]).toEqual(fakeData);
-
-      try {
-        await instance.postTransactionId(fakeData);
-        fail('expected error was not occurred');
-      } catch (error) {
-        const { keyword, message } = error[0];
-        expect(keyword).toEqual('test');
-        expect(message).toEqual('error from validatePostTxIdSchema');
-      }
-      expect(validatePostTxIdSchema.mock.calls.length).toBe(2);
-      expect(validatePostTxIdSchema.mock.calls[1][0]).toEqual(fakeData);
-
-      validatePostTxIdSchema.mockReturnValue([true]);
-    });
-
     it('should postSB be called with correct parameters if postPermission is called', async () => {
-      const sortedData = sortPostTransactionIdData(fakeData);
       await instance.postTransactionId(fakeData);
 
       expect(instance.postSB.mock.calls[0][0]).toBe(
         `${domain}api/v1.1.0/bridge/transaction/txid`,
       );
       expect(JSON.stringify(instance.postSB.mock.calls[0][1])).toBe(
-        JSON.stringify(sortedData),
+        JSON.stringify(fakeData),
       );
       expect(instance.postSB.mock.calls.length).toBe(1);
     });
@@ -580,64 +407,17 @@ describe('test api', () => {
     instance.postSB = jest.fn();
 
     beforeEach(() => {
-      validatePostBeneficiaryEndpointUrlSchema.mockClear();
       instance.postSB.mockClear();
     });
 
-    it('should validatePostBeneficiaryEndpointUrlSchema be called with correct parameters if postBeneficiaryEndpointUrl is called', async () => {
-      const fakeError = [
-        {
-          keyword: 'test',
-          dataPath: '',
-          schemaPath: '#/properties',
-          params: { comparison: '>=' },
-          message: `error from validatePostBeneficiaryEndpointUrlSchema`,
-        },
-      ];
-      validatePostBeneficiaryEndpointUrlSchema.mockReset();
-
-      validatePostBeneficiaryEndpointUrlSchema
-        .mockReturnValueOnce([true])
-        .mockReturnValue([false, fakeError]);
-
-      await instance.postBeneficiaryEndpointUrl(fakeData);
-      expect(validatePostBeneficiaryEndpointUrlSchema.mock.calls.length).toBe(
-        1,
-      );
-      expect(validatePostBeneficiaryEndpointUrlSchema.mock.calls[0][0]).toEqual(
-        fakeData,
-      );
-
-      fakeData.callback_txid_url = callback_txid_url;
-      try {
-        await instance.postBeneficiaryEndpointUrl(fakeData);
-        fail('expected error was not occurred');
-      } catch (error) {
-        const { keyword, message } = error[0];
-        expect(keyword).toEqual('test');
-        expect(message).toEqual(
-          'error from validatePostBeneficiaryEndpointUrlSchema',
-        );
-      }
-      expect(validatePostBeneficiaryEndpointUrlSchema.mock.calls.length).toBe(
-        2,
-      );
-      expect(
-        validatePostBeneficiaryEndpointUrlSchema.mock.calls[1][0],
-      ).toEqual({ ...fakeData, callback_txid_url });
-
-      validatePostBeneficiaryEndpointUrlSchema.mockReturnValue([true]);
-    });
-
     it('should postSB be called with correct parameters if postBeneficiaryEndpointUrl is called', async () => {
-      const sortedData = sortPostBeneficiaryEndpointUrlData(fakeData);
       await instance.postBeneficiaryEndpointUrl(fakeData);
 
       expect(instance.postSB.mock.calls[0][0]).toBe(
         `${domain}api/v1.1.0/bridge/vasp/beneficiary-endpoint-url`,
       );
       expect(JSON.stringify(instance.postSB.mock.calls[0][1])).toBe(
-        JSON.stringify(sortedData),
+        JSON.stringify(fakeData),
       );
       expect(instance.postSB.mock.calls.length).toBe(1);
 
@@ -647,14 +427,13 @@ describe('test api', () => {
         vasp_code,
       };
 
-      const sortedData1 = sortPostBeneficiaryEndpointUrlData(fakeData1);
       await instance.postBeneficiaryEndpointUrl(fakeData1);
 
       expect(instance.postSB.mock.calls[1][0]).toBe(
         `${domain}api/v1.1.0/bridge/vasp/beneficiary-endpoint-url`,
       );
       expect(JSON.stringify(instance.postSB.mock.calls[1][1])).toBe(
-        JSON.stringify(sortedData1),
+        JSON.stringify(fakeData1),
       );
       expect(instance.postSB.mock.calls.length).toBe(2);
 
@@ -665,14 +444,13 @@ describe('test api', () => {
         callback_permission_request_url,
       };
 
-      const sortedData2 = sortPostBeneficiaryEndpointUrlData(fakeData2);
       await instance.postBeneficiaryEndpointUrl(fakeData2);
 
       expect(instance.postSB.mock.calls[2][0]).toBe(
         `${domain}api/v1.1.0/bridge/vasp/beneficiary-endpoint-url`,
       );
       expect(JSON.stringify(instance.postSB.mock.calls[2][1])).toBe(
-        JSON.stringify(sortedData2),
+        JSON.stringify(fakeData2),
       );
       expect(instance.postSB.mock.calls.length).toBe(3);
 
@@ -683,14 +461,13 @@ describe('test api', () => {
         callback_permission_request_url,
       };
 
-      const sortedData3 = sortPostBeneficiaryEndpointUrlData(fakeData3);
       await instance.postBeneficiaryEndpointUrl(fakeData3);
 
       expect(instance.postSB.mock.calls[3][0]).toBe(
         `${domain}api/v1.1.0/bridge/vasp/beneficiary-endpoint-url`,
       );
       expect(JSON.stringify(instance.postSB.mock.calls[3][1])).toBe(
-        JSON.stringify(sortedData3),
+        JSON.stringify(fakeData3),
       );
       expect(instance.postSB.mock.calls.length).toBe(4);
     });
