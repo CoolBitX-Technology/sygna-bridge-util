@@ -34,9 +34,9 @@ exports.sygnaDecodePrivateObj = (privMsg, privateKey) => {
 };
 
 /**
- * @param {{private_info: string, transaction:object, data_dt:string, expire_date?:number}} data
+ * @param {{private_info: string, transaction:object, data_dt:string, expire_date?:number, need_validate_addr?:boolean}} data
  * @param {string} privateKey
- * @return {{private_info: string, transaction:{}, data_dt:string, signature:string, expire_date?:number}}
+ * @return {{private_info: string, transaction:{}, data_dt:string, expire_date?:number, need_validate_addr?:boolean, signature:string}}
  */
 exports.signPermissionRequest = (data, privateKey) => {
   validatePrivateKey(privateKey);
@@ -102,9 +102,9 @@ exports.verifyObject = (obj, publicKey = SYGNA_BRIDGE_CENTRAL_PUBKEY) => {
 };
 
 /**
- * @param {{vasp_code:string,callback_permission_request_url?:string,callback_txid_url?:string}} data
+ * @param {{vasp_code:string,callback_permission_request_url?:string,callback_txid_url?:string,callback_validate_addr_url?:string}} data
  * @param {string} privateKey
- * @return {{vasp_code:string,callback_permission_request_url?:string,,callback_txid_url?:string,signature:string}}
+ * @return {{vasp_code:string,callback_permission_request_url?:string,,callback_txid_url?:string,callback_validate_addr_url?:string,signature:string}}
  */
 exports.signBeneficiaryEndpointUrl = (data, privateKey) => {
   validatePrivateKey(privateKey);
