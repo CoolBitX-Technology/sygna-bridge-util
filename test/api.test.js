@@ -21,7 +21,7 @@ jest.mock('../src/crypto', () => ({
 
 describe('test api', () => {
   const apiModule = require('../src/api');
-  const domain = 'https://api.sygna.io/api/v2/bridge/';
+  const domain = 'https://api.sygna.io/v2/bridge/';
   const api_key = '1234567890';
 
   beforeEach(() => {
@@ -34,8 +34,8 @@ describe('test api', () => {
     const instance = new apiModule.API(api_key, domain);
 
     it('should fetch be called with correct parameters if getSB is called', async () => {
-      const headers = { api_key };
-      const url = 'https://api.sygna.io/api/v2/bridge/';
+      const headers = { 'x-api-key': api_key };
+      const url = 'https://api.sygna.io/v2/bridge/';
       const response = await instance.getSB(url);
       expect(fetch.mock.calls[0][0]).toBe(url);
       expect(fetch.mock.calls[0][1]).toEqual({ headers });
@@ -50,10 +50,10 @@ describe('test api', () => {
     it('should fetch be called with correct parameters if postSB is called', async () => {
       const headers = {
         'Content-Type': 'application/json',
-        api_key,
+        'x-api-key': api_key,
       };
       //await fetch(url, { method: 'POST', body: JSON.stringify(json), headers: headers });
-      const url = 'https://api.sygna.io/api/v2/bridge/';
+      const url = 'https://api.sygna.io/v2/bridge/';
       const body = {
         key: 'value',
       };
@@ -78,13 +78,11 @@ describe('test api', () => {
         {
           vasp_code: 'AAAAAAAA798',
           vasp_name: 'AAAA',
-          is_sb_need_static: false,
           vasp_pubkey: '123456',
         },
         {
           vasp_code: 'ABCDKRZZ111',
           vasp_name: 'ASDFGHJKL111111',
-          is_sb_need_static: true,
           vasp_pubkey: '22222222222222222222222',
         },
       ],
@@ -99,9 +97,7 @@ describe('test api', () => {
 
     it('should getSB be called with correct parameters if getVASPList is called', async () => {
       const response = await instance.getVASPList(false);
-      expect(instance.getSB.mock.calls[0][0]).toBe(
-        `${domain}api/v2/bridge/vasp`,
-      );
+      expect(instance.getSB.mock.calls[0][0]).toBe(`${domain}v2/bridge/vasp`);
       expect(instance.getSB.mock.calls.length).toBe(1);
       expect(response).toEqual(fakeResponse.vasp_data);
     });
@@ -181,13 +177,11 @@ describe('test api', () => {
       {
         vasp_code: 'AAAAAAAA798',
         vasp_name: 'AAAA',
-        is_sb_need_static: false,
         vasp_pubkey: '123456',
       },
       {
         vasp_code: 'ABCDKRZZ111',
         vasp_name: 'ASDFGHJKL111111',
-        is_sb_need_static: true,
         vasp_pubkey: '22222222222222222222222',
       },
     ];
@@ -267,25 +261,44 @@ describe('test api', () => {
   describe('test postPermissionRequest', () => {
     const fakeData = {
       data: {
-        expire_date: 123,
-        transaction: {
-          amount: 1,
-          transaction_currency: '0x80000000',
-          originator_addrs_extra: { DT: '001' },
-          originator_addrs: ['16bUGjvunVp7LqygLHrTvHyvbvfeuRCWAh'],
-          beneficiary_addrs_extra: { DT: '002' },
-          beneficiary_vasp_code: 'VASPTWTP2',
-          beneficiary_addrs: ['3CHgkx946yyueucCMiJhyH2Vg5kBBvfSGH'],
-          originator_vasp_code: 'VASPTWTP1',
-        },
         private_info:
-          '6b51d431df5d7f141cbececcf79edf3dd861c3b4069f0b11661a3eefacbba918',
-        signature: '1234567890',
-        data_dt: '2019-07-29T06:29:00.123Z',
+          '79676feb56c7b8c222924d945ba3d7c73333c27b7bc94e8a76cbaa643db3722695d7b822aa3d62443f3bacbdb993b45ec9421769b15b97bd085c0fc21132de4c08a4626b28ddc40481e1563245b337ffb782113e364cc94e40348577eae4a714c9764e6c206439b1d86fa97c17f33164f2a2ca343dd1d5f9e7d2c68fbb8ed58d',
+        transaction: {
+          originator_vasp: {
+            vasp_code: 'VASPUSNY1',
+            addrs: [
+              {
+                address: 'bnb1vynn9hamtqg9me7y6frja0rvfva9saprl55gl4',
+                addr_extra_info: [],
+              },
+            ],
+          },
+          beneficiary_vasp: {
+            vasp_code: 'VASPUSNY2',
+            addrs: [
+              {
+                address: 'bnb1hj767k8nlf0jn6p3c3wvl0a66c4782a3f78d7e',
+                addr_extra_info: [
+                  {
+                    tag: 'abc',
+                  },
+                ],
+              },
+            ],
+          },
+          currency_id: 'sygna:0x80000090',
+          amount: '4.51120135938784',
+        },
+        need_validate_addr: true,
+        data_dt: '2020-07-13T05:56:53.088Z',
+        signature:
+          '90b909183e11bdf0896fb9008c778a2e1e1a4df58c4985a853a91b6254e58514033394459f6c3948ce41a0335d89e23436c81b31dc834ff4dba93f6a20f53aee',
       },
       callback: {
-        signature: '1234567890',
-        callback_url: 'https://api.sygna.io/api/v2/bridge/',
+        callback_url:
+          'https://facb1c03d3dae42f07008d0c42979623.m.pipedream.net',
+        signature:
+          'be9000b96b5a86b971fe1818e23790beb33fc9d2b27d761ea70c067eb73adea06fd8aada3ec577f62e87b77ff18cb635bd48e1e33b677908b0bf92ea743c85b4',
       },
     };
 
@@ -299,7 +312,7 @@ describe('test api', () => {
     it('should postSB be called with correct data if postPermissionRequest is called', async () => {
       await instance.postPermissionRequest(fakeData);
       expect(instance.postSB.mock.calls[0][0]).toBe(
-        `${domain}api/v2/bridge/transaction/permission-request`,
+        `${domain}v2/bridge/transaction/permission-request`,
       );
       expect(JSON.stringify(instance.postSB.mock.calls[0][1])).toBe(
         JSON.stringify(fakeData),
@@ -330,7 +343,7 @@ describe('test api', () => {
       await instance.postPermission(fakeData);
 
       expect(instance.postSB.mock.calls[0][0]).toBe(
-        `${domain}api/v2/bridge/transaction/permission`,
+        `${domain}v2/bridge/transaction/permission`,
       );
       expect(JSON.stringify(instance.postSB.mock.calls[0][1])).toBe(
         JSON.stringify(fakeData),
@@ -354,7 +367,7 @@ describe('test api', () => {
       await instance.getStatus(transfer_id);
 
       expect(instance.getSB.mock.calls[0][0]).toBe(
-        `${domain}api/v2/bridge/transaction/status?transfer_id=${transfer_id}`,
+        `${domain}v2/bridge/transaction/status?transfer_id=${transfer_id}`,
       );
       expect(instance.getSB.mock.calls.length).toBe(1);
     });
@@ -381,7 +394,7 @@ describe('test api', () => {
       await instance.postTransactionId(fakeData);
 
       expect(instance.postSB.mock.calls[0][0]).toBe(
-        `${domain}api/v2/bridge/transaction/txid`,
+        `${domain}v2/bridge/transaction/txid`,
       );
       expect(JSON.stringify(instance.postSB.mock.calls[0][1])).toBe(
         JSON.stringify(fakeData),
@@ -393,8 +406,8 @@ describe('test api', () => {
   describe('test postBeneficiaryEndpointUrl', () => {
     const vasp_code = 'QQQQKRQQ';
     const callback_permission_request_url =
-      'https://api.sygna.io/api/v2/bridge/permission-request';
-    const callback_txid_url = 'https://api.sygna.io/api/v2/bridge/txid';
+      'https://api.sygna.io/v2/bridge/permission-request';
+    const callback_txid_url = 'https://api.sygna.io/v2/bridge/txid';
     const signature =
       '6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b';
 
@@ -414,7 +427,7 @@ describe('test api', () => {
       await instance.postBeneficiaryEndpointUrl(fakeData);
 
       expect(instance.postSB.mock.calls[0][0]).toBe(
-        `${domain}api/v2/bridge/vasp/beneficiary-endpoint-url`,
+        `${domain}v2/bridge/vasp/beneficiary-endpoint-url`,
       );
       expect(JSON.stringify(instance.postSB.mock.calls[0][1])).toBe(
         JSON.stringify(fakeData),
@@ -430,7 +443,7 @@ describe('test api', () => {
       await instance.postBeneficiaryEndpointUrl(fakeData1);
 
       expect(instance.postSB.mock.calls[1][0]).toBe(
-        `${domain}api/v2/bridge/vasp/beneficiary-endpoint-url`,
+        `${domain}v2/bridge/vasp/beneficiary-endpoint-url`,
       );
       expect(JSON.stringify(instance.postSB.mock.calls[1][1])).toBe(
         JSON.stringify(fakeData1),
@@ -447,7 +460,7 @@ describe('test api', () => {
       await instance.postBeneficiaryEndpointUrl(fakeData2);
 
       expect(instance.postSB.mock.calls[2][0]).toBe(
-        `${domain}api/v2/bridge/vasp/beneficiary-endpoint-url`,
+        `${domain}v2/bridge/vasp/beneficiary-endpoint-url`,
       );
       expect(JSON.stringify(instance.postSB.mock.calls[2][1])).toBe(
         JSON.stringify(fakeData2),
@@ -464,12 +477,78 @@ describe('test api', () => {
       await instance.postBeneficiaryEndpointUrl(fakeData3);
 
       expect(instance.postSB.mock.calls[3][0]).toBe(
-        `${domain}api/v2/bridge/vasp/beneficiary-endpoint-url`,
+        `${domain}v2/bridge/vasp/beneficiary-endpoint-url`,
       );
       expect(JSON.stringify(instance.postSB.mock.calls[3][1])).toBe(
         JSON.stringify(fakeData3),
       );
       expect(instance.postSB.mock.calls.length).toBe(4);
+    });
+  });
+
+  describe('test postRety', () => {
+    const vasp_code = 'QQQQKRQQ';
+
+    const fakeData = {
+      vasp_code,
+    };
+    const instance = new apiModule.API(api_key, domain);
+    instance.postSB = jest.fn();
+
+    beforeEach(() => {
+      instance.postSB.mockClear();
+    });
+
+    it('should postSB be called with postRety parameters if postRety is called', async () => {
+      await instance.postRetry(fakeData);
+
+      expect(instance.postSB.mock.calls[0][0]).toBe(
+        `${domain}v2/bridge/transaction/retry`,
+      );
+      expect(JSON.stringify(instance.postSB.mock.calls[0][1])).toBe(
+        JSON.stringify(fakeData),
+      );
+      expect(instance.postSB.mock.calls.length).toBe(1);
+    });
+  });
+
+  describe('test getCurrencies', () => {
+    const currency_id = 'sygna:0x80000090';
+    const currency_name = 'XRP';
+    const currency_symbol = 'XRP';
+
+    const instance = new apiModule.API(api_key, domain);
+    instance.getSB = jest.fn();
+
+    beforeEach(() => {
+      instance.getSB.mockClear();
+    });
+
+    it('should getSB be called with getCurrencies if getCurrencies is called', async () => {
+      await instance.getCurrencies();
+
+      expect(instance.getSB.mock.calls[0][0]).toBe(
+        `${domain}v2/bridge/transaction/currencies`,
+      );
+      expect(instance.getSB.mock.calls.length).toBe(1);
+
+      await instance.getCurrencies({ currency_id });
+
+      expect(instance.getSB.mock.calls[1][0]).toBe(
+        `${domain}v2/bridge/transaction/currencies?currency_id=${currency_id}`,
+      );
+
+      await instance.getCurrencies({ currency_id, currency_symbol });
+
+      expect(instance.getSB.mock.calls[2][0]).toBe(
+        `${domain}v2/bridge/transaction/currencies?currency_id=${currency_id}&currency_symbol=${currency_symbol}`,
+      );
+
+      await instance.getCurrencies({ currency_name, currency_symbol });
+
+      expect(instance.getSB.mock.calls[3][0]).toBe(
+        `${domain}v2/bridge/transaction/currencies?currency_name=${currency_name}&currency_symbol=${currency_symbol}`,
+      );
     });
   });
 });
