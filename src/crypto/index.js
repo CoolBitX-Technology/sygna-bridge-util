@@ -9,7 +9,7 @@ const { validatePrivateKey } = require('../utils');
  * @param {string} publicKey recipeint public key in hex string.
  * @return {string} ECIES encoded privMsg.
  */
-exports.sygnaEncodePrivateObj = (data, publicKey) => {
+exports.encodePrivateObj = (data, publicKey) => {
   let msgString = data;
   if (typeof data === 'object') {
     msgString = JSON.stringify(data);
@@ -19,18 +19,32 @@ exports.sygnaEncodePrivateObj = (data, publicKey) => {
 };
 
 /**
+ * the function would be deprecated next version, use encodePrivateObj instead
+ */
+exports.sygnaEncodePrivateObj = (data, publicKey) => {
+  return this.encodePrivateObj(data, publicKey);
+};
+
+/**
  * Decode private info from recipent server.
  * @param {string} privMsg
  * @param {string} privateKey
  * @return {object}
  */
-exports.sygnaDecodePrivateObj = (privMsg, privateKey) => {
+exports.decodePrivateObj = (privMsg, privateKey) => {
   const decoded = ecies.ECIESDecode(privMsg, privateKey);
   try {
     return JSON.parse(decoded);
   } catch (error) {
     return decoded;
   }
+};
+
+/**
+ * the function would be deprecated next version, use decodePrivateObj instead
+ */
+exports.sygnaDecodePrivateObj = (privMsg, privateKey) => {
+  return this.decodePrivateObj(privMsg, privateKey);
 };
 
 /**
