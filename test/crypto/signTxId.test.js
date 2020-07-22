@@ -1,14 +1,9 @@
 const { FAKE_PRIVATE_KEY, FAKE_PUBLIC_KEY } = require('../fakeKeys');
 
-const {
-  validateTxIdSchema,
-  validatePrivateKey,
-  sortTxIdData,
-} = require('../../src/utils');
+const { validatePrivateKey } = require('../../src/utils');
 
 jest.mock('../../src/utils', () => ({
   ...jest.requireActual('../../src/utils'),
-  validateTxIdSchema: jest.fn().mockReturnValue([true]),
   validatePrivateKey: jest.fn(),
 }));
 
@@ -29,47 +24,8 @@ describe('test signTxId', () => {
 
     const { signTxId } = crypto;
     beforeEach(() => {
-      validateTxIdSchema.mockClear();
       crypto.signObject.mockReset();
       validatePrivateKey.mockClear();
-    });
-
-    it('should validateTxIdSchema be called with correct parameters if signTxId is called', () => {
-      const fakeData = {
-        transfer_id,
-        txid,
-      };
-      const fakeError = [
-        {
-          keyword: 'test',
-          dataPath: '',
-          schemaPath: '#/properties',
-          params: { comparison: '>=' },
-          message: `error from validateTxIdSchema`,
-        },
-      ];
-      validateTxIdSchema.mockReset();
-
-      validateTxIdSchema
-        .mockReturnValueOnce([true])
-        .mockReturnValue([false, fakeError]);
-
-      signTxId(fakeData, FAKE_PRIVATE_KEY);
-      expect(validateTxIdSchema.mock.calls.length).toBe(1);
-      expect(validateTxIdSchema.mock.calls[0][0]).toEqual(fakeData);
-
-      try {
-        signTxId(fakeData, FAKE_PRIVATE_KEY);
-        fail('expected error was not occurred');
-      } catch (error) {
-        const { keyword, message } = error[0];
-        expect(keyword).toEqual('test');
-        expect(message).toEqual('error from validateTxIdSchema');
-      }
-      expect(validateTxIdSchema.mock.calls.length).toBe(2);
-      expect(validateTxIdSchema.mock.calls[1][0]).toEqual(fakeData);
-
-      validateTxIdSchema.mockReturnValue([true]);
     });
 
     it('should validatePrivateKey be called with correct parameters if signTxId is called', () => {
@@ -104,11 +60,10 @@ describe('test signTxId', () => {
         txid,
         transfer_id,
       };
-      const sortedData = sortTxIdData(fakeData);
       signTxId(fakeData, FAKE_PRIVATE_KEY);
       expect(crypto.signObject.mock.calls.length).toBe(1);
       expect(JSON.stringify(crypto.signObject.mock.calls[0][0])).toBe(
-        JSON.stringify(sortedData),
+        JSON.stringify(fakeData),
       );
       expect(crypto.signObject.mock.calls[0][1]).toEqual(FAKE_PRIVATE_KEY);
     });
@@ -123,13 +78,12 @@ describe('test signTxId', () => {
     const { signTxId, verifyObject } = crypto;
     it('should object which is return by signTxId be correct', () => {
       const fakeData = { txid, transfer_id };
-      const sortedData = sortTxIdData(fakeData);
       const signature = signTxId(fakeData, FAKE_PRIVATE_KEY);
       expect(JSON.stringify(signature)).toBe(
         JSON.stringify({
-          ...sortedData,
+          ...fakeData,
           signature:
-            '637b90ee3cf2fcb97fa155f7d99228ac41134ac01803575242b496166eac11ab4eb4d132829a2fda83ed9ee3d8b90c5360f752d8969b929344c73141ff03d318',
+            '86a238c9fdba67bbe8b197e112e49c76c25ac9b22397e5467e459a4cf7a0a74c13851c4f6788af9c2592e521dad3bea0d7792c9a608e66f090e971cffa9c909b',
         }),
       );
       const isValid = verifyObject(signature, FAKE_PUBLIC_KEY);
@@ -137,13 +91,12 @@ describe('test signTxId', () => {
 
       fakeData.txid =
         '9d5f8e32aa87dd5e787b766912345cf3a961b4e439a56670b07569c846fe375d';
-      const sortedData1 = sortTxIdData(fakeData);
       const signature1 = signTxId(fakeData, FAKE_PRIVATE_KEY);
       expect(JSON.stringify(signature1)).toBe(
         JSON.stringify({
-          ...sortedData1,
+          ...fakeData,
           signature:
-            '30326aab59c7cbd2a04fc957ff2d3baa91bf3e4279db35735e48321b8cf973bd52f2aa64f6304e38a4f2f4b87f6f4b81eec0aa2dea4f00b34e2beddc74e795f7',
+            'bd318f858fbd684e7ac04a78e5485a7c9aa5eec9f4c906f976a6ea521341b1a80efe8119b000c2d612923fcad69ecc5fd6cd75948d3b10d217bddcd3139970e7',
         }),
       );
       const isValid1 = verifyObject(signature1, FAKE_PUBLIC_KEY);

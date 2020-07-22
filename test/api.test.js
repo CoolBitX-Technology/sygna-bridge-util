@@ -7,26 +7,6 @@ const {
 } = require('../src/config');
 const crypto = require('../src/crypto');
 const fetch = require('node-fetch');
-const {
-  validatePostPermissionRequestSchema,
-  validatePostPermissionSchema,
-  validateGetTransferStatusSchema,
-  validatePostTxIdSchema,
-  sortPostPermissionData,
-  sortPostPermissionRequestData,
-  sortPostTransactionIdData,
-  validatePostBeneficiaryEndpointUrlSchema,
-  sortPostBeneficiaryEndpointUrlData,
-} = require('../src/utils');
-
-jest.mock('../src/utils', () => ({
-  ...jest.requireActual('../src/utils'),
-  validatePostPermissionRequestSchema: jest.fn().mockReturnValue([true]),
-  validatePostPermissionSchema: jest.fn().mockReturnValue([true]),
-  validateGetTransferStatusSchema: jest.fn().mockReturnValue([true]),
-  validatePostTxIdSchema: jest.fn().mockReturnValue([true]),
-  validatePostBeneficiaryEndpointUrlSchema: jest.fn().mockReturnValue([true]),
-}));
 
 jest.mock('node-fetch');
 fetch.mockImplementation(() => {
@@ -41,7 +21,7 @@ jest.mock('../src/crypto', () => ({
 
 describe('test api', () => {
   const apiModule = require('../src/api');
-  const domain = 'https://api.sygna.io/api/v1.1.0/bridge/';
+  const domain = 'https://api.sygna.io/v2/bridge/';
   const api_key = '1234567890';
 
   beforeEach(() => {
@@ -54,8 +34,8 @@ describe('test api', () => {
     const instance = new apiModule.API(api_key, domain);
 
     it('should fetch be called with correct parameters if getSB is called', async () => {
-      const headers = { api_key };
-      const url = 'https://api.sygna.io/api/v1.1.0/bridge/';
+      const headers = { 'x-api-key': api_key };
+      const url = 'https://api.sygna.io/v2/bridge/';
       const response = await instance.getSB(url);
       expect(fetch.mock.calls[0][0]).toBe(url);
       expect(fetch.mock.calls[0][1]).toEqual({ headers });
@@ -70,10 +50,10 @@ describe('test api', () => {
     it('should fetch be called with correct parameters if postSB is called', async () => {
       const headers = {
         'Content-Type': 'application/json',
-        api_key,
+        'x-api-key': api_key,
       };
       //await fetch(url, { method: 'POST', body: JSON.stringify(json), headers: headers });
-      const url = 'https://api.sygna.io/api/v1.1.0/bridge/';
+      const url = 'https://api.sygna.io/v2/bridge/';
       const body = {
         key: 'value',
       };
@@ -98,13 +78,11 @@ describe('test api', () => {
         {
           vasp_code: 'AAAAAAAA798',
           vasp_name: 'AAAA',
-          is_sb_need_static: false,
           vasp_pubkey: '123456',
         },
         {
           vasp_code: 'ABCDKRZZ111',
           vasp_name: 'ASDFGHJKL111111',
-          is_sb_need_static: true,
           vasp_pubkey: '22222222222222222222222',
         },
       ],
@@ -119,9 +97,7 @@ describe('test api', () => {
 
     it('should getSB be called with correct parameters if getVASPList is called', async () => {
       const response = await instance.getVASPList(false);
-      expect(instance.getSB.mock.calls[0][0]).toBe(
-        `${domain}api/v1.1.0/bridge/vasp`,
-      );
+      expect(instance.getSB.mock.calls[0][0]).toBe(`${domain}v2/bridge/vasp`);
       expect(instance.getSB.mock.calls.length).toBe(1);
       expect(response).toEqual(fakeResponse.vasp_data);
     });
@@ -201,13 +177,11 @@ describe('test api', () => {
       {
         vasp_code: 'AAAAAAAA798',
         vasp_name: 'AAAA',
-        is_sb_need_static: false,
         vasp_pubkey: '123456',
       },
       {
         vasp_code: 'ABCDKRZZ111',
         vasp_name: 'ASDFGHJKL111111',
-        is_sb_need_static: true,
         vasp_pubkey: '22222222222222222222222',
       },
     ];
@@ -287,25 +261,44 @@ describe('test api', () => {
   describe('test postPermissionRequest', () => {
     const fakeData = {
       data: {
-        expire_date: 123,
-        transaction: {
-          amount: 1,
-          transaction_currency: '0x80000000',
-          originator_addrs_extra: { DT: '001' },
-          originator_addrs: ['16bUGjvunVp7LqygLHrTvHyvbvfeuRCWAh'],
-          beneficiary_addrs_extra: { DT: '002' },
-          beneficiary_vasp_code: 'VASPTWTP2',
-          beneficiary_addrs: ['3CHgkx946yyueucCMiJhyH2Vg5kBBvfSGH'],
-          originator_vasp_code: 'VASPTWTP1',
-        },
         private_info:
-          '6b51d431df5d7f141cbececcf79edf3dd861c3b4069f0b11661a3eefacbba918',
-        signature: '1234567890',
-        data_dt: '2019-07-29T06:29:00.123Z',
+          '79676feb56c7b8c222924d945ba3d7c73333c27b7bc94e8a76cbaa643db3722695d7b822aa3d62443f3bacbdb993b45ec9421769b15b97bd085c0fc21132de4c08a4626b28ddc40481e1563245b337ffb782113e364cc94e40348577eae4a714c9764e6c206439b1d86fa97c17f33164f2a2ca343dd1d5f9e7d2c68fbb8ed58d',
+        transaction: {
+          originator_vasp: {
+            vasp_code: 'VASPUSNY1',
+            addrs: [
+              {
+                address: 'bnb1vynn9hamtqg9me7y6frja0rvfva9saprl55gl4',
+                addr_extra_info: [],
+              },
+            ],
+          },
+          beneficiary_vasp: {
+            vasp_code: 'VASPUSNY2',
+            addrs: [
+              {
+                address: 'bnb1hj767k8nlf0jn6p3c3wvl0a66c4782a3f78d7e',
+                addr_extra_info: [
+                  {
+                    tag: 'abc',
+                  },
+                ],
+              },
+            ],
+          },
+          currency_id: 'sygna:0x80000090',
+          amount: '4.51120135938784',
+        },
+        need_validate_addr: true,
+        data_dt: '2020-07-13T05:56:53.088Z',
+        signature:
+          '90b909183e11bdf0896fb9008c778a2e1e1a4df58c4985a853a91b6254e58514033394459f6c3948ce41a0335d89e23436c81b31dc834ff4dba93f6a20f53aee',
       },
       callback: {
-        signature: '1234567890',
-        callback_url: 'https://api.sygna.io/api/v1.1.0/bridge/',
+        callback_url:
+          'https://facb1c03d3dae42f07008d0c42979623.m.pipedream.net',
+        signature:
+          'be9000b96b5a86b971fe1818e23790beb33fc9d2b27d761ea70c067eb73adea06fd8aada3ec577f62e87b77ff18cb635bd48e1e33b677908b0bf92ea743c85b4',
       },
     };
 
@@ -313,58 +306,16 @@ describe('test api', () => {
     instance.postSB = jest.fn();
 
     beforeEach(() => {
-      validatePostPermissionRequestSchema.mockClear();
       instance.postSB.mockClear();
     });
 
-    it('should validatePostPermissionRequestSchema be called with correct parameters if postPermissionRequest is called', async () => {
-      const fakeError = [
-        {
-          keyword: 'test',
-          dataPath: '',
-          schemaPath: '#/properties',
-          params: { comparison: '>=' },
-          message: `error from validatePostPermissionRequestSchema`,
-        },
-      ];
-      validatePostPermissionRequestSchema.mockReset();
-
-      validatePostPermissionRequestSchema
-        .mockReturnValueOnce([true])
-        .mockReturnValue([false, fakeError]);
-
-      await instance.postPermissionRequest(fakeData);
-      expect(validatePostPermissionRequestSchema.mock.calls.length).toBe(1);
-      expect(validatePostPermissionRequestSchema.mock.calls[0][0]).toEqual(
-        fakeData,
-      );
-
-      try {
-        await instance.postPermissionRequest(fakeData);
-        fail('expected error was not occurred');
-      } catch (error) {
-        const { keyword, message } = error[0];
-        expect(keyword).toEqual('test');
-        expect(message).toEqual(
-          'error from validatePostPermissionRequestSchema',
-        );
-      }
-      expect(validatePostPermissionRequestSchema.mock.calls.length).toBe(2);
-      expect(validatePostPermissionRequestSchema.mock.calls[1][0]).toEqual(
-        fakeData,
-      );
-
-      validatePostPermissionRequestSchema.mockReturnValue([true]);
-    });
-
-    it('should postSB be called with sorted data if postPermissionRequest is called', async () => {
-      const sortedData = sortPostPermissionRequestData(fakeData);
+    it('should postSB be called with correct data if postPermissionRequest is called', async () => {
       await instance.postPermissionRequest(fakeData);
       expect(instance.postSB.mock.calls[0][0]).toBe(
-        `${domain}api/v1.1.0/bridge/transaction/permission-request`,
+        `${domain}v2/bridge/transaction/permission-request`,
       );
       expect(JSON.stringify(instance.postSB.mock.calls[0][1])).toBe(
-        JSON.stringify(sortedData),
+        JSON.stringify(fakeData),
       );
       expect(instance.postSB.mock.calls.length).toBe(1);
     });
@@ -385,53 +336,17 @@ describe('test api', () => {
     instance.postSB = jest.fn();
 
     beforeEach(() => {
-      validatePostPermissionSchema.mockClear();
       instance.postSB.mockClear();
     });
 
-    it('should validatePostPermissionSchema be called with correct parameters if postPermissionRequest is called', async () => {
-      const fakeError = [
-        {
-          keyword: 'test',
-          dataPath: '',
-          schemaPath: '#/properties',
-          params: { comparison: '>=' },
-          message: `error from validatePostPermissionSchema`,
-        },
-      ];
-      validatePostPermissionSchema.mockReset();
-
-      validatePostPermissionSchema
-        .mockReturnValueOnce([true])
-        .mockReturnValue([false, fakeError]);
-
-      await instance.postPermission(fakeData);
-      expect(validatePostPermissionSchema.mock.calls.length).toBe(1);
-      expect(validatePostPermissionSchema.mock.calls[0][0]).toEqual(fakeData);
-
-      try {
-        await instance.postPermission(fakeData);
-        fail('expected error was not occurred');
-      } catch (error) {
-        const { keyword, message } = error[0];
-        expect(keyword).toEqual('test');
-        expect(message).toEqual('error from validatePostPermissionSchema');
-      }
-      expect(validatePostPermissionSchema.mock.calls.length).toBe(2);
-      expect(validatePostPermissionSchema.mock.calls[1][0]).toEqual(fakeData);
-
-      validatePostPermissionSchema.mockReturnValue([true]);
-    });
-
     it('should postSB be called with correct parameters if postPermission is called', async () => {
-      const sortedData = sortPostPermissionData(fakeData);
       await instance.postPermission(fakeData);
 
       expect(instance.postSB.mock.calls[0][0]).toBe(
-        `${domain}api/v1.1.0/bridge/transaction/permission`,
+        `${domain}v2/bridge/transaction/permission`,
       );
       expect(JSON.stringify(instance.postSB.mock.calls[0][1])).toBe(
-        JSON.stringify(sortedData),
+        JSON.stringify(fakeData),
       );
       expect(instance.postSB.mock.calls.length).toBe(1);
     });
@@ -445,53 +360,14 @@ describe('test api', () => {
     instance.getSB = jest.fn();
 
     beforeEach(() => {
-      validateGetTransferStatusSchema.mockClear();
       instance.getSB.mockClear();
-    });
-
-    it('should validateGetTransferStatusSchema be called with correct parameters if getStatus is called', async () => {
-      const fakeError = [
-        {
-          keyword: 'test',
-          dataPath: '',
-          schemaPath: '#/properties',
-          params: { comparison: '>=' },
-          message: `error from validateGetTransferStatusSchema`,
-        },
-      ];
-      validateGetTransferStatusSchema.mockReset();
-
-      validateGetTransferStatusSchema
-        .mockReturnValueOnce([true])
-        .mockReturnValue([false, fakeError]);
-
-      await instance.getStatus(transfer_id);
-      expect(validateGetTransferStatusSchema.mock.calls.length).toBe(1);
-      expect(validateGetTransferStatusSchema.mock.calls[0][0]).toEqual({
-        transfer_id,
-      });
-
-      try {
-        await instance.getStatus(transfer_id);
-        fail('expected error was not occurred');
-      } catch (error) {
-        const { keyword, message } = error[0];
-        expect(keyword).toEqual('test');
-        expect(message).toEqual('error from validateGetTransferStatusSchema');
-      }
-      expect(validateGetTransferStatusSchema.mock.calls.length).toBe(2);
-      expect(validateGetTransferStatusSchema.mock.calls[1][0]).toEqual({
-        transfer_id,
-      });
-
-      validateGetTransferStatusSchema.mockReturnValue([true]);
     });
 
     it('should getSB be called with correct parameters if getStatus is called', async () => {
       await instance.getStatus(transfer_id);
 
       expect(instance.getSB.mock.calls[0][0]).toBe(
-        `${domain}api/v1.1.0/bridge/transaction/status?transfer_id=${transfer_id}`,
+        `${domain}v2/bridge/transaction/status?transfer_id=${transfer_id}`,
       );
       expect(instance.getSB.mock.calls.length).toBe(1);
     });
@@ -511,53 +387,17 @@ describe('test api', () => {
     instance.postSB = jest.fn();
 
     beforeEach(() => {
-      validatePostTxIdSchema.mockClear();
       instance.postSB.mockClear();
     });
 
-    it('should validatePostTxIdSchema be called with correct parameters if postTransactionId is called', async () => {
-      const fakeError = [
-        {
-          keyword: 'test',
-          dataPath: '',
-          schemaPath: '#/properties',
-          params: { comparison: '>=' },
-          message: `error from validatePostTxIdSchema`,
-        },
-      ];
-      validatePostTxIdSchema.mockReset();
-
-      validatePostTxIdSchema
-        .mockReturnValueOnce([true])
-        .mockReturnValue([false, fakeError]);
-
-      await instance.postTransactionId(fakeData);
-      expect(validatePostTxIdSchema.mock.calls.length).toBe(1);
-      expect(validatePostTxIdSchema.mock.calls[0][0]).toEqual(fakeData);
-
-      try {
-        await instance.postTransactionId(fakeData);
-        fail('expected error was not occurred');
-      } catch (error) {
-        const { keyword, message } = error[0];
-        expect(keyword).toEqual('test');
-        expect(message).toEqual('error from validatePostTxIdSchema');
-      }
-      expect(validatePostTxIdSchema.mock.calls.length).toBe(2);
-      expect(validatePostTxIdSchema.mock.calls[1][0]).toEqual(fakeData);
-
-      validatePostTxIdSchema.mockReturnValue([true]);
-    });
-
     it('should postSB be called with correct parameters if postPermission is called', async () => {
-      const sortedData = sortPostTransactionIdData(fakeData);
       await instance.postTransactionId(fakeData);
 
       expect(instance.postSB.mock.calls[0][0]).toBe(
-        `${domain}api/v1.1.0/bridge/transaction/txid`,
+        `${domain}v2/bridge/transaction/txid`,
       );
       expect(JSON.stringify(instance.postSB.mock.calls[0][1])).toBe(
-        JSON.stringify(sortedData),
+        JSON.stringify(fakeData),
       );
       expect(instance.postSB.mock.calls.length).toBe(1);
     });
@@ -566,8 +406,8 @@ describe('test api', () => {
   describe('test postBeneficiaryEndpointUrl', () => {
     const vasp_code = 'QQQQKRQQ';
     const callback_permission_request_url =
-      'https://api.sygna.io/api/v1.1.0/bridge/permission-request';
-    const callback_txid_url = 'https://api.sygna.io/api/v1.1.0/bridge/txid';
+      'https://api.sygna.io/v2/bridge/permission-request';
+    const callback_txid_url = 'https://api.sygna.io/v2/bridge/txid';
     const signature =
       '6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b';
 
@@ -580,64 +420,17 @@ describe('test api', () => {
     instance.postSB = jest.fn();
 
     beforeEach(() => {
-      validatePostBeneficiaryEndpointUrlSchema.mockClear();
       instance.postSB.mockClear();
     });
 
-    it('should validatePostBeneficiaryEndpointUrlSchema be called with correct parameters if postBeneficiaryEndpointUrl is called', async () => {
-      const fakeError = [
-        {
-          keyword: 'test',
-          dataPath: '',
-          schemaPath: '#/properties',
-          params: { comparison: '>=' },
-          message: `error from validatePostBeneficiaryEndpointUrlSchema`,
-        },
-      ];
-      validatePostBeneficiaryEndpointUrlSchema.mockReset();
-
-      validatePostBeneficiaryEndpointUrlSchema
-        .mockReturnValueOnce([true])
-        .mockReturnValue([false, fakeError]);
-
-      await instance.postBeneficiaryEndpointUrl(fakeData);
-      expect(validatePostBeneficiaryEndpointUrlSchema.mock.calls.length).toBe(
-        1,
-      );
-      expect(validatePostBeneficiaryEndpointUrlSchema.mock.calls[0][0]).toEqual(
-        fakeData,
-      );
-
-      fakeData.callback_txid_url = callback_txid_url;
-      try {
-        await instance.postBeneficiaryEndpointUrl(fakeData);
-        fail('expected error was not occurred');
-      } catch (error) {
-        const { keyword, message } = error[0];
-        expect(keyword).toEqual('test');
-        expect(message).toEqual(
-          'error from validatePostBeneficiaryEndpointUrlSchema',
-        );
-      }
-      expect(validatePostBeneficiaryEndpointUrlSchema.mock.calls.length).toBe(
-        2,
-      );
-      expect(
-        validatePostBeneficiaryEndpointUrlSchema.mock.calls[1][0],
-      ).toEqual({ ...fakeData, callback_txid_url });
-
-      validatePostBeneficiaryEndpointUrlSchema.mockReturnValue([true]);
-    });
-
     it('should postSB be called with correct parameters if postBeneficiaryEndpointUrl is called', async () => {
-      const sortedData = sortPostBeneficiaryEndpointUrlData(fakeData);
       await instance.postBeneficiaryEndpointUrl(fakeData);
 
       expect(instance.postSB.mock.calls[0][0]).toBe(
-        `${domain}api/v1.1.0/bridge/vasp/beneficiary-endpoint-url`,
+        `${domain}v2/bridge/vasp/beneficiary-endpoint-url`,
       );
       expect(JSON.stringify(instance.postSB.mock.calls[0][1])).toBe(
-        JSON.stringify(sortedData),
+        JSON.stringify(fakeData),
       );
       expect(instance.postSB.mock.calls.length).toBe(1);
 
@@ -647,14 +440,13 @@ describe('test api', () => {
         vasp_code,
       };
 
-      const sortedData1 = sortPostBeneficiaryEndpointUrlData(fakeData1);
       await instance.postBeneficiaryEndpointUrl(fakeData1);
 
       expect(instance.postSB.mock.calls[1][0]).toBe(
-        `${domain}api/v1.1.0/bridge/vasp/beneficiary-endpoint-url`,
+        `${domain}v2/bridge/vasp/beneficiary-endpoint-url`,
       );
       expect(JSON.stringify(instance.postSB.mock.calls[1][1])).toBe(
-        JSON.stringify(sortedData1),
+        JSON.stringify(fakeData1),
       );
       expect(instance.postSB.mock.calls.length).toBe(2);
 
@@ -665,14 +457,13 @@ describe('test api', () => {
         callback_permission_request_url,
       };
 
-      const sortedData2 = sortPostBeneficiaryEndpointUrlData(fakeData2);
       await instance.postBeneficiaryEndpointUrl(fakeData2);
 
       expect(instance.postSB.mock.calls[2][0]).toBe(
-        `${domain}api/v1.1.0/bridge/vasp/beneficiary-endpoint-url`,
+        `${domain}v2/bridge/vasp/beneficiary-endpoint-url`,
       );
       expect(JSON.stringify(instance.postSB.mock.calls[2][1])).toBe(
-        JSON.stringify(sortedData2),
+        JSON.stringify(fakeData2),
       );
       expect(instance.postSB.mock.calls.length).toBe(3);
 
@@ -683,16 +474,81 @@ describe('test api', () => {
         callback_permission_request_url,
       };
 
-      const sortedData3 = sortPostBeneficiaryEndpointUrlData(fakeData3);
       await instance.postBeneficiaryEndpointUrl(fakeData3);
 
       expect(instance.postSB.mock.calls[3][0]).toBe(
-        `${domain}api/v1.1.0/bridge/vasp/beneficiary-endpoint-url`,
+        `${domain}v2/bridge/vasp/beneficiary-endpoint-url`,
       );
       expect(JSON.stringify(instance.postSB.mock.calls[3][1])).toBe(
-        JSON.stringify(sortedData3),
+        JSON.stringify(fakeData3),
       );
       expect(instance.postSB.mock.calls.length).toBe(4);
+    });
+  });
+
+  describe('test postRety', () => {
+    const vasp_code = 'QQQQKRQQ';
+
+    const fakeData = {
+      vasp_code,
+    };
+    const instance = new apiModule.API(api_key, domain);
+    instance.postSB = jest.fn();
+
+    beforeEach(() => {
+      instance.postSB.mockClear();
+    });
+
+    it('should postSB be called with postRety parameters if postRety is called', async () => {
+      await instance.postRetry(fakeData);
+
+      expect(instance.postSB.mock.calls[0][0]).toBe(
+        `${domain}v2/bridge/transaction/retry`,
+      );
+      expect(JSON.stringify(instance.postSB.mock.calls[0][1])).toBe(
+        JSON.stringify(fakeData),
+      );
+      expect(instance.postSB.mock.calls.length).toBe(1);
+    });
+  });
+
+  describe('test getCurrencies', () => {
+    const currency_id = 'sygna:0x80000090';
+    const currency_name = 'XRP';
+    const currency_symbol = 'XRP';
+
+    const instance = new apiModule.API(api_key, domain);
+    instance.getSB = jest.fn();
+
+    beforeEach(() => {
+      instance.getSB.mockClear();
+    });
+
+    it('should getSB be called with getCurrencies if getCurrencies is called', async () => {
+      await instance.getCurrencies();
+
+      expect(instance.getSB.mock.calls[0][0]).toBe(
+        `${domain}v2/bridge/transaction/currencies`,
+      );
+      expect(instance.getSB.mock.calls.length).toBe(1);
+
+      await instance.getCurrencies({ currency_id });
+
+      expect(instance.getSB.mock.calls[1][0]).toBe(
+        `${domain}v2/bridge/transaction/currencies?currency_id=${currency_id}`,
+      );
+
+      await instance.getCurrencies({ currency_id, currency_symbol });
+
+      expect(instance.getSB.mock.calls[2][0]).toBe(
+        `${domain}v2/bridge/transaction/currencies?currency_id=${currency_id}&currency_symbol=${currency_symbol}`,
+      );
+
+      await instance.getCurrencies({ currency_name, currency_symbol });
+
+      expect(instance.getSB.mock.calls[3][0]).toBe(
+        `${domain}v2/bridge/transaction/currencies?currency_name=${currency_name}&currency_symbol=${currency_symbol}`,
+      );
     });
   });
 });

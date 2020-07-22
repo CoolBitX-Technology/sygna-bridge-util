@@ -1,19 +1,7 @@
 const ecies = require('./ecies');
 const sygnaSign = require('./sign');
 const { SYGNA_BRIDGE_CENTRAL_PUBKEY, REJECTED } = require('../config');
-const {
-  validateTxIdSchema,
-  validateCallbackSchema,
-  validatePermissionSchema,
-  validatePermissionRequestSchema,
-  validatePrivateKey,
-  sortCallbackData,
-  sortTxIdData,
-  sortPermissionData,
-  sortPermissionRequestData,
-  validateBeneficiaryEndpointUrlSchema,
-  sortBeneficiaryEndpointUrlData,
-} = require('../utils');
+const { validatePrivateKey } = require('../utils');
 
 /**
  * Encrypt private info object to hex string.
@@ -21,7 +9,7 @@ const {
  * @param {string} publicKey recipeint public key in hex string.
  * @return {string} ECIES encoded privMsg.
  */
-exports.sygnaEncodePrivateObj = (data, publicKey) => {
+exports.encodePrivateObj = (data, publicKey) => {
   let msgString = data;
   if (typeof data === 'object') {
     msgString = JSON.stringify(data);
@@ -31,12 +19,19 @@ exports.sygnaEncodePrivateObj = (data, publicKey) => {
 };
 
 /**
+ * the function would be deprecated next version, use encodePrivateObj instead
+ */
+exports.sygnaEncodePrivateObj = (data, publicKey) => {
+  return this.encodePrivateObj(data, publicKey);
+};
+
+/**
  * Decode private info from recipent server.
  * @param {string} privMsg
  * @param {string} privateKey
  * @return {object}
  */
-exports.sygnaDecodePrivateObj = (privMsg, privateKey) => {
+exports.decodePrivateObj = (privMsg, privateKey) => {
   const decoded = ecies.ECIESDecode(privMsg, privateKey);
   try {
     return JSON.parse(decoded);
@@ -46,18 +41,20 @@ exports.sygnaDecodePrivateObj = (privMsg, privateKey) => {
 };
 
 /**
- * @param {{private_info: string, transaction:object, data_dt:string, expire_date?:number}} data
+ * the function would be deprecated next version, use decodePrivateObj instead
+ */
+exports.sygnaDecodePrivateObj = (privMsg, privateKey) => {
+  return this.decodePrivateObj(privMsg, privateKey);
+};
+
+/**
+ * @param {{private_info: string, transaction:object, data_dt:string, expire_date?:number, need_validate_addr?:boolean}} data
  * @param {string} privateKey
- * @return {{private_info: string, transaction:{}, data_dt:string, signature:string, expire_date?:number}}
+ * @return {{private_info: string, transaction:{}, data_dt:string, expire_date?:number, need_validate_addr?:boolean, signature:string}}
  */
 exports.signPermissionRequest = (data, privateKey) => {
-  const valid = validatePermissionRequestSchema(data);
-  if (!valid[0]) {
-    throw valid[1];
-  }
   validatePrivateKey(privateKey);
-  const sortedData = sortPermissionRequestData(data);
-  return this.signObject(sortedData, privateKey);
+  return this.signObject(data, privateKey);
 };
 
 /**
@@ -66,14 +63,8 @@ exports.signPermissionRequest = (data, privateKey) => {
  * @return {{callback_url, signature: string}}
  */
 exports.signCallBack = (data, privateKey) => {
-  const valid = validateCallbackSchema(data);
-  if (!valid[0]) {
-    throw valid[1];
-  }
   validatePrivateKey(privateKey);
-
-  const sortedData = sortCallbackData(data);
-  return this.signObject(sortedData, privateKey);
+  return this.signObject(data, privateKey);
 };
 
 /**
@@ -82,14 +73,8 @@ exports.signCallBack = (data, privateKey) => {
  * @return {{transfer_id:string, permission_status:REJECTED| ACCEPTED, signature: string, expire_date?:number, reject_code?:string, reject_message?:string}}}
  */
 exports.signPermission = (data, privateKey) => {
-  const valid = validatePermissionSchema(data);
-  if (!valid[0]) {
-    throw valid[1];
-  }
   validatePrivateKey(privateKey);
-
-  const sortedData = sortPermissionData(data);
-  return this.signObject(sortedData, privateKey);
+  return this.signObject(data, privateKey);
 };
 
 /**
@@ -98,14 +83,8 @@ exports.signPermission = (data, privateKey) => {
  * @return {{transfer_id:string, txid:string, signature:string}}
  */
 exports.signTxId = (data, privateKey) => {
-  const valid = validateTxIdSchema(data);
-  if (!valid[0]) {
-    throw valid[1];
-  }
   validatePrivateKey(privateKey);
-
-  const sortedData = sortTxIdData(data);
-  return this.signObject(sortedData, privateKey);
+  return this.signObject(data, privateKey);
 };
 
 /**
@@ -137,17 +116,11 @@ exports.verifyObject = (obj, publicKey = SYGNA_BRIDGE_CENTRAL_PUBKEY) => {
 };
 
 /**
- * @param {{vasp_code:string,callback_permission_request_url?:string,callback_txid_url?:string}} data
+ * @param {{vasp_code:string,callback_permission_request_url?:string,callback_txid_url?:string,callback_validate_addr_url?:string}} data
  * @param {string} privateKey
- * @return {{vasp_code:string,callback_permission_request_url?:string,,callback_txid_url?:string,signature:string}}
+ * @return {{vasp_code:string,callback_permission_request_url?:string,,callback_txid_url?:string,callback_validate_addr_url?:string,signature:string}}
  */
 exports.signBeneficiaryEndpointUrl = (data, privateKey) => {
-  const valid = validateBeneficiaryEndpointUrlSchema(data);
-  if (!valid[0]) {
-    throw valid[1];
-  }
   validatePrivateKey(privateKey);
-
-  const sortedData = sortBeneficiaryEndpointUrlData(data);
-  return this.signObject(sortedData, privateKey);
+  return this.signObject(data, privateKey);
 };

@@ -1,14 +1,11 @@
+const _ = require('lodash');
+
 const { FAKE_PRIVATE_KEY, FAKE_PUBLIC_KEY } = require('../fakeKeys');
 
-const {
-  validatePermissionRequestSchema,
-  validatePrivateKey,
-  sortPermissionRequestData,
-} = require('../../src/utils');
+const { validatePrivateKey } = require('../../src/utils');
 
 jest.mock('../../src/utils', () => ({
   ...jest.requireActual('../../src/utils'),
-  validatePermissionRequestSchema: jest.fn().mockReturnValue([true]),
   validatePrivateKey: jest.fn(),
 }));
 
@@ -17,6 +14,44 @@ describe('test signPermissionRequest', () => {
   jest.isolateModules(() => {
     crypto = require('../../src/crypto');
   });
+
+  const fakeData = {
+    data_dt: '2019-07-29T06:29:00.123Z',
+    private_info:
+      '6b51d431df5d7f141cbececcf79edf3dd861c3b4069f0b11661a3eefacbba918',
+    transaction: {
+      originator_vasp: {
+        vasp_code: 'VASPJPJT4',
+        addrs: [
+          {
+            address: 'bnb1vynn9hamtqg9me7y6frja0rvfva9saprl55gl4',
+            addr_extra_info: [
+              {
+                memo_text: '634346542',
+              },
+            ],
+          },
+        ],
+      },
+      beneficiary_vasp: {
+        vasp_code: 'VASPJPJT3',
+        addrs: [
+          {
+            address: 'bnb1hj767k8nlf0jn6p3c3wvl0r0qfwfrvuxrqlxce',
+            addr_extra_info: [
+              {
+                memo_text: 'Idzl1532434853',
+              },
+            ],
+          },
+        ],
+      },
+      currency_id:
+        'sygna:0x800002ca.bnb1u9j9hkst6gf09dkdvxlj7puk8c7vh68a0kkmht',
+      amount: '0.1234',
+    },
+  };
+
   describe('test mock', () => {
     const crypto = require('../../src/crypto');
     crypto.signObject = jest.fn();
@@ -24,83 +59,16 @@ describe('test signPermissionRequest', () => {
     const { signPermissionRequest } = crypto;
     beforeEach(() => {
       crypto.signObject.mockClear();
-      validatePermissionRequestSchema.mockClear();
       validatePrivateKey.mockClear();
     });
 
-    it('should validatePermissionRequestSchema be called with correct parameters if signPermissionRequest is called', () => {
-      const fakeData = {
-        data_dt: '2019-07-29T06:29:00.123Z',
-        private_info:
-          '6b51d431df5d7f141cbececcf79edf3dd861c3b4069f0b11661a3eefacbba918',
-        signature: '1234567890',
-        transaction: {
-          transaction_currency: '0x80000000',
-          originator_addrs: ['16bUGjvunVp7LqygLHrTvHyvbvfeuRCWAh'],
-          originator_vasp_code: 'VASPTWTP1',
-          beneficiary_addrs: ['3CHgkx946yyueucCMiJhyH2Vg5kBBvfSGH'],
-          amount: 1,
-          beneficiary_vasp_code: 'VASPTWTP2',
-        },
-      };
-      const fakeError = [
-        {
-          keyword: 'test',
-          dataPath: '',
-          schemaPath: '#/properties',
-          params: { comparison: '>=' },
-          message: `error from validatePermissionRequestSchema`,
-        },
-      ];
-      validatePermissionRequestSchema.mockReset();
-
-      validatePermissionRequestSchema
-        .mockReturnValueOnce([true])
-        .mockReturnValue([false, fakeError]);
-
-      signPermissionRequest(fakeData, FAKE_PRIVATE_KEY);
-      expect(validatePermissionRequestSchema.mock.calls.length).toBe(1);
-      expect(validatePermissionRequestSchema.mock.calls[0][0]).toEqual(
-        fakeData,
-      );
-
-      try {
-        signPermissionRequest(fakeData, FAKE_PRIVATE_KEY);
-        fail('expected error was not occurred');
-      } catch (error) {
-        const { keyword, message } = error[0];
-        expect(keyword).toEqual('test');
-        expect(message).toEqual('error from validatePermissionRequestSchema');
-      }
-      expect(validatePermissionRequestSchema.mock.calls.length).toBe(2);
-      expect(validatePermissionRequestSchema.mock.calls[1][0]).toEqual(
-        fakeData,
-      );
-
-      validatePermissionRequestSchema.mockReturnValue([true]);
-    });
-
     it('should validatePrivateKey be called with correct parameters if signPermissionRequest is called', () => {
-      const fakeData = {
-        data_dt: '2019-07-29T06:29:00.123Z',
-        private_info:
-          '6b51d431df5d7f141cbececcf79edf3dd861c3b4069f0b11661a3eefacbba918',
-        signature: '1234567890',
-        transaction: {
-          transaction_currency: '0x80000000',
-          originator_addrs: ['16bUGjvunVp7LqygLHrTvHyvbvfeuRCWAh'],
-          originator_vasp_code: 'VASPTWTP1',
-          beneficiary_addrs: ['3CHgkx946yyueucCMiJhyH2Vg5kBBvfSGH'],
-          amount: 1,
-          beneficiary_vasp_code: 'VASPTWTP2',
-        },
-      };
-
-      signPermissionRequest(fakeData, 123);
+      const cloneData = _.cloneDeep(fakeData);
+      signPermissionRequest(cloneData, 123);
       expect(validatePrivateKey.mock.calls.length).toBe(1);
       expect(validatePrivateKey.mock.calls[0][0]).toEqual(123);
 
-      signPermissionRequest(fakeData, 'abc');
+      signPermissionRequest(cloneData, 'abc');
       expect(validatePrivateKey.mock.calls.length).toBe(2);
       expect(validatePrivateKey.mock.calls[1][0]).toEqual('abc');
 
@@ -109,7 +77,7 @@ describe('test signPermissionRequest', () => {
         throw new Error('error from validatePrivateKey');
       });
       try {
-        signPermissionRequest(fakeData, 'def');
+        signPermissionRequest(cloneData, 'def');
         fail('expected error was not occurred');
       } catch (error) {
         const { message } = error;
@@ -119,32 +87,19 @@ describe('test signPermissionRequest', () => {
     });
 
     it('should signObject be called with correct parameters if signPermissionRequest is called', () => {
-      const fakeData = {
-        data_dt: '2019-07-29T06:29:00.123Z',
-        private_info:
-          '6b51d431df5d7f141cbececcf79edf3dd861c3b4069f0b11661a3eefacbba918',
-        signature: '1234567890',
-        transaction: {
-          transaction_currency: '0x80000000',
-          originator_addrs: ['16bUGjvunVp7LqygLHrTvHyvbvfeuRCWAh'],
-          originator_vasp_code: 'VASPTWTP1',
-          beneficiary_addrs: ['3CHgkx946yyueucCMiJhyH2Vg5kBBvfSGH'],
-          amount: 1,
-          beneficiary_vasp_code: 'VASPTWTP2',
-        },
-      };
-      signPermissionRequest(fakeData, FAKE_PRIVATE_KEY);
+      const cloneData = _.cloneDeep(fakeData);
+      signPermissionRequest(cloneData, FAKE_PRIVATE_KEY);
       expect(crypto.signObject.mock.calls.length).toBe(1);
       expect(JSON.stringify(crypto.signObject.mock.calls[0][0])).toBe(
-        JSON.stringify(sortPermissionRequestData(fakeData)),
+        JSON.stringify(cloneData),
       );
       expect(crypto.signObject.mock.calls[0][1]).toEqual(FAKE_PRIVATE_KEY);
 
-      fakeData.expire_date = 123;
-      signPermissionRequest(fakeData, FAKE_PRIVATE_KEY);
+      cloneData.expire_date = 123;
+      signPermissionRequest(cloneData, FAKE_PRIVATE_KEY);
       expect(crypto.signObject.mock.calls.length).toBe(2);
       expect(JSON.stringify(crypto.signObject.mock.calls[1][0])).toBe(
-        JSON.stringify(sortPermissionRequestData(fakeData)),
+        JSON.stringify(cloneData),
       );
       expect(crypto.signObject.mock.calls[1][1]).toEqual(FAKE_PRIVATE_KEY);
     });
@@ -154,66 +109,57 @@ describe('test signPermissionRequest', () => {
     const { signPermissionRequest, verifyObject } = crypto;
 
     it('should object which is return by signPermissionRequest be correct', () => {
-      const fakeData = {
-        data_dt: '2019-07-29T06:29:00.123Z',
-        private_info:
-          '6b51d431df5d7f141cbececcf79edf3dd861c3b4069f0b11661a3eefacbba918',
-        transaction: {
-          transaction_currency: '0x80000000',
-          originator_addrs: ['16bUGjvunVp7LqygLHrTvHyvbvfeuRCWAh'],
-          originator_vasp_code: 'VASPTWTP1',
-          beneficiary_addrs: ['3CHgkx946yyueucCMiJhyH2Vg5kBBvfSGH'],
-          amount: 1,
-          beneficiary_vasp_code: 'VASPTWTP2',
-        },
-      };
-      const signature = signPermissionRequest(fakeData, FAKE_PRIVATE_KEY);
-      const sortedFakeData = sortPermissionRequestData(fakeData);
+      const cloneData = _.cloneDeep(fakeData);
+      const signature = signPermissionRequest(cloneData, FAKE_PRIVATE_KEY);
       expect(JSON.stringify(signature)).toBe(
         JSON.stringify({
-          ...sortedFakeData,
+          ...cloneData,
           signature:
-            'c7b9c1edc35e17dc0a78858d68786e5bcb26bbc09d02a0e1747e7eeabdc59d4e79c6d1156359a06b1662084d782bd86f4bdc6cc5aa6696f20c5ea8e20fa328e8',
+            '3818d740a75e3698eaab4843d6e9c718f3c52518fa9573db095eaa3c91ef164151084241036a7c68d3c9eb69cfbdaf409b4482d1aca5a3769fdc45a7d06837bb',
         }),
       );
 
       const isValid = verifyObject(signature, FAKE_PUBLIC_KEY);
       expect(isValid).toBe(true);
 
-      fakeData.expire_date = 2529024749000;
-      const signature1 = signPermissionRequest(fakeData, FAKE_PRIVATE_KEY);
-      const sortedFakeData1 = sortPermissionRequestData(fakeData);
+      delete cloneData.signature;
+      cloneData.expire_date = 2529024749000;
+      const signature1 = signPermissionRequest(cloneData, FAKE_PRIVATE_KEY);
       expect(JSON.stringify(signature1)).toBe(
         JSON.stringify({
-          ...sortedFakeData1,
+          ...cloneData,
           signature:
-            '2727bc6be48b780bfd4712c2f8bfa39bcc24e7e2aa48e8fbfa02789b8bac31443c8dc991731108bddabc52761dc9bf97cb5938838c3c28fae1c4fcd31e5a7c5c',
+            '16bff17516d619042cb5b46815403bea09c058e4643879b10ab26b64e366299b1961119c3e63b5f494dddc52b90490d1abbc4bbb2ca1ab38bee81b57411240e0',
         }),
       );
       const isValid1 = verifyObject(signature1, FAKE_PUBLIC_KEY);
       expect(isValid1).toBe(true);
 
-      fakeData.transaction.originator_addrs_extra = { DT: '001' };
-      const signature2 = signPermissionRequest(fakeData, FAKE_PRIVATE_KEY);
-      const sortedFakeData2 = sortPermissionRequestData(fakeData);
+      delete cloneData.signature;
+      cloneData.transaction.originator_vasp.addrs[0].addr_extra_info = [
+        {
+          DT: '001',
+        },
+      ];
+      const signature2 = signPermissionRequest(cloneData, FAKE_PRIVATE_KEY);
       expect(JSON.stringify(signature2)).toBe(
         JSON.stringify({
-          ...sortedFakeData2,
+          ...cloneData,
           signature:
-            'c758a58cc6920a3179c45a467d5cd7e297ba725c0c6fafd391f15e7345de7592344f8fa6f9a7c5433dd4e43da08f4d27ad17b2664697218df9bf7bce18fcd841',
+            'e1f3be1fb01bf67c0b8718215a8524cdc3fa1ff6b203491caf13cf80b76727643e315cff4eee612f7c53be2f05a0a842ab2e6f7b33b9a7123f128969c20e15f8',
         }),
       );
       const isValid2 = verifyObject(signature2, FAKE_PUBLIC_KEY);
       expect(isValid2).toBe(true);
 
-      fakeData.transaction.beneficiary_addrs_extra = { DT: '002' };
-      const signature3 = signPermissionRequest(fakeData, FAKE_PRIVATE_KEY);
-      const sortedFakeData3 = sortPermissionRequestData(fakeData);
+      delete cloneData.signature;
+      cloneData.need_validate_addr = true;
+      const signature3 = signPermissionRequest(cloneData, FAKE_PRIVATE_KEY);
       expect(JSON.stringify(signature3)).toBe(
         JSON.stringify({
-          ...sortedFakeData3,
+          ...cloneData,
           signature:
-            '0b647c4803731fb6aa58613f979d38e01e1f69d953a104a326941c1700e2b2d6450da8d26f7490c323ec340c0274996b38527649f3cc4ef4fbfd65af69afbe28',
+            'b5ccfc27297fed4c40e9a0dedcf042c1601d6d4b9b0f799145ee074964cc203912e30639d046c83a1c77ebbde8fe30710473ff1d1c175aff6f7f85fe42b48713',
         }),
       );
       const isValid3 = verifyObject(signature3, FAKE_PUBLIC_KEY);
