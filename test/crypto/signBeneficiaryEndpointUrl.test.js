@@ -10,8 +10,10 @@ jest.mock('../../src/utils', () => ({
 describe('test signBeneficiaryEndpointUrl', () => {
   const vasp_code = 'VASPUSNY1';
   const callback_permission_request_url =
-    'https://api.sygna.io/api/v1.1.0/bridge/permission-request';
-  const callback_txid_url = 'https://api.sygna.io/api/v1.1.0/bridge/txid';
+    'https://api.sygna.io/v2/bridge/permission-request';
+  const callback_txid_url = 'https://api.sygna.io/v2/bridge/txid';
+  const callback_validate_addr_url =
+    'https://api.sygna.io/v2/bridge/permission-request';
 
   let crypto;
   jest.isolateModules(() => {
@@ -78,7 +80,7 @@ describe('test signBeneficiaryEndpointUrl', () => {
         JSON.stringify({
           ...fakeData,
           signature:
-            'bcc1f78ee790b19dfdc9b2395f395f2e73e05b9171c7f1ef8e5c36243ae1a7d149bedfe18bdbf80747ad726b06f607bd01aad552279a9c0811b63eba29937dde',
+            'f0f80cbf7ae85ab54f49797f99ec4905a83db0ea774cf4c76d07a66620b8b18107e2f34237d7a0ba595d423da5bd88602a075d7e3d8934eedc551aeeccb3d1fd',
         }),
       );
       const isValid = verifyObject(signature, FAKE_PUBLIC_KEY);
@@ -93,7 +95,7 @@ describe('test signBeneficiaryEndpointUrl', () => {
         JSON.stringify({
           ...fakeData1,
           signature:
-            'f0823dc79748576c525b0a502ebd32bbf3f14b7f017c06e48b6f8d0b5ffa1cc123b256032addbd4bc8017e0786b8365550c8a3fbda3d660949419ac2f6412737',
+            '62b7a73f9050b9c4524a101c46b8fe3f285079448a6e1b37d1618185396df54a062a918914a0bc99ff219f64d5443151f7b9b3aa4ad25d606bb1c72c98ddfc69',
         }),
       );
       const isValid1 = verifyObject(signature1, FAKE_PUBLIC_KEY);
@@ -113,11 +115,32 @@ describe('test signBeneficiaryEndpointUrl', () => {
         JSON.stringify({
           ...fakeData2,
           signature:
-            '2d32548e95ad7341ab3479097fdd81b4cbe6d0b39e36ad3419a7654f6656ecff07a3ea55cdb773a9dc7fd6b2ccd29bef4f9088eed4545223f983c79dd40159b3',
+            '14b56544a0fb0069afa13d277f394140162b6710346ca298b12ebc9e5d1be12b11b564485b2eadf03d4f78b4ded0610c6b60ad332935331e9d1e1889f212c3f2',
         }),
       );
       const isValid2 = verifyObject(signature2, FAKE_PUBLIC_KEY);
       expect(isValid2).toBe(true);
+
+      const fakeData3 = {
+        callback_txid_url,
+        vasp_code,
+        callback_permission_request_url,
+        callback_validate_addr_url,
+      };
+
+      const signature3 = signBeneficiaryEndpointUrl(
+        fakeData3,
+        FAKE_PRIVATE_KEY,
+      );
+      expect(JSON.stringify(signature3)).toBe(
+        JSON.stringify({
+          ...fakeData3,
+          signature:
+            'f25a96885d61394fedea6133f0b57da1b730d9398decb77d72286ea57b6d6ee25fa17e5f8365eb93e75cb26b56d5d2cc9cdea670e51ca71646e27f891aa0b8cc',
+        }),
+      );
+      const isValid3 = verifyObject(signature3, FAKE_PUBLIC_KEY);
+      expect(isValid3).toBe(true);
     });
   });
 });

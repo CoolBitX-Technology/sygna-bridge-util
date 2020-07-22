@@ -9,7 +9,7 @@ const { validatePrivateKey } = require('../utils');
  * @param {string} publicKey recipeint public key in hex string.
  * @return {string} ECIES encoded privMsg.
  */
-exports.sygnaEncodePrivateObj = (data, publicKey) => {
+exports.encodePrivateObj = (data, publicKey) => {
   let msgString = data;
   if (typeof data === 'object') {
     msgString = JSON.stringify(data);
@@ -19,12 +19,19 @@ exports.sygnaEncodePrivateObj = (data, publicKey) => {
 };
 
 /**
+ * the function would be deprecated next version, use encodePrivateObj instead
+ */
+exports.sygnaEncodePrivateObj = (data, publicKey) => {
+  return this.encodePrivateObj(data, publicKey);
+};
+
+/**
  * Decode private info from recipent server.
  * @param {string} privMsg
  * @param {string} privateKey
  * @return {object}
  */
-exports.sygnaDecodePrivateObj = (privMsg, privateKey) => {
+exports.decodePrivateObj = (privMsg, privateKey) => {
   const decoded = ecies.ECIESDecode(privMsg, privateKey);
   try {
     return JSON.parse(decoded);
@@ -34,9 +41,16 @@ exports.sygnaDecodePrivateObj = (privMsg, privateKey) => {
 };
 
 /**
- * @param {{private_info: string, transaction:object, data_dt:string, expire_date?:number}} data
+ * the function would be deprecated next version, use decodePrivateObj instead
+ */
+exports.sygnaDecodePrivateObj = (privMsg, privateKey) => {
+  return this.decodePrivateObj(privMsg, privateKey);
+};
+
+/**
+ * @param {{private_info: string, transaction:object, data_dt:string, expire_date?:number, need_validate_addr?:boolean}} data
  * @param {string} privateKey
- * @return {{private_info: string, transaction:{}, data_dt:string, signature:string, expire_date?:number}}
+ * @return {{private_info: string, transaction:{}, data_dt:string, expire_date?:number, need_validate_addr?:boolean, signature:string}}
  */
 exports.signPermissionRequest = (data, privateKey) => {
   validatePrivateKey(privateKey);
@@ -102,9 +116,9 @@ exports.verifyObject = (obj, publicKey = SYGNA_BRIDGE_CENTRAL_PUBKEY) => {
 };
 
 /**
- * @param {{vasp_code:string,callback_permission_request_url?:string,callback_txid_url?:string}} data
+ * @param {{vasp_code:string,callback_permission_request_url?:string,callback_txid_url?:string,callback_validate_addr_url?:string}} data
  * @param {string} privateKey
- * @return {{vasp_code:string,callback_permission_request_url?:string,,callback_txid_url?:string,signature:string}}
+ * @return {{vasp_code:string,callback_permission_request_url?:string,,callback_txid_url?:string,callback_validate_addr_url?:string,signature:string}}
  */
 exports.signBeneficiaryEndpointUrl = (data, privateKey) => {
   validatePrivateKey(privateKey);
