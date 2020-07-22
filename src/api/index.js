@@ -74,7 +74,7 @@ class API {
   /**
    * Should be called by Originator.
    * @param {{ data : {private_info:string, transaction:{}, data_dat:string, expire_date?:number, need_validate_addr?:boolean, signature:string}, callback : {callback_url: string, signature:string} }} data
-   * data : Private sender info encoded by crypto.sygnaEncodePrivateObj
+   * data : Private sender info encrypted by crypto.encryptPrivateObj
    * @return {Promise<{transfer_id: string}>} transfer-id
    */
   async postPermissionRequest(data) {
