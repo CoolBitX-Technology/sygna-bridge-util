@@ -99,7 +99,7 @@ API calls to communicate with Sygna Bridge server.
 We use **baisc auth** with all the API calls. To simplify the process, we provide a API class to deal with authentication and post/ get request format.
 
 ```javascript
-const sbServer = 'https://apis.sygna.io/';
+const sbServer = 'https://api.sygna.io/';
 const sbAPI = new sygnaBridgeUtil.API('api-key', sbServer);
 ```
 
