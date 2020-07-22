@@ -45,12 +45,26 @@ The following example is the snippet of originator's signing process of `premiss
 
 ```javascript
 let transaction = {
-  originator_vasp_code: '10000',
-  originator_addrs: ['3KvJ1uHPShhEAWyqsBEzhfXyeh1TXKAd7D'],
-  beneficiary_vasp_code: '10001',
-  beneficiary_addrs: ['3F4ReDwiMLu8LrAiXwwD2DhH8U9xMrUzUf'],
-  transaction_currency: '0x80000000',
-  amount: 0.973,
+  originator_vasp:{
+    vasp_code: 'VASPUSNY1',
+    "addrs": [
+      {
+        "address": "3KvJ1uHPShhEAWyqsBEzhfXyeh1TXKAd7D",
+        "addr_extra_info": []
+      }
+    ]
+  },
+  beneficiary_vasp:{
+    vasp_code: 'VASPUSNY1',
+    "addrs": [
+      {
+        "address": "3F4ReDwiMLu8LrAiXwwD2DhH8U9xMrUzUf",
+        "addr_extra_info": []
+      }
+    ]
+  },
+  currency_id: 'sygna:0x80000000',
+  amount: "0.973",
 };
 
 let data_dt = '2019-07-29T06:28:00Z';
@@ -85,7 +99,7 @@ API calls to communicate with Sygna Bridge server.
 We use **baisc auth** with all the API calls. To simplify the process, we provide a API class to deal with authentication and post/ get request format.
 
 ```javascript
-const sbServer = 'https://apis.sygna.io/sb/';
+const sbServer = 'https://apis.sygna.io/';
 const sbAPI = new sygnaBridgeUtil.API('api-key', sbServer);
 ```
 
@@ -122,13 +136,27 @@ const private_info = sygnaBridge.crypto.sygnaEncodePrivateObj(
 );
 
 const transaction = {
-  originator_vasp_code: '10000',
-  originator_addrs: ['3KvJ1uHPShhEAWyqsBEzhfXyeh1TXKAd7D'],
-  beneficiary_vasp_code: '10298',
-  beneficiary_addrs: ['3CHgkx946yyueucCMiJhyH2Vg5kBBvfSGH'],
-  transaction_currency: '0x80000000',
-  amount: 0.973,
-};
+  originator_vasp:{
+    vasp_code: 'VASPUSNY1',
+    "addrs": [
+      {
+        "address": "3KvJ1uHPShhEAWyqsBEzhfXyeh1TXKAd7D",
+        "addr_extra_info": []
+      }
+    ]
+  },
+  beneficiary_vasp:{
+    vasp_code: 'VASPUSNY1',
+    "addrs": [
+      {
+        "address": "3F4ReDwiMLu8LrAiXwwD2DhH8U9xMrUzUf",
+        "addr_extra_info": []
+      }
+    ]
+  },
+  currency_id: 'sygna:0x80000000',
+  amount: "0.973",
+};;
 const data_dt = '2019-07-29T07:29:80Z';
 
 const signPermissionRequestData = {
@@ -142,7 +170,7 @@ const transferObj = sygnaBridgeUtil.crypto.signPermissionRequest(
 );
 
 const callback_url =
-  'https://81f7d956.ngrok.io/api/v1/originator/transaction/premission';
+  'https://81f7d956.ngrok.io/api/v2/originator/transaction/premission';
 
 const signCallBackData = {
   callback_url,

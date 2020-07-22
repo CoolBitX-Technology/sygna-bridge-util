@@ -34,7 +34,7 @@ class API {
    * @return {Promise<Array<{ vasp_name:string, vasp_code:string, vasp_pubkey:string }>>}
    */
   async getVASPList(validate = true, isProd = false) {
-    const url = this.domain + 'api/v2/bridge/vasp';
+    const url = this.domain + 'v2/bridge/vasp';
     const result = await this.getSB(url);
     if (!result.vasp_data) {
       throw new Error(`Request VASPs failed: ${result.message}`);
@@ -56,7 +56,7 @@ class API {
    * @return {Promise}
    */
   async postPermission(data) {
-    const url = this.domain + 'api/v2/bridge/transaction/permission';
+    const url = this.domain + 'v2/bridge/transaction/permission';
     return await this.postSB(url, data);
   }
 
@@ -66,21 +66,19 @@ class API {
    */
   async getStatus(transfer_id) {
     const url =
-      this.domain +
-      'api/v2/bridge/transaction/status?transfer_id=' +
-      transfer_id;
+      this.domain + 'v2/bridge/transaction/status?transfer_id=' + transfer_id;
     const result = await this.getSB(url);
     return result;
   }
 
   /**
    * Should be called by Originator.
-   * @param {{ data : {private_info:string, transaction:{}, data_dat:string, expire_date?:number, signature:string}, callback : {callback_url: string, signature:string} }} data
+   * @param {{ data : {private_info:string, transaction:{}, data_dat:string, expire_date?:number, need_validate_addr?:boolean, signature:string}, callback : {callback_url: string, signature:string} }} data
    * data : Private sender info encoded by crypto.sygnaEncodePrivateObj
    * @return {Promise<{transfer_id: string}>} transfer-id
    */
   async postPermissionRequest(data) {
-    const url = this.domain + 'api/v2/bridge/transaction/permission-request';
+    const url = this.domain + 'v2/bridge/transaction/permission-request';
     return await this.postSB(url, data);
   }
 
@@ -90,7 +88,7 @@ class API {
    * @return {Promise}
    */
   async postTransactionId(data) {
-    const url = this.domain + 'api/v2/bridge/transaction/txid';
+    const url = this.domain + 'v2/bridge/transaction/txid';
     return await this.postSB(url, data);
   }
 
@@ -102,7 +100,7 @@ class API {
   async postSB(url, json) {
     const headers = {
       'Content-Type': 'application/json',
-      api_key: this.api_key,
+      'x-api-key': this.api_key,
     };
     const response = await fetch(url, {
       method: 'POST',
@@ -117,7 +115,7 @@ class API {
    * @param {string} url
    */
   async getSB(url) {
-    const headers = { api_key: this.api_key };
+    const headers = { 'x-api-key': this.api_key };
     const response = await fetch(url, { headers: headers });
     return await response.json();
   }
@@ -128,8 +126,35 @@ class API {
    * @return {Promise}
    */
   async postBeneficiaryEndpointUrl(data) {
-    const url = this.domain + 'api/v2/bridge/vasp/beneficiary-endpoint-url';
+    const url = this.domain + 'v2/bridge/vasp/beneficiary-endpoint-url';
     return await this.postSB(url, data);
+  }
+
+  /**
+   * retrieve the lost transfer requests
+   * @param {{vasp_code: string}} data
+   * @return {Promise}
+   */
+  async postRetry(data) {
+    const url = this.domain + 'v2/bridge/transaction/retry';
+    return await this.postSB(url, data);
+  }
+
+  /**
+   * get supported currencies
+   * @param {{currency_id?: string,currency_symbol?: string,currency_name?: string}} data
+   * @return {Promise}
+   */
+  async getCurrencies(data) {
+    const queryString = Object.entries(data || {})
+      .map((data) => `${data[0]}=${data[1]}`)
+      .join('&');
+
+    const url =
+      this.domain +
+      'v2/bridge/transaction/currencies' +
+      (queryString && `?${queryString}`);
+    return await this.getSB(url);
   }
 }
 
