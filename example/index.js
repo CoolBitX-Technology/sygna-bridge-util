@@ -1,6 +1,4 @@
-const { API } = require('../src/api');
-const Crypto = require('../src/crypto');
-const config = require('../src/config');
+const { API ,crypto, config} = require('../index');
 
 const DOMAIN = config.SYGNA_BRIDGE_API_TEST_DOMAIN;
 
@@ -14,27 +12,27 @@ const BENEFICIARY_PUBLIC_KEY = '{{BENEFICIARY_PUBLIC_KEY}}';
 
 function signAndVerify() {
   const data = { key: 'value' };
-  const signedData = Crypto.signObject(data, ORIGINATOR_PRIVATE_KEY);
+  const signedData = crypto.signObject(data, ORIGINATOR_PRIVATE_KEY);
   console.log(`signed_data = ${JSON.stringify(signedData)}`);
 
-  const isCorrect = Crypto.verifyObject(signedData, ORIGINATOR_PUBLIC_KEY);
+  const isCorrect = crypto.verifyObject(signedData, ORIGINATOR_PUBLIC_KEY);
   console.log(`isCorrect = ${isCorrect}`);
 }
 
-function encodeAndDecode() {
+function encryptAndDecrypt() {
   const data = {
     originator: { name: 'Antoine Griezmann', date_of_birth: '1991-03-21' },
     beneficiary: { name: 'Leo Messi' },
   };
 
-  const encodedData = Crypto.encodePrivateObj(data, BENEFICIARY_PUBLIC_KEY);
-  console.log(`encodedData = ${encodedData}`);
+  const encryptedData = crypto.encryptPrivateObj(data, BENEFICIARY_PUBLIC_KEY);
+  console.log(`encryptedData = ${encryptedData}`);
 
-  const decodedData = Crypto.decodePrivateObj(
-    encodedData,
+  const decryptedData = crypto.decryptPrivateObj(
+    encryptedData,
     BENEFICIARY_PRIVATE_KEY,
   );
-  console.log(`decodedData = ${JSON.stringify(decodedData)}`);
+  console.log(`decryptedData = ${JSON.stringify(decryptedData)}`);
 }
 
 async function getStatus() {
@@ -78,7 +76,7 @@ async function postPermissionRequest() {
     originator: { name: 'Antoine Griezmann', date_of_birth: '1991-03-21' },
     beneficiary: { name: 'Leo Messi' },
   };
-  const private_info = Crypto.encodePrivateObj(
+  const private_info = crypto.encryptPrivateObj(
     sensitive_data,
     BENEFICIARY_PUBLIC_KEY,
   );
@@ -113,7 +111,7 @@ async function postPermissionRequest() {
     data_dt: '2020-07-13T05:56:53.088Z',
   };
 
-  const signed_permission_request_data = Crypto.signPermissionRequest(
+  const signed_permission_request_data = crypto.signPermissionRequest(
     permission_request_data,
     ORIGINATOR_PRIVATE_KEY,
   );
@@ -123,7 +121,7 @@ async function postPermissionRequest() {
       'https://81f7d956.ngrok.io/v2/originator/transaction/premission',
   };
 
-  const signed_callback = Crypto.signCallBack(callback, ORIGINATOR_PRIVATE_KEY);
+  const signed_callback = crypto.signCallBack(callback, ORIGINATOR_PRIVATE_KEY);
 
   const post_permission_request_data = {
     data: signed_permission_request_data,
@@ -143,7 +141,7 @@ async function postPermission() {
     permission_status: config.ACCEPTED,
   };
 
-  const signed_permission_data = Crypto.signPermission(
+  const signed_permission_data = crypto.signPermission(
     permission_data,
     BENEFICIARY_PRIVATE_KEY,
   );
@@ -160,7 +158,7 @@ async function postTxId() {
     txid: '1234567890',
   };
 
-  const signed_txid_data = Crypto.signPermission(
+  const signed_txid_data = crypto.signPermission(
     txid_data,
     ORIGINATOR_PRIVATE_KEY,
   );
@@ -178,7 +176,7 @@ async function postBeneficiaryEndpointUrl() {
     callback_validate_addr_url: 'https://github.com',
   };
 
-  const signed_beneficiary_endpoint_url_data = Crypto.signBeneficiaryEndpointUrl(
+  const signed_beneficiary_endpoint_url_data = crypto.signBeneficiaryEndpointUrl(
     beneficiary_endpoint_url_data,
     BENEFICIARY_PRIVATE_KEY,
   );
@@ -200,8 +198,8 @@ async function postRetry() {
   console.log(`postRetry response = ${JSON.stringify(response)}`);
 }
 
-// signAndVerify();
-// encodeAndDecode();
+signAndVerify();
+// encryptAndDecrypt();
 // getStatus();
 // getVASPList();
 // getVASPPublicKey();

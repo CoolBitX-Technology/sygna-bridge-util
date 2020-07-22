@@ -10,9 +10,9 @@ npm i @sygna/bridge-util
 
 ## Crypto
 
-Dealing with encoding, decoding, signing and verifying in Sygna Bridge.
+Dealing with encrypting, decrypting, signing and verifying in Sygna Bridge.
 
-### ECIES Encoding an Decoding
+### ECIES Encrypting an Decrypting
 
 During the communication of VASPs, there are some private information that must be encrypted. We use ECIES(Elliptic Curve Integrated Encryption Scheme) to securely encrypt these private data so that they can only be accessed by the recipient.
 
@@ -27,11 +27,11 @@ const sensitive_data = {
   },
 };
 
-const private_info = sygnaBridgeUtil.crypto.sygnaEncodePrivateObj(
+const private_info = sygnaBridgeUtil.crypto.encryptPrivateObj(
   sensitive_data,
   recipient_pubKey,
 );
-const decoded_priv_info = sygnaBridge.crypto.sygnaDecodePrivateObj(
+const decrypted_priv_info = sygnaBridge.crypto.decryptPrivateObj(
   private_info,
   recipient_privKey,
 );
@@ -130,7 +130,7 @@ const privateSenderInfo = {
   beneficiary: { name: 'Leo Messi' },
 };
 const recipientPublicKey = await sbAPI.getVASPPublicKey('10298');
-const private_info = sygnaBridge.crypto.sygnaEncodePrivateObj(
+const private_info = sygnaBridge.crypto.encryptPrivateObj(
   privateSenderInfo,
   recipientPublicKey,
 );
