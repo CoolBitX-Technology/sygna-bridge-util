@@ -7,44 +7,44 @@ const { validatePrivateKey } = require('../utils');
  * Encrypt private info object to hex string.
  * @param {object|string} data priv_info in object or string format.
  * @param {string} publicKey recipeint public key in hex string.
- * @return {string} ECIES encoded privMsg.
+ * @return {string} ECIES encrypted privMsg.
  */
-exports.encodePrivateObj = (data, publicKey) => {
+exports.encryptPrivateObj = (data, publicKey) => {
   let msgString = data;
   if (typeof data === 'object') {
     msgString = JSON.stringify(data);
   }
-  const encoded = ecies.ECIESEncode(msgString, publicKey);
-  return encoded;
+  const encrypted = ecies.ECIESEncrypt(msgString, publicKey);
+  return encrypted;
 };
 
 /**
- * the function would be deprecated next version, use encodePrivateObj instead
+ * the function would be deprecated next version, use encryptPrivateObj instead
  */
 exports.sygnaEncodePrivateObj = (data, publicKey) => {
-  return this.encodePrivateObj(data, publicKey);
+  return this.encryptPrivateObj(data, publicKey);
 };
 
 /**
- * Decode private info from recipent server.
+ * Decrypt private info from recipent server.
  * @param {string} privMsg
  * @param {string} privateKey
  * @return {object}
  */
-exports.decodePrivateObj = (privMsg, privateKey) => {
-  const decoded = ecies.ECIESDecode(privMsg, privateKey);
+exports.decryptPrivateObj = (privMsg, privateKey) => {
+  const decrypted = ecies.ECIESDecrypt(privMsg, privateKey);
   try {
-    return JSON.parse(decoded);
+    return JSON.parse(decrypted);
   } catch (error) {
-    return decoded;
+    return decrypted;
   }
 };
 
 /**
- * the function would be deprecated next version, use decodePrivateObj instead
+ * the function would be deprecated next version, use decryptPrivateObj instead
  */
 exports.sygnaDecodePrivateObj = (privMsg, privateKey) => {
-  return this.decodePrivateObj(privMsg, privateKey);
+  return this.decryptPrivateObj(privMsg, privateKey);
 };
 
 /**
