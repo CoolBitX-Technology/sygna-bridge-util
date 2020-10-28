@@ -1,10 +1,11 @@
 {
   "name": "@sygna/bridge-util",
-  "version": "2.0.0",
+  "version": "2.1.0-beta.1",
   "description": "JavaScript library to interact with Sygna Bridge Server.",
   "main": "index.js",
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "gen-proto": "bash ./src/protobuf/generate-proto.sh"
   },
   "repository": {
     "type": "git",
@@ -14,11 +15,16 @@
   "license": "MIT",
   "dependencies": {
     "ajv": "^6.12.0",
-    "node-fetch": "^2.6.0",
+    "node-fetch": "^2.6.1",
+    "node-forge": "^0.10.0",
     "secp256k1": "^4.0.0"
   },
   "devDependencies": {
+    "@types/jest": "^26.0.14",
+    "grpc-tools": "^1.9.1",
+    "grpc_tools_node_protoc_ts": "^5.0.1",
     "jest": "^25.2.7",
-    "lodash": "^4.17.19"
+    "lodash": "^4.17.20",
+    "prettier": "^2.0.5"
   }
 }
