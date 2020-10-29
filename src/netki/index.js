@@ -3,7 +3,7 @@ const {
   validateProtobufSignature,
   rsaKeyPairGen,
 } = require("./crypto");
-const { attestationToPrinciple } = require("./attestation");
+const { attestationToPrinciple, ivmsToAttestations } = require("./attestation");
 const {
   generateCertificate,
   attestationCertificateToOwnersData,
@@ -16,4 +16,5 @@ module.exports = {
   attestationToPrinciple,
   generateCertificate,
   attestationCertificateToOwnersData,
+  ivmsToAttestations,
 };
