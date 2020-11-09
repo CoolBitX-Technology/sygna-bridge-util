@@ -23,7 +23,7 @@ const getPricipleObject = (CN, C, L, O, OU, ST) => [
   },
   {
     shortName: "ST",
-    value: ST,
+    value: ST || "",
   },
 ];
 

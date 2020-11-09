@@ -21,6 +21,10 @@ jobs:
       - name: Install dependencies
         run: |
           npm install
+      - name: Install Protoc
+        uses: arduino/setup-protoc@v1
+        with:
+          version: '3.x'
       - name: Generate protobuf
         run: |
           bash ./generate-proto.sh
