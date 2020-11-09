@@ -9,6 +9,7 @@ message InvoiceRequest {
   optional uint64 amount = 1 [default = 0];                   // amount is integer-number-of-satoshis
   optional string memo = 2;                                   // Human-readable description of invoice request for the receiver
   optional string notification_url = 3;                       // URL to notify on EncryptedPaymentRequest ready
+  // this field will be empty if from sygna
   repeated Owner owners = 4;                                  // Account owners
   repeated Output outputs = 5;                                // Where payment should be sent
   repeated AttestationType attestationsRequested = 6;         // List of attestations requested
@@ -17,6 +18,9 @@ message InvoiceRequest {
   required bytes  sender_signature = 9;                       // Sender's Signature of the whole message
   optional string recipient_vasp_name = 10;                  // Recipient's vasp name
   optional string recipient_chain_address = 11;              // Recipient's chain address
+  // sygna specific fields
+  optional string sygna_transfer_id = 12;
+  optional bytes sygna_encrypted_owner = 13;
 }
 
 message PaymentRequest {
@@ -27,6 +31,9 @@ message PaymentRequest {
   required string sender_pki_type = 5 [default = "none"];     // none / x509+sha256
   required bytes  sender_pki_data = 6;                        // Sender's pki data, depends on pki_type
   required bytes  sender_signature = 7;                       // Sender's Signature of the whole message
+  // sygna specific fields
+  optional string sygna_transfer_id = 8;
+  optional bytes sygna_encrypted_owner = 9;
 }
 
 message Payment {
@@ -35,11 +42,14 @@ message Payment {
   repeated Output refund_to = 3;          // Where to send refunds, if a refund is necessary
   optional string memo = 4;               // Human-readable message for the merchant
   repeated Owner owners = 5;              // Account owners containing the requested attestations
+  optional string sygna_transfer_id = 6;
 }
 
 message PaymentACK {
   required Payment payment = 1;           // Payment message that triggered this ACK
   optional string memo = 2;               // Human-readable message for customer
+  // sygna specific fields
+  optional string sygna_transfer_id = 3;
 }
 
 message Owner {
