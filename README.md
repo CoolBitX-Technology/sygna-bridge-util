@@ -16,15 +16,56 @@ Dealing with encrypting, decrypting, signing and verifying in Sygna Bridge.
 
 During the communication of VASPs, there are some private information that must be encrypted. We use ECIES(Elliptic Curve Integrated Encryption Scheme) to securely encrypt these private data so that they can only be accessed by the recipient.
 
+We're using [IVMS101 (interVASP Messaging Standard)](https://intervasp.org/) as our private information format.
+
+We also provide [IVMS101 Typescript Utility](https://github.com/CoolBitX-Technology/sygna-bridge-ivms-utils/tree/master/typescript) to construct data payload.
+
 ```javascript
 const sensitive_data = {
-  originator: {
-    name: 'Antoine Griezmann', //required and must be in English
-    date_of_birth: '1991-03-21',
+  "originator": {
+    "originator_persons": [
+      {
+        "natural_person": {
+          "name": {
+            "name_identifiers": [
+              {
+                "primary_identifier": "Wu Xinli",
+                "name_identifier_type": "LEGL"
+              }
+            ]
+          },
+          "national_identification": {
+            "national_identifier": "446005",
+            "national_identifier_type": "RAID",
+            "registration_authority": "RA000553"
+          },
+          "country_of_residence": "TZ"
+        }
+      }
+    ],
+    "account_numbers": [
+      "1BvBMSEYstWetqTFn5Au4m4GFg7xJaNVN2"
+    ]
   },
-  beneficiary: {
-    name: 'Leo Messi',
-  },
+  "beneficiary": {
+    "beneficiary_persons": [
+      {
+        "legal_person": {
+          "name": {
+            "name_identifiers": [
+              {
+                "legal_person_name": "ABC Limited",
+                "legal_person_name_identifier_type": "LEGL"
+              }
+            ]
+          }
+        }
+      }
+    ],
+    "account_numbers": [
+      "1BvBMSEYstWetqTFn5Au4m4GFg7xJaNVN3"
+    ]
+  }
 };
 
 const private_info = sygnaBridgeUtil.crypto.encryptPrivateObj(
