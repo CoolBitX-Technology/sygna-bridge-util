@@ -44,7 +44,7 @@ const sensitive_data = {
       }
     ],
     "account_numbers": [
-      "1BvBMSEYstWetqTFn5Au4m4GFg7xJaNVN2"
+      "3KvJ1uHPShhEAWyqsBEzhfXyeh1TXKAd7D"
     ]
   },
   "beneficiary": {
@@ -63,7 +63,7 @@ const sensitive_data = {
       }
     ],
     "account_numbers": [
-      "1BvBMSEYstWetqTFn5Au4m4GFg7xJaNVN3"
+      "3F4ReDwiMLu8LrAiXwwD2DhH8U9xMrUzUf"
     ]
   }
 };
@@ -80,9 +80,9 @@ const decrypted_priv_info = sygnaBridge.crypto.decryptPrivateObj(
 
 ### Sign and Verify
 
-In Sygna Bridge, we use secp256k1 ECDSA over sha256 of utf-8 json string to create signature on every API call. Since you need to provide the identical utf-8 string during verfication, the order of key-value pair you put into the object is important.
+In Sygna Bridge, we use secp256k1 ECDSA over sha256 of utf-8 json string to create signature on every API call. Since you need to provide the identical utf-8 string during verification, the order of key-value pair you put into the object is important.
 
-The following example is the snippet of originator's signing process of `premissionRequest` API call. If you put the key `transaction` before `private_info` in the object, the verification will fail in the central server.
+The following example is the snippet of originator's signing process of `permissionRequest` API call. If you put the key `transaction` before `private_info` in the object, the verification will fail in the central server.
 
 ```javascript
 let transaction = {
@@ -166,13 +166,10 @@ The full logic of originator would be like the following:
 ```javascript
 // originator.js
 
-const privateSenderInfo = {
-  originator: { name: 'Antoine Griezmann', date_of_birth: '1991-03-21' },
-  beneficiary: { name: 'Leo Messi' },
-};
 const recipientPublicKey = await sbAPI.getVASPPublicKey('10298');
 const private_info = sygnaBridge.crypto.encryptPrivateObj(
-  privateSenderInfo,
+  // sensitive_data from example above
+  sensitive_data,
   recipientPublicKey,
 );
 
@@ -229,7 +226,7 @@ const { transfer_id } = await sbAPI.postPermissionRequest(
   postPermissionRequestData,
 );
 
-// Boradcast your transaction to blockchain after got and api reponse at your api server.
+// Broadcast your transaction to blockchain after got and api response at your api server.
 const txid = '1a0c9bef489a136f7e05671f7f7fada2b9d96ac9f44598e1bcaa4779ac564dcd';
 
 // Inform Sygna Bridge that a specific transfer is successfully broadcasted to the blockchain.
@@ -258,4 +255,4 @@ const permissionObj = sygnaBridgeUtil.crypto.signPermission(
 const finalresult = await sygnaAPI.postPermission(permissionObj);
 ```
 
-If you're trying to implement the beneficiary server on your own, we strongly recommand you to take a look at our [Nodejs sample](https://github.com/CoolBitX-Technology/sygna-bridge-sample) to get a big picture of how it should behave in the ecosystem.
+If you're trying to implement the beneficiary server on your own, we strongly recommend you to take a look at our [Nodejs sample](https://github.com/CoolBitX-Technology/sygna-bridge-sample) to get a big picture of how it should behave in the ecosystem.
