@@ -16,15 +16,56 @@ Dealing with encrypting, decrypting, signing and verifying in Sygna Bridge.
 
 During the communication of VASPs, there are some private information that must be encrypted. We use ECIES(Elliptic Curve Integrated Encryption Scheme) to securely encrypt these private data so that they can only be accessed by the recipient.
 
+We're using [IVMS101 (interVASP Messaging Standard)](https://intervasp.org/) as our private information format.
+
+We also provide [IVMS101 Typescript Utility](https://github.com/CoolBitX-Technology/sygna-bridge-ivms-utils/tree/master/typescript) to construct data payload.
+
 ```javascript
 const sensitive_data = {
-  originator: {
-    name: 'Antoine Griezmann', //required and must be in English
-    date_of_birth: '1991-03-21',
+  "originator": {
+    "originator_persons": [
+      {
+        "natural_person": {
+          "name": {
+            "name_identifiers": [
+              {
+                "primary_identifier": "Wu Xinli",
+                "name_identifier_type": "LEGL"
+              }
+            ]
+          },
+          "national_identification": {
+            "national_identifier": "446005",
+            "national_identifier_type": "RAID",
+            "registration_authority": "RA000553"
+          },
+          "country_of_residence": "TZ"
+        }
+      }
+    ],
+    "account_numbers": [
+      "r3kmLJN5D28dHuH8vZNUZpMC43pEHpaocV"
+    ]
   },
-  beneficiary: {
-    name: 'Leo Messi',
-  },
+  "beneficiary": {
+    "beneficiary_persons": [
+      {
+        "legal_person": {
+          "name": {
+            "name_identifiers": [
+              {
+                "legal_person_name": "ABC Limited",
+                "legal_person_name_identifier_type": "LEGL"
+              }
+            ]
+          }
+        }
+      }
+    ],
+    "account_numbers": [
+      "rAPERVgXZavGgiGv6xBgtiZurirW2yAmY"
+    ]
+  }
 };
 
 const private_info = sygnaBridgeUtil.crypto.encryptPrivateObj(
@@ -39,9 +80,9 @@ const decrypted_priv_info = sygnaBridge.crypto.decryptPrivateObj(
 
 ### Sign and Verify
 
-In Sygna Bridge, we use secp256k1 ECDSA over sha256 of utf-8 json string to create signature on every API call. Since you need to provide the identical utf-8 string during verfication, the order of key-value pair you put into the object is important.
+In Sygna Bridge, we use secp256k1 ECDSA over sha256 of utf-8 json string to create signature on every API call. Since you need to provide the identical utf-8 string during verification, the order of key-value pair you put into the object is important.
 
-The following example is the snippet of originator's signing process of `premissionRequest` API call. If you put the key `transaction` before `private_info` in the object, the verification will fail in the central server.
+The following example is the snippet of originator's signing process of `permissionRequest` API call. If you put the key `transaction` before `private_info` in the object, the verification will fail in the central server.
 
 ```javascript
 let transaction = {
@@ -49,7 +90,7 @@ let transaction = {
     vasp_code: 'VASPUSNY1',
     "addrs": [
       {
-        "address": "3KvJ1uHPShhEAWyqsBEzhfXyeh1TXKAd7D",
+        "address": "r3kmLJN5D28dHuH8vZNUZpMC43pEHpaocV",
         "addr_extra_info": []
       }
     ]
@@ -58,7 +99,7 @@ let transaction = {
     vasp_code: 'VASPUSNY1',
     "addrs": [
       {
-        "address": "3F4ReDwiMLu8LrAiXwwD2DhH8U9xMrUzUf",
+        "address": "rAPERVgXZavGgiGv6xBgtiZurirW2yAmY",
         "addr_extra_info": []
       }
     ]
@@ -125,42 +166,16 @@ The full logic of originator would be like the following:
 ```javascript
 // originator.js
 
-const privateSenderInfo = {
-  originator: { name: 'Antoine Griezmann', date_of_birth: '1991-03-21' },
-  beneficiary: { name: 'Leo Messi' },
-};
 const recipientPublicKey = await sbAPI.getVASPPublicKey('10298');
 const private_info = sygnaBridge.crypto.encryptPrivateObj(
-  privateSenderInfo,
+  // sensitive_data from example above
+  sensitive_data,
   recipientPublicKey,
 );
 
-const transaction = {
-  originator_vasp:{
-    vasp_code: 'VASPUSNY1',
-    "addrs": [
-      {
-        "address": "3KvJ1uHPShhEAWyqsBEzhfXyeh1TXKAd7D",
-        "addr_extra_info": []
-      }
-    ]
-  },
-  beneficiary_vasp:{
-    vasp_code: 'VASPUSNY1',
-    "addrs": [
-      {
-        "address": "3F4ReDwiMLu8LrAiXwwD2DhH8U9xMrUzUf",
-        "addr_extra_info": []
-      }
-    ]
-  },
-  currency_id: 'sygna:0x80000000',
-  amount: "0.973",
-};;
-const data_dt = '2019-07-29T07:29:80Z';
-
 const signPermissionRequestData = {
   private_info,
+  // from example above
   transaction,
   data_dt,
 };
@@ -188,7 +203,7 @@ const { transfer_id } = await sbAPI.postPermissionRequest(
   postPermissionRequestData,
 );
 
-// Boradcast your transaction to blockchain after got and api reponse at your api server.
+// Broadcast your transaction to blockchain after got and api response at your api server.
 const txid = '1a0c9bef489a136f7e05671f7f7fada2b9d96ac9f44598e1bcaa4779ac564dcd';
 
 // Inform Sygna Bridge that a specific transfer is successfully broadcasted to the blockchain.
@@ -202,7 +217,7 @@ let result = await sygnaAPI.postTransactionId(sendTxIdObj);
 
 ### For Beneficiary
 
-There is only one api for Beneficiary VASP to call, which is `postPermission`. After the beneficiary server confirm thet legitemacy of a transfer request, they will sign `{ transfer_id, permission_status }` using `signPermission()` function, and send the result with signature to Sygna Bridge Central Server.
+There is only one api for Beneficiary VASP to call, which is `postPermission`. After the beneficiary server confirm their legitimacy of a transfer request, they will sign `{ transfer_id, permission_status }` using `signPermission()` function, and send the result with signature to Sygna Bridge Central Server.
 
 ```javascript
 const permission_status = 'ACCEPTED'; // or "REJECTED"
@@ -214,7 +229,7 @@ const permissionObj = sygnaBridgeUtil.crypto.signPermission(
   signPermissionData,
   beneficiary_privKey,
 );
-const finalresult = await sygnaAPI.postPermission(permissionObj);
+const finalResult = await sygnaAPI.postPermission(permissionObj);
 ```
 
-If you're trying to implement the beneficiary server on your own, we strongly recommand you to take a look at our [Nodejs sample](https://github.com/CoolBitX-Technology/sygna-bridge-sample) to get a big picture of how it should behave in the ecosystem.
+For more complete example, please refer to [Example](example/index.js) file.
