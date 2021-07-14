@@ -44,7 +44,7 @@ const sensitive_data = {
       }
     ],
     "account_numbers": [
-      "3KvJ1uHPShhEAWyqsBEzhfXyeh1TXKAd7D"
+      "r3kmLJN5D28dHuH8vZNUZpMC43pEHpaocV"
     ]
   },
   "beneficiary": {
@@ -63,7 +63,7 @@ const sensitive_data = {
       }
     ],
     "account_numbers": [
-      "3F4ReDwiMLu8LrAiXwwD2DhH8U9xMrUzUf"
+      "rAPERVgXZavGgiGv6xBgtiZurirW2yAmY"
     ]
   }
 };
@@ -90,7 +90,7 @@ let transaction = {
     vasp_code: 'VASPUSNY1',
     "addrs": [
       {
-        "address": "3KvJ1uHPShhEAWyqsBEzhfXyeh1TXKAd7D",
+        "address": "r3kmLJN5D28dHuH8vZNUZpMC43pEHpaocV",
         "addr_extra_info": []
       }
     ]
@@ -99,7 +99,7 @@ let transaction = {
     vasp_code: 'VASPUSNY1',
     "addrs": [
       {
-        "address": "3F4ReDwiMLu8LrAiXwwD2DhH8U9xMrUzUf",
+        "address": "rAPERVgXZavGgiGv6xBgtiZurirW2yAmY",
         "addr_extra_info": []
       }
     ]
@@ -173,32 +173,9 @@ const private_info = sygnaBridge.crypto.encryptPrivateObj(
   recipientPublicKey,
 );
 
-const transaction = {
-  originator_vasp:{
-    vasp_code: 'VASPUSNY1',
-    "addrs": [
-      {
-        "address": "3KvJ1uHPShhEAWyqsBEzhfXyeh1TXKAd7D",
-        "addr_extra_info": []
-      }
-    ]
-  },
-  beneficiary_vasp:{
-    vasp_code: 'VASPUSNY1',
-    "addrs": [
-      {
-        "address": "3F4ReDwiMLu8LrAiXwwD2DhH8U9xMrUzUf",
-        "addr_extra_info": []
-      }
-    ]
-  },
-  currency_id: 'sygna:0x80000000',
-  amount: "0.973",
-};;
-const data_dt = '2019-07-29T07:29:80Z';
-
 const signPermissionRequestData = {
   private_info,
+  // from example above
   transaction,
   data_dt,
 };
