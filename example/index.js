@@ -10,6 +10,53 @@ const BENEFICIARY_API_KEY = '{{BENEFICIARY_API_KEY}}';
 const BENEFICIARY_PRIVATE_KEY = '{{BENEFICIARY_PRIVATE_KEY}}';
 const BENEFICIARY_PUBLIC_KEY = '{{BENEFICIARY_PUBLIC_KEY}}';
 
+const sensitive_data = {
+  "originator": {
+    "originator_persons": [
+      {
+        "natural_person": {
+          "name": {
+            "name_identifiers": [
+              {
+                "primary_identifier": "Wu Xinli",
+                "name_identifier_type": "LEGL"
+              }
+            ]
+          },
+          "national_identification": {
+            "national_identifier": "446005",
+            "national_identifier_type": "RAID",
+            "registration_authority": "RA000553"
+          },
+          "country_of_residence": "TZ"
+        }
+      }
+    ],
+    "account_numbers": [
+      "3KvJ1uHPShhEAWyqsBEzhfXyeh1TXKAd7D"
+    ]
+  },
+  "beneficiary": {
+    "beneficiary_persons": [
+      {
+        "legal_person": {
+          "name": {
+            "name_identifiers": [
+              {
+                "legal_person_name": "ABC Limited",
+                "legal_person_name_identifier_type": "LEGL"
+              }
+            ]
+          }
+        }
+      }
+    ],
+    "account_numbers": [
+      "3F4ReDwiMLu8LrAiXwwD2DhH8U9xMrUzUf"
+    ]
+  }
+};
+
 function signAndVerify() {
   const data = { key: 'value' };
   const signedData = crypto.signObject(data, ORIGINATOR_PRIVATE_KEY);
@@ -20,12 +67,7 @@ function signAndVerify() {
 }
 
 function encryptAndDecrypt() {
-  const data = {
-    originator: { name: 'Antoine Griezmann', date_of_birth: '1991-03-21' },
-    beneficiary: { name: 'Leo Messi' },
-  };
-
-  const encryptedData = crypto.encryptPrivateObj(data, BENEFICIARY_PUBLIC_KEY);
+  const encryptedData = crypto.encryptPrivateObj(sensitive_data, BENEFICIARY_PUBLIC_KEY);
   console.log(`encryptedData = ${encryptedData}`);
 
   const decryptedData = crypto.decryptPrivateObj(
@@ -72,10 +114,6 @@ async function getCurrencies() {
 }
 
 async function postPermissionRequest() {
-  const sensitive_data = {
-    originator: { name: 'Antoine Griezmann', date_of_birth: '1991-03-21' },
-    beneficiary: { name: 'Leo Messi' },
-  };
   const private_info = crypto.encryptPrivateObj(
     sensitive_data,
     BENEFICIARY_PUBLIC_KEY,

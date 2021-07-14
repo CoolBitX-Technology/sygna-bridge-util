@@ -255,4 +255,4 @@ const permissionObj = sygnaBridgeUtil.crypto.signPermission(
 const finalResult = await sygnaAPI.postPermission(permissionObj);
 ```
 
-If you're trying to implement the beneficiary server on your own, we strongly recommend you to take a look at our [Nodejs sample](https://github.com/CoolBitX-Technology/sygna-bridge-sample) to get a big picture of how it should behave in the ecosystem.
+If you're trying to implement the beneficiary server on your own, we strongly recommend you to take a look at our [Nodejs sample](example/index.js) to get a big picture of how it should behave in the ecosystem.
