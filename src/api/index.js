@@ -101,6 +101,7 @@ class API {
     const headers = {
       'Content-Type': 'application/json',
       'x-api-key': this.api_key,
+      'User-Agent': 'util-js'
     };
     const response = await fetch(url, {
       method: 'POST',
@@ -115,7 +116,7 @@ class API {
    * @param {string} url
    */
   async getSB(url) {
-    const headers = { 'x-api-key': this.api_key };
+    const headers = { 'x-api-key': this.api_key, 'User-Agent': 'util-js' };
     const response = await fetch(url, { headers: headers });
     return await response.json();
   }

@@ -34,7 +34,7 @@ describe('test api', () => {
     const instance = new apiModule.API(api_key, domain);
 
     it('should fetch be called with correct parameters if getSB is called', async () => {
-      const headers = { 'x-api-key': api_key };
+      const headers = { 'x-api-key': api_key , 'User-Agent': 'util-js'};
       const url = 'https://api.sygna.io/v2/bridge/';
       const response = await instance.getSB(url);
       expect(fetch.mock.calls[0][0]).toBe(url);
@@ -51,6 +51,7 @@ describe('test api', () => {
       const headers = {
         'Content-Type': 'application/json',
         'x-api-key': api_key,
+        'User-Agent': 'util-js'
       };
       //await fetch(url, { method: 'POST', body: JSON.stringify(json), headers: headers });
       const url = 'https://api.sygna.io/v2/bridge/';
